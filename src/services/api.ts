@@ -14,6 +14,7 @@ import {
 import { DEMO_SCANS, DEMO_FINDINGS, DEFAULT_USER_SETTINGS, DEMO_ACTIVITIES } from '@/data/mockData';
 import { 
   getApiBaseUrl, 
+  getDefaultApiUrl,
   validateApiUrl, 
   setApiBaseUrl, 
   STORAGE_KEYS 
@@ -28,7 +29,11 @@ function initializeStorage() {
     localStorage.setItem(STORAGE_KEYS.FINDINGS, JSON.stringify(DEMO_FINDINGS));
   }
   if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(DEFAULT_USER_SETTINGS));
+    const initialSettings: UserSettings = {
+      ...DEFAULT_USER_SETTINGS,
+      apiUrl: getDefaultApiUrl(),
+    };
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(initialSettings));
   }
 }
 

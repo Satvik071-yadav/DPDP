@@ -1,16 +1,13 @@
-# DPDP-Guard: Production Deployment Guide (Render)
+# DPDP-Guard: Free Hackathon Deployment Guide ($0/Month)
 
-This guide documents the exact steps to deploy **DPDP-Guard** as a public, secure cybersecurity and privacy auditing SaaS on [Render](https://render.com).
+This guide documents how to deploy **DPDP-Guard** as a public cybersecurity and privacy investigation website on **Render's Free Tier** ($0/month) backed by an **external free PostgreSQL database (Neon)** for persistent demo storage.
+
+> [!IMPORTANT]
+> **Hackathon Demonstration Notice**: Free tier hosting is intended strictly for live judging, demonstrations, and technical verification. It is not suitable for production storage of real-world personal data or sensitive enterprise telemetry.
 
 ---
 
-## 1. Architecture Overview
-
-DPDP-Guard is configured for high-reliability deployment using a unified multi-stage Docker build:
-- **Frontend**: Vite + React 18 + TypeScript compiled to static HTML/JS/CSS assets.
-- **Backend**: FastAPI (Python 3.12) running under Uvicorn, serving API endpoints and handling SPA fallback routing.
-- **Auditing Engine**: Playwright Headless Chromium with complete Linux graphics and font libraries for live telemetry collection.
-- **Database**: Managed PostgreSQL (production) or persistent SQLite (local development and small standalone instances).
+## 1. Free Tier Architecture & Resource Constraints
 
 ```
                       +---------------------------------------+
@@ -19,149 +16,150 @@ DPDP-Guard is configured for high-reliability deployment using a unified multi-s
                                           |
                                           v (HTTPS)
                       +---------------------------------------+
-                      |          Render Web Service           |
-                      |   (Docker Container on dynamic $PORT)  |
+                      |        Render Free Web Service        |
+                      |   (Docker Container, 512MB RAM, $0)   |
                       |                                       |
                       |  +---------------------------------+  |
-                      |  | Fast API / Uvicorn (0.0.0.0)    |  |
+                      |  | FastAPI + Uvicorn               |  |
                       |  |                                 |  |
                       |  |  * Static SPA Frontend (/ & *)  |  |
                       |  |  * REST API (/api/v1/*)         |  |
-                      |  |  * Health Endpoint (/api/health)| |
-                      |  |  * Playwright Engine            |  |
+                      |  |  * Healthcheck (/api/health)    |  |
+                      |  |  * Memory-Optimized Playwright  |  |
                       |  +---------------------------------+  |
                       +---------------------------------------+
                                           |
-                                          v (Internal SSL)
+                                          v (Secure TLS / SSL)
                       +---------------------------------------+
-                      |       Render Managed PostgreSQL       |
-                      |    (DATABASE_URL with SSL require)    |
+                      |       Neon Free Cloud PostgreSQL      |
+                      |     (External Free Tier, Does Not     |
+                      |         Expire after 30 days)         |
                       +---------------------------------------+
 ```
 
----
-
-## 2. Option A: One-Click Blueprint Deployment (`render.yaml`)
-
-DPDP-Guard includes a root `render.yaml` blueprint.
-
-1. Push your repository to GitHub or GitLab.
-2. In the Render Dashboard, navigate to **Blueprints**.
-3. Click **New Blueprint Instance** and select your repository.
-4. Render will detect `render.yaml` and provision:
-   - **dpdp-guard-postgres**: Managed PostgreSQL database instance.
-   - **dpdp-guard-saas**: Docker Web Service linked to the database via `DATABASE_URL`.
-5. Click **Apply**. Render will automatically build the container and deploy the service.
+### Critical Free Tier Operational Realities:
+1. **Sleep on Inactivity (Cold Starts)**: Render free web services automatically spin down after 15 minutes of inactivity. When a request arrives, the service wakes up; cold starts take **45 to 60 seconds**.
+2. **Ephemeral Container Storage**: Render free services do **not** support persistent disks. Any local SQLite database inside the container is wiped when the container restarts or wakes from sleep.
+3. **Database Persistence via Neon**: To keep scan history, findings, and verification audit records persistent across sleep cycles, configure an external free PostgreSQL database (e.g. [Neon](https://neon.tech)). Render's built-in free PostgreSQL is **not recommended** because Render deletes it after 30 days.
+4. **512 MB RAM Budget**: The Docker container runs within 512 MB RAM. Chromium runs with `--disable-dev-shm-usage`, `--disable-extensions`, `--js-flags=--max-old-space-size=128`, and `MAX_SCAN_CONCURRENCY=1` to guarantee memory stability.
 
 ---
 
-## 3. Option B: Manual Render Setup
+## 2. Step 1: Provision Free PostgreSQL on Neon ($0/month)
 
-If you prefer configuring services individually in the Render Dashboard:
+1. Go to [Neon Console](https://console.neon.tech/) and sign up for a free account.
+2. Click **Create Project**:
+   - **Name**: `dpdp-guard-demo`
+   - **Postgres version**: `16` (or latest)
+   - **Region**: Choose closest to your Render service (e.g. `US East (Ohio)` or `Frankfurt`).
+3. Once created, copy the **Connection string** from the Dashboard:
+   - Select **Pooled connection** or **Direct connection**.
+   - Example format:
+     ```
+     postgresql://dpdp_owner:s3cr3t@ep-cool-flower-12345.us-east-2.aws.neon.tech/neondb?sslmode=require
+     ```
+   *(DPDP-Guard automatically translates `sslmode=require` to `ssl=require` for asyncpg compatibility).*
 
-### Step 3.1: Create Managed PostgreSQL Database
-1. Go to **Dashboard** > **New +** > **PostgreSQL**.
-2. **Name**: `dpdp-guard-postgres`
-3. **Database**: `dpdp_guard`
-4. **User**: `dpdp_admin`
-5. **Region**: Choose your nearest region (e.g., `Oregon`, `Frankfurt`, or `Singapore`).
-6. **Plan**: `Free` or `Starter`.
-7. Click **Create Database**.
-8. Once provisioned, locate the **Internal Database URL** (e.g., `postgres://dpdp_admin:...@dpg-...-a/dpdp_guard`). Note this for the web service.
+---
 
-### Step 3.2: Create Web Service
-1. Go to **Dashboard** > **New +** > **Web Service**.
+## 3. Step 2: Deploy to Render via Blueprint ($0/month)
+
+1. Push your repository to your GitHub account (e.g. `https://github.com/Satvik071-yadav/DPDP`).
+2. Log in to [Render Dashboard](https://dashboard.render.com).
+3. Click **Blueprints** > **New Blueprint Instance**.
+4. Connect your `DPDP` GitHub repository.
+5. Render will automatically read [`render.yaml`](./render.yaml).
+6. When prompted for environment variables:
+   - `DATABASE_URL`: Paste your **Neon PostgreSQL connection string**.
+   *(If left empty, DPDP-Guard will fall back to local SQLite, which resets on container restart).*
+7. Click **Apply**.
+8. Render will:
+   - Build the unified Docker image (React frontend + FastAPI backend + Playwright Chromium).
+   - Generate a cryptographically secure 64-character `SECRET_KEY` automatically.
+   - Run database migrations (`run_migrations()`) to set up all tables and indexes.
+   - Deploy the service on the **Free** instance type.
+
+---
+
+## 4. Step 3: Manual Render Setup (Alternative to Blueprint)
+
+If you prefer deploying without `render.yaml`:
+
+1. In Render Dashboard, click **New +** > **Web Service**.
 2. Select **Build and deploy from a Git repository** and pick your repository.
 3. Configure the service settings:
    - **Name**: `dpdp-guard-saas`
-   - **Region**: Same region as your database.
-   - **Branch**: `main`
+   - **Region**: Same region as your Neon database.
+   - **Branch**: `master` (or `main`)
    - **Runtime**: `Docker`
    - **Dockerfile Path**: `./Dockerfile`
-   - **Instance Type**: `Starter` (recommended for running Playwright browser automation with >= 512MB RAM).
+   - **Instance Type**: **Free** ($0/month)
+4. Add the following **Environment Variables**:
 
-### Step 3.3: Configure Environment Variables
-Under the **Environment Variables** tab of your Web Service, configure:
-
-| Variable | Recommended Value | Notes |
+| Variable | Value | Purpose |
 | :--- | :--- | :--- |
-| `APP_ENV` | `production` | Enforces production security checks |
-| `DEBUG` | `false` | Prevents leaking debug stack traces |
-| `API_V1_PREFIX` | `/api/v1` | Standard API v1 route prefix |
-| `SECRET_KEY` | *(Generate a 32+ char secret)* | Cryptographic key for tokens and sessions |
-| `DATABASE_URL` | *(Paste Internal Database URL)* | Render `postgres://` URLs are automatically normalized to `postgresql+asyncpg://` |
-| `CORS_ORIGINS` | `*` or `https://your-domain.onrender.com` | Allowed browser origins |
-| `ALLOWED_LOCAL_DOMAINS` | `paysecure-india.in,apollo-telemed.co.in,retail-bharat.store,localhost,127.0.0.1,demo.dpdpguard.in` | Security boundary for scans |
-| `MAX_SCAN_CONCURRENCY` | `3` | Maximum concurrent browser audits |
+| `APP_ENV` | `production` | Enforces production security constraints |
+| `DEBUG` | `false` | Prevents exposing debug stack traces |
+| `API_V1_PREFIX` | `/api/v1` | Standard API v1 prefix |
+| `SECRET_KEY` | *(Click "Generate" for 64-char string)* | JWT and session token signing |
+| `DATABASE_URL` | *(Your Neon PostgreSQL connection string)* | Persistent database connection with SSL |
+| `CORS_ORIGINS` | `*` | Allows cross-origin API calls |
+| `ALLOWED_LOCAL_DOMAINS` | `paysecure-india.in,apollo-telemed.co.in,retail-bharat.store,localhost,127.0.0.1,demo.dpdpguard.in` | Scan target whitelist boundary |
+| `MAX_SCAN_CONCURRENCY` | `1` | Strictly throttles concurrency to 1 to fit 512MB RAM |
 | `ENABLE_TESTBED` | `false` | Keeps synthetic testbed disabled in production |
 | `COPILOT_PROVIDER` | `demo` | AI Copilot provider (`demo`, `openai`, `anthropic`) |
 
-### Step 3.4: Configure Health Check Path
-- In **Settings** > **Health Check Path**, enter:
-  ```
-  /api/health
-  ```
-- Render will poll this endpoint during deployment before shifting live traffic.
+5. Under **Health Check Path**, enter `/api/health`.
+6. Click **Create Web Service**.
 
 ---
 
-## 4. Port Binding & Single Container Operation
+## 5. Pre-Flight Verification & Live Demo Checks
 
-- Render automatically injects a dynamic `$PORT` environment variable (typically `10000`).
-- The `Dockerfile` entrypoint is configured as:
-  ```dockerfile
-  CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
-  ```
-- This ensures the application dynamically binds to whichever port Render assigns, while gracefully defaulting to `8000` when running locally via Docker or Docker Compose.
+Once deployed, verify the deployment:
 
----
+### 1. Healthcheck Verification
+```bash
+curl -i https://your-app-name.onrender.com/api/health
+```
+Expected output:
+```json
+{
+  "status": "healthy",
+  "version": "1.0.0",
+  "service": "dpdp-guard-backend",
+  "database": "healthy"
+}
+```
 
-## 5. Schema Migrations & Data Persistence
+### 2. Frontend SPA Routing
+Open `https://your-app-name.onrender.com/` in your browser.
+- Verify that navigating between `/`, `/scan`, `/findings`, `/privacy-flow`, `/fix-verify`, `/history`, and `/settings` works smoothly without 404 errors.
+- Refreshing the browser on any sub-route (`/findings`) properly re-serves the React SPA.
 
-1. On startup, the backend automatically calls `init_db()` and `run_migrations()`.
-2. Safe dialect-agnostic checks inspect existing tables and columns:
-   - On PostgreSQL: queries `information_schema.columns`.
-   - On SQLite: queries `PRAGMA table_info`.
-3. The schema migration version is tracked in `schema_version`.
-4. Existing scan history, findings, and verification audit records are **never dropped or purged** on redeployment.
+### 3. Production Security Boundary
+- Navigating to `https://your-app-name.onrender.com/testbed` returns `403 Forbidden` (`"Controlled testbed endpoints are disabled in production environment."`).
+- The application will refuse to start if `SECRET_KEY` is shorter than 32 characters or left as the development default.
 
----
-
-## 6. Pre-Flight Verification & Health Checks
-
-Once deployed, verify the service:
-
-1. **Health Check**:
-   ```bash
-   curl -i https://your-service.onrender.com/api/health
-   ```
-   Expected response:
-   ```json
-   {
-     "status": "healthy",
-     "version": "1.0.0",
-     "system": "DPDP-Guard Security & Privacy API"
-   }
-   ```
-
-2. **Frontend SPA Navigation**:
-   Open `https://your-service.onrender.com/` in your browser.
-   - Verify that direct navigation and browser refreshes on `/scan`, `/findings`, `/fix-verify`, and `/settings` load the React interface seamlessly without 404 errors.
-
-3. **Production Security Verification**:
-   - Accessing `/testbed` in production when `ENABLE_TESTBED=false` returns `403 Forbidden` (`"Controlled testbed endpoints are disabled in production environment."`).
-   - The API will refuse to start if `APP_ENV=production` and `SECRET_KEY` is left as the default or shorter than 32 characters.
+### 4. Database Persistence Check
+1. In the live website, run a scan on a demo preset target (e.g. `paysecure-india.in`).
+2. Run a verification probe in **Fix & Verify**.
+3. Trigger a manual restart of the web service in the Render dashboard.
+4. Once the service restarts, navigate to **History** and **Overview** — verify that all scans, findings, and audit history records are intact from Neon PostgreSQL.
 
 ---
 
-## 7. Local Testing with Docker Compose
+## 6. Local Docker Testing Before Deployment
 
-You can verify the production container setup locally before deploying:
+You can verify the production Docker image locally:
 
 ```bash
-# Build and run with SQLite persistent volume
-docker compose up --build
+# Build the production multi-stage image
+docker build -t dpdp-guard:latest .
 
-# Or run with PostgreSQL
-docker compose --profile with-postgres up --build
+# Run container locally with ephemeral environment
+docker run -p 8000:8000 \
+  -e APP_ENV=production \
+  -e SECRET_KEY=a_secure_production_secret_key_longer_than_32_characters \
+  dpdp-guard:latest
 ```

@@ -167,6 +167,14 @@ export function getApiBaseUrl(): string {
     return runtimeApiUrlOverride;
   }
 
+  // Detect whether we are running in an HTTPS production environment
+  const isHttpsProduction = 
+    typeof window !== 'undefined' && 
+    Boolean(window.location) && 
+    window.location.protocol === 'https:' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1';
+
   if (typeof localStorage !== 'undefined') {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.SETTINGS);
@@ -175,6 +183,18 @@ export function getApiBaseUrl(): string {
         if (parsed?.apiUrl && typeof parsed.apiUrl === 'string') {
           const val = validateApiUrl(parsed.apiUrl);
           if (val.valid && val.normalizedUrl) {
+            // When served over HTTPS in production, ignore stale localhost/127.0.0.1 URLs
+            // from developer localStorage to prevent browser Mixed Content blocking
+            const isLocalhostTarget = 
+              val.normalizedUrl.includes('://localhost') || 
+              val.normalizedUrl.includes('://127.0.0.1');
+
+            if (isHttpsProduction && isLocalhostTarget) {
+              const defaultOrigin = getDefaultApiUrl();
+              runtimeApiUrlOverride = defaultOrigin;
+              return defaultOrigin;
+            }
+
             runtimeApiUrlOverride = val.normalizedUrl;
             return val.normalizedUrl;
           }

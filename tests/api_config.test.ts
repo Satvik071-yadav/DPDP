@@ -176,6 +176,69 @@ test('Saved URL Override and Settings Propagation', async (t) => {
 
     assert.equal(getApiBaseUrl(), 'https://dpdp-prod.company.in:8443');
   });
+
+  await t.test('ignores stale localhost URL in localStorage under HTTPS production', () => {
+    resetApiUrlOverride();
+    storage.clear();
+
+    const staleSettings = {
+      apiUrl: 'http://127.0.0.1:8000',
+      organizationName: 'Production Org',
+      demoMode: false,
+    };
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(staleSettings));
+
+    // Simulate window.location on HTTPS production domain (e.g. Render)
+    const originalWindow = (globalThis as any).window;
+    (globalThis as any).window = {
+      location: {
+        protocol: 'https:',
+        hostname: 'dpdp-guard-saas.onrender.com',
+        origin: 'https://dpdp-guard-saas.onrender.com',
+        port: '',
+      },
+      dispatchEvent: () => true,
+    };
+
+    try {
+      const resolved = getApiBaseUrl();
+      assert.equal(resolved, 'https://dpdp-guard-saas.onrender.com');
+    } finally {
+      (globalThis as any).window = originalWindow;
+      resetApiUrlOverride();
+    }
+  });
+
+  await t.test('preserves explicit HTTPS URL in localStorage under HTTPS production', () => {
+    resetApiUrlOverride();
+    storage.clear();
+
+    const customSettings = {
+      apiUrl: 'https://custom-backend.internal.org:9443',
+      organizationName: 'Custom Org',
+      demoMode: false,
+    };
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(customSettings));
+
+    const originalWindow = (globalThis as any).window;
+    (globalThis as any).window = {
+      location: {
+        protocol: 'https:',
+        hostname: 'dpdp-guard-saas.onrender.com',
+        origin: 'https://dpdp-guard-saas.onrender.com',
+        port: '',
+      },
+      dispatchEvent: () => true,
+    };
+
+    try {
+      const resolved = getApiBaseUrl();
+      assert.equal(resolved, 'https://custom-backend.internal.org:9443');
+    } finally {
+      (globalThis as any).window = originalWindow;
+      resetApiUrlOverride();
+    }
+  });
 });
 
 test('Connection Health Testing and Error Handling', async (t) => {

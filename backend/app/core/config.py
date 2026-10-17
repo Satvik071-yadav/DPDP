@@ -46,14 +46,21 @@ class Settings(BaseSettings):
         - postgres:// -> postgresql+asyncpg:// (Render default format)
         - postgresql:// -> postgresql+asyncpg://
         - sqlite:// -> sqlite+aiosqlite://
+        - Translates sslmode= (Neon / Supabase default) to ssl= for asyncpg driver compatibility
         """
         raw_url = self.DATABASE_URL.strip()
         if raw_url.startswith("postgres://"):
-            return "postgresql+asyncpg://" + raw_url[len("postgres://"):]
-        if raw_url.startswith("postgresql://") and not raw_url.startswith("postgresql+"):
-            return "postgresql+asyncpg://" + raw_url[len("postgresql://"):]
-        if raw_url.startswith("sqlite://") and not raw_url.startswith("sqlite+"):
-            return "sqlite+aiosqlite://" + raw_url[len("sqlite://"):]
+            raw_url = "postgresql+asyncpg://" + raw_url[len("postgres://"):]
+        elif raw_url.startswith("postgresql://") and not raw_url.startswith("postgresql+"):
+            raw_url = "postgresql+asyncpg://" + raw_url[len("postgresql://"):]
+        elif raw_url.startswith("sqlite://") and not raw_url.startswith("sqlite+"):
+            raw_url = "sqlite+aiosqlite://" + raw_url[len("sqlite://"):]
+
+        # asyncpg does not accept 'sslmode' query argument; translate to 'ssl'
+        if "sslmode=" in raw_url:
+            import re
+            raw_url = re.sub(r'([?&])sslmode=', r'\1ssl=', raw_url)
+
         return raw_url
 
     @property
@@ -76,6 +83,7 @@ class Settings(BaseSettings):
         Enforces strict production security configuration:
         - Disallows default or short development secrets
         - Disallows DEBUG mode in production
+        - Requires an external persistent database (PostgreSQL) rather than ephemeral SQLite
         """
         if self.APP_ENV == "production":
             if self.DEBUG:
@@ -92,6 +100,13 @@ class Settings(BaseSettings):
                 raise RuntimeError(
                     "Production configuration error: SECRET_KEY must be a cryptographically secure random "
                     "string of at least 32 characters. Do not use the development default."
+                )
+
+            if self.is_sqlite:
+                raise RuntimeError(
+                    "Production configuration error: DATABASE_URL must be configured with an external "
+                    "persistent database (e.g. Neon PostgreSQL) when APP_ENV=production. Ephemeral SQLite "
+                    "cannot be used for persistent records in production."
                 )
 
 

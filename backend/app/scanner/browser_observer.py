@@ -106,6 +106,15 @@ class BrowserObservationService:
                             "--no-sandbox",
                             "--disable-dev-shm-usage",
                             "--disable-gpu",
+                            "--disable-software-rasterizer",
+                            "--disable-extensions",
+                            "--disable-background-networking",
+                            "--disable-default-apps",
+                            "--disable-sync",
+                            "--disable-translate",
+                            "--metrics-recording-only",
+                            "--no-first-run",
+                            "--js-flags=--max-old-space-size=128",
                             "--proxy-bypass-list=<-loopback>"
                         ],
                         proxy={

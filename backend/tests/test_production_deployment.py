@@ -13,11 +13,18 @@ def test_database_url_normalization():
     assert s1.is_postgres is True
     assert s1.is_sqlite is False
 
-    # Standard postgresql:// with SSL mode query parameter
+    # Standard postgresql:// with SSL mode query parameter translated for asyncpg/Neon
     s2 = Settings(DATABASE_URL="postgresql://dpdp_admin:secret@host:5432/dpdp_guard?sslmode=require")
     assert s2.async_database_url.startswith("postgresql+asyncpg://")
-    assert "sslmode=require" in s2.async_database_url
+    assert "ssl=require" in s2.async_database_url
+    assert "sslmode=" not in s2.async_database_url
     assert s2.is_postgres is True
+
+    # External Neon Free Tier URL format
+    s_neon = Settings(DATABASE_URL="postgresql://neon_user:secret@ep-cool-flower-12345.us-east-2.aws.neon.tech/neondb?sslmode=require")
+    assert s_neon.async_database_url.startswith("postgresql+asyncpg://")
+    assert "ssl=require" in s_neon.async_database_url
+    assert s_neon.is_postgres is True
 
     # Standard sqlite:// format
     s3 = Settings(DATABASE_URL="sqlite:///./data/dpdp_guard.db")
@@ -59,13 +66,33 @@ def test_production_security_validation():
     with pytest.raises(RuntimeError, match="DEBUG cannot be True"):
         s_debug.validate_production_configuration()
 
-    # 4. Accepts valid production configuration
+    # 4. Rejects SQLite in production (requires external persistent database)
+    s_sqlite = Settings(
+        APP_ENV="production",
+        SECRET_KEY="a_valid_cryptographic_secret_key_longer_than_32_characters",
+        DEBUG=False,
+        DATABASE_URL="sqlite+aiosqlite:///./dpdp_guard.db"
+    )
+    with pytest.raises(RuntimeError, match="DATABASE_URL must be configured with an external persistent database"):
+        s_sqlite.validate_production_configuration()
+
+    # 5. Accepts valid production configuration with external PostgreSQL
     s_valid = Settings(
         APP_ENV="production",
         SECRET_KEY="a_valid_cryptographic_secret_key_longer_than_32_characters",
-        DEBUG=False
+        DEBUG=False,
+        DATABASE_URL="postgresql://neon_admin:fake_test_token@ep-test.neon.tech/neondb?sslmode=require"
     )
     s_valid.validate_production_configuration()
+
+    # 6. Allows SQLite in development environment
+    s_dev = Settings(
+        APP_ENV="development",
+        SECRET_KEY="short",
+        DEBUG=True,
+        DATABASE_URL="sqlite+aiosqlite:///./dpdp_guard.db"
+    )
+    s_dev.validate_production_configuration()
 
 
 def test_testbed_enabled_logic():

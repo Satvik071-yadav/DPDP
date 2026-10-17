@@ -13,10 +13,11 @@ if settings.is_sqlite:
     connect_args = {"check_same_thread": False}
     engine_kwargs["connect_args"] = connect_args
 else:
-    # Production PostgreSQL connection resilience
+    # Production PostgreSQL connection resilience (optimized for free tier external databases like Neon)
     engine_kwargs["pool_pre_ping"] = True
-    engine_kwargs["pool_size"] = 10
-    engine_kwargs["max_overflow"] = 20
+    engine_kwargs["pool_size"] = 5
+    engine_kwargs["max_overflow"] = 5
+    engine_kwargs["pool_recycle"] = 300
 
 engine = create_async_engine(
     settings.async_database_url,
