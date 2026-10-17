@@ -20,11 +20,35 @@ def test_database_url_normalization():
     assert "sslmode=" not in s2.async_database_url
     assert s2.is_postgres is True
 
-    # External Neon Free Tier URL format
+    # External Neon Free Tier URL format (with sslmode=require)
     s_neon = Settings(DATABASE_URL="postgresql://neon_user:secret@ep-cool-flower-12345.us-east-2.aws.neon.tech/neondb?sslmode=require")
     assert s_neon.async_database_url.startswith("postgresql+asyncpg://")
     assert "ssl=require" in s_neon.async_database_url
+    assert "sslmode=" not in s_neon.async_database_url
     assert s_neon.is_postgres is True
+
+    # External Neon URL with channel_binding parameter (e.g. copied from Neon dashboard)
+    s_neon_cb = Settings(DATABASE_URL="postgresql://neon_user:secret@ep-cool-flower-12345.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require")
+    assert s_neon_cb.async_database_url.startswith("postgresql+asyncpg://")
+    assert "ssl=require" in s_neon_cb.async_database_url
+    assert "channel_binding" not in s_neon_cb.async_database_url
+    assert "sslmode=" not in s_neon_cb.async_database_url
+
+    # Verify SQLAlchemy asyncpg dialect does not pass channel_binding to asyncpg.connect
+    from sqlalchemy.engine.url import make_url
+    from sqlalchemy.dialects.postgresql.asyncpg import PGDialect_asyncpg
+    dialect = PGDialect_asyncpg()
+    _, connect_kwargs = dialect.create_connect_args(make_url(s_neon_cb.async_database_url))
+    assert "channel_binding" not in connect_kwargs
+    assert "sslmode" not in connect_kwargs
+    assert connect_kwargs.get("ssl") == "require"
+
+    # Verify get_database_ssl_context enforces certificate and hostname verification for Neon
+    import ssl
+    ssl_ctx = s_neon_cb.get_database_ssl_context()
+    assert ssl_ctx is not None
+    assert ssl_ctx.check_hostname is True
+    assert ssl_ctx.verify_mode == ssl.CERT_REQUIRED
 
     # Standard sqlite:// format
     s3 = Settings(DATABASE_URL="sqlite:///./data/dpdp_guard.db")
@@ -93,6 +117,16 @@ def test_production_security_validation():
         DATABASE_URL="sqlite+aiosqlite:///./dpdp_guard.db"
     )
     s_dev.validate_production_configuration()
+
+    # 7. Rejects disabled SSL in production
+    s_no_ssl = Settings(
+        APP_ENV="production",
+        SECRET_KEY="a_valid_cryptographic_secret_key_longer_than_32_characters",
+        DEBUG=False,
+        DATABASE_URL="postgresql://neon_admin:fake_token@ep-test.neon.tech/neondb?sslmode=disable"
+    )
+    with pytest.raises(RuntimeError, match="TLS/SSL encryption cannot be disabled in production"):
+        s_no_ssl.validate_production_configuration()
 
 
 def test_testbed_enabled_logic():

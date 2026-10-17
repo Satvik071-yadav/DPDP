@@ -19,6 +19,10 @@ else:
     engine_kwargs["max_overflow"] = 5
     engine_kwargs["pool_recycle"] = 300
 
+    ssl_ctx = settings.get_database_ssl_context()
+    if ssl_ctx is not None:
+        engine_kwargs["connect_args"] = {"ssl": ssl_ctx}
+
 engine = create_async_engine(
     settings.async_database_url,
     **engine_kwargs
