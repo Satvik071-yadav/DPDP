@@ -17,7 +17,13 @@ import {
   Activity,
   Layers,
   Zap,
-  Check
+  Check,
+  Shield,
+  LogIn,
+  UserPlus,
+  FileText,
+  Eye,
+  Database
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -31,12 +37,18 @@ import {
   Cell 
 } from 'recharts';
 import { api } from '@/services/api';
-import { Finding, ScanResult, ScanProfile, Severity, AuditHistoryRecord } from '@/types';
+import { authService } from '@/services/authService';
+import { LoginModal } from '@/components/auth/LoginModal';
+import { Finding, ScanResult, ScanProfile, Severity, AuditHistoryRecord, UserProfile } from '@/types';
 import { formatSeverity, formatDate, truncateUrl } from '@/lib/utils';
 import { DEMO_PRESET_TARGETS } from '@/data/mockData';
 
 export const Overview: React.FC = () => {
   const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(authService.getCurrentUser());
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginModalMode, setLoginModalMode] = useState<'login' | 'register'>('login');
+
   const [findings, setFindings] = useState<Finding[]>([]);
   const [scans, setScans] = useState<ScanResult[]>([]);
   const [auditHistory, setAuditHistory] = useState<AuditHistoryRecord[]>([]);
@@ -48,6 +60,13 @@ export const Overview: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadData = async () => {
+    if (!authService.isAuthenticated()) {
+      setFindings([]);
+      setScans([]);
+      setAuditHistory([]);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setLoadError(null);
     try {
@@ -67,7 +86,25 @@ export const Overview: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    const unsubscribe = authService.onAuthStateChange((user) => {
+      setCurrentUser(user);
+      if (user) {
+        loadData();
+      } else {
+        setFindings([]);
+        setScans([]);
+        setAuditHistory([]);
+        setIsLoading(false);
+      }
+    });
+
+    if (authService.isAuthenticated()) {
+      loadData();
+    } else {
+      setIsLoading(false);
+    }
+
+    return () => unsubscribe();
   }, []);
 
 
@@ -238,6 +275,212 @@ export const Overview: React.FC = () => {
     if (tableFilter === 'verified') return f.status === 'verified_fix';
     return true;
   });
+
+  if (!currentUser) {
+    return (
+      <div className="space-y-8 pb-12 animate-in fade-in duration-200">
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onLoginSuccess={(user) => {
+            setCurrentUser(user);
+            setShowLoginModal(false);
+            loadData();
+          }}
+          initialMode={loginModalMode}
+        />
+
+        {/* Guest Warning / CTA Banner */}
+        <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-cyan-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-white uppercase tracking-wider">Public Security Gateway</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] bg-cyan-500/20 text-cyan-300 font-mono">Unauthenticated</span>
+              </div>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Telemetry and audit records are isolated per tenant. Sign in to launch target audits and review your organization's findings.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
+            <button
+              onClick={() => { setLoginModalMode('login'); setShowLoginModal(true); }}
+              className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-cyan-sm"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+            <button
+              onClick={() => { setLoginModalMode('register'); setShowLoginModal(true); }}
+              className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Register</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Hero Section */}
+        <div className="relative rounded-3xl bg-gradient-to-b from-obsidian-850 via-obsidian-900 to-obsidian-950 border border-white/10 p-8 sm:p-12 overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[28rem] h-[28rem] rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 -mb-24 w-96 h-96 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-3xl space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold tracking-wide">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>India DPDP Act 2023 Technical Compliance & Verification</span>
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+                Continuous Client-Side Privacy Auditing & Exposure Defense
+              </h1>
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+                DPDP-Guard instruments automated headless Chromium browsers to detect pre-consent tracker egress, unconsented storage writes, statutory notice omissions, and data security vulnerabilities in live web applications.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                onClick={() => { setLoginModalMode('login'); setShowLoginModal(true); }}
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 text-slate-950 font-bold text-sm shadow-cyan-md hover:shadow-cyan-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
+              >
+                <span>Access Compliance Workspace</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => { setLoginModalMode('register'); setShowLoginModal(true); }}
+                className="px-5 py-3 rounded-xl bg-obsidian-800 hover:bg-obsidian-750 border border-white/10 text-slate-200 font-semibold text-sm transition-all flex items-center gap-2"
+              >
+                <UserPlus className="w-4 h-4 text-cyan-400" />
+                <span>Create Multi-Tenant Account</span>
+              </button>
+
+              <Link
+                to="/scan"
+                className="px-4 py-3 rounded-xl text-slate-400 hover:text-white font-medium text-sm transition-colors flex items-center gap-1.5"
+              >
+                <span>Explore Scanner</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* 4 Core Pillars Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <Radar className="w-5 h-5" />
+            </div>
+            <h3 className="text-sm font-bold text-white">Browser Observer</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Instruments headless Chromium via Playwright to observe live network requests, cookies, and localStorage writes prior to user consent.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+              <Shield className="w-5 h-5" />
+            </div>
+            <h3 className="text-sm font-bold text-white">Statutory DPDP Rules</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Automated rule checks against Sections 6(1) Notice, 6(4) Consent Withdrawal, 8(5) Security, 9(1) Children's Data, and 11(1) Rights.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <h3 className="text-sm font-bold text-white">Cryptographic Verification</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Captures SHA-256 evidence logs and runs automated remediation probes to verify that reported privacy gaps have been patched.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <Database className="w-5 h-5" />
+            </div>
+            <h3 className="text-sm font-bold text-white">Multi-Tenant Isolation</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Enterprise tenant isolation ensures that your organization's scans, findings, evidence logs, and settings are never exposed across tenants.
+            </p>
+          </div>
+        </div>
+
+        {/* DPDP Act 2023 Statutory Breakdown Table */}
+        <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-cyan-400" />
+              <h2 className="text-sm font-bold text-white">DPDP Act, 2023 — Statutory Inspection Modules</h2>
+            </div>
+            <span className="text-[11px] text-slate-400">Active Rule Engine Coverage</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-white/[0.08] text-slate-400 font-mono text-[11px]">
+                  <th className="py-2.5 px-3">Statutory Provision</th>
+                  <th className="py-2.5 px-3">Evaluation Scope</th>
+                  <th className="py-2.5 px-3">Severity</th>
+                  <th className="py-2.5 px-3">Automated Telemetry Method</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.04] text-slate-300">
+                <tr>
+                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 6(1)</td>
+                  <td className="py-3 px-3">Notice Requirements & Itemised Purpose Specification</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">HIGH</span></td>
+                  <td className="py-3 px-3 text-slate-400">DOM extraction of consent notice and purpose disclosure</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 6(4)</td>
+                  <td className="py-3 px-3">Ease of Consent Withdrawal (Equal friction)</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">HIGH</span></td>
+                  <td className="py-3 px-3 text-slate-400">Withdrawal link accessibility and friction comparison</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 8(5)</td>
+                  <td className="py-3 px-3">Reasonable Security Safeguards & Egress Protection</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">CRITICAL</span></td>
+                  <td className="py-3 px-3 text-slate-400">Network egress capture, tracker detection, cookie auditing</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 9(1)</td>
+                  <td className="py-3 px-3">Verifiable Parental Consent for Children's Data</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">CRITICAL</span></td>
+                  <td className="py-3 px-3 text-slate-400">Age gating, profiling script checks, parental consent mechanism</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 11(1)</td>
+                  <td className="py-3 px-3">Data Principal Rights: Access, Correction & Erasure</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">MEDIUM</span></td>
+                  <td className="py-3 px-3 text-slate-400">Privacy policy rights clause parsing and DPO contact verification</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="p-4 rounded-2xl bg-obsidian-900/80 border border-white/[0.07] flex items-start gap-3 text-xs text-slate-400">
+          <AlertCircle className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+          <p className="text-[11px] leading-relaxed">
+            Technical audit scores, exposure categories, and automated observations represent an advisory security assessment of observed system behaviors under India's Digital Personal Data Protection Act, 2023. They identify potential compliance risk indicators and do not constitute formal legal adjudication.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-8">

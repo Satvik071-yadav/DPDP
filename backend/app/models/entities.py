@@ -12,6 +12,7 @@ class ScanJob(Base):
     __tablename__ = "scan_jobs"
 
     id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
     target_url = Column(String, nullable=False, index=True)
     profile = Column(String, nullable=False, default="privacy_audit")
     status = Column(String, nullable=False, default="queued", index=True)  # queued, running, completed, failed, cancelled
@@ -94,6 +95,7 @@ class AuditRecordModel(Base):
     __tablename__ = "audit_records"
 
     id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     # ondelete="SET NULL" preserves historical compliance records even if associated finding is purged
     finding_id = Column(String, ForeignKey("findings.id", ondelete="SET NULL"), nullable=True, index=True)
     finding_title = Column(String, nullable=False)
@@ -114,6 +116,7 @@ class CopilotInteractionModel(Base):
     __tablename__ = "copilot_interactions"
 
     id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
     finding_id = Column(String, nullable=False, index=True)
     user_prompt = Column(Text, nullable=False)
     provider_used = Column(String, nullable=False, default="demo")
@@ -125,6 +128,7 @@ class SettingsModel(Base):
     __tablename__ = "platform_settings"
 
     id = Column(String, primary_key=True, default="default")
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
     organization_name = Column(String, nullable=False, default="Bharat Privacy Labs Ltd.")
     dpo_name = Column(String, nullable=False, default="Aditi Deshmukh, CISSP")
     dpo_email = Column(String, nullable=False, default="dpo@bharatprivacy.in")

@@ -102,7 +102,7 @@ def test_adversarial_mixed_public_private_dns_answers():
 # 4. Adversarial Test: Navigation Timeout & Crash Resilience
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_adversarial_navigation_timeout_and_failure():
+async def test_adversarial_navigation_timeout_and_failure(auth_headers):
     """
     Verifies that navigation timeouts or unreachable endpoints:
     1. Set scan status to 'failed'
@@ -118,7 +118,8 @@ async def test_adversarial_navigation_timeout_and_failure():
         ):
             res = await client.post(
                 "/api/v1/scans",
-                json={"targetUrl": "http://127.0.0.1:8000/testbed", "profile": "privacy_audit"}
+                json={"targetUrl": "http://127.0.0.1:8000/testbed", "profile": "privacy_audit"},
+                headers=auth_headers
             )
             assert res.status_code == 201
             data = res.json()
@@ -308,7 +309,7 @@ async def test_adversarial_egress_proxy_enforcement_and_auth():
 # 7. Adversarial Test: Copilot Prompt Redaction in Database Persistence
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_adversarial_copilot_prompt_redaction_in_database():
+async def test_adversarial_copilot_prompt_redaction_in_database(auth_headers):
     """
     Verifies that when a user submits sensitive PII (PAN, Aadhaar, Phone)
     in the Copilot chat prompt:
@@ -347,7 +348,7 @@ async def test_adversarial_copilot_prompt_redaction_in_database():
     }
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        response = await ac.post("/api/v1/copilot/chat", json=payload)
+        response = await ac.post("/api/v1/copilot/chat", json=payload, headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert raw_pan not in data["summary"]

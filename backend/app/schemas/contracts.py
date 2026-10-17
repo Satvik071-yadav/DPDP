@@ -236,6 +236,14 @@ class UserLoginRequest(BaseModel):
     password: str
 
 
+class UserRegisterRequest(BaseModel):
+    username: str
+    email: str
+    password: str
+    fullName: Optional[str] = None
+    role: Optional[str] = "auditor"
+
+
 class UserProfileSchema(BaseModel):
     id: str
     username: str

@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
+from app.core.auth import get_current_user, require_role
 from app.schemas.contracts import (
     FindingSchema,
     ObservedEvidenceSchema,
@@ -24,21 +25,32 @@ def get_utc_now():
 
 
 @router.get("", response_model=List[FindingSchema])
-async def list_findings(db: AsyncSession = Depends(get_db)):
+async def list_findings(
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    List all detected findings.
+    List all detected findings scoped to the authenticated user.
     """
-    return await finding_service.list_findings(db)
+    user_id = claims.get("sub")
+    return await finding_service.list_findings(db, user_id=user_id)
 
 
 @router.get("/verification/audit-history", response_model=List[AuditHistoryRecordSchema])
-async def list_audit_history(db: AsyncSession = Depends(get_db)):
+async def list_audit_history(
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Retrieve historical probe verification audit records from the database.
+    Retrieve historical probe verification audit records from the database for the authenticated user.
     Retains both before-fix and after-fix outcomes so UI can display a genuine comparison.
     """
+    user_id = claims.get("sub")
     res = await db.execute(
-        select(AuditRecordModel).order_by(AuditRecordModel.timestamp.desc()).limit(100)
+        select(AuditRecordModel)
+        .where(AuditRecordModel.user_id == user_id)
+        .order_by(AuditRecordModel.timestamp.desc())
+        .limit(100)
     )
     records = res.scalars().all()
     return [
@@ -62,28 +74,35 @@ async def list_audit_history(db: AsyncSession = Depends(get_db)):
 @router.delete("/verification/audit-history")
 async def clear_audit_history(
     confirm: bool = Query(False, description="Explicit confirmation required to clear audit records"),
+    claims: dict = Depends(require_role("dpo", "admin")),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Clear verification audit history records from the database.
-    Requires explicit confirmation to prevent accidental loss of accountability records.
+    Requires DPO or Admin privileges and explicit confirmation to prevent accidental loss of accountability records.
     """
     if not confirm:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Audit history deletion requires explicit confirmation (?confirm=true). Audit trails are required for compliance accountability."
         )
-    await db.execute(delete(AuditRecordModel))
+    user_id = claims.get("sub")
+    await db.execute(delete(AuditRecordModel).where(AuditRecordModel.user_id == user_id))
     await db.commit()
     return {"cleared": True, "message": "Verification audit history cleared."}
 
 
 @router.get("/{finding_id}", response_model=FindingSchema)
-async def get_finding(finding_id: str, db: AsyncSession = Depends(get_db)):
+async def get_finding(
+    finding_id: str,
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Retrieve details of a specific finding.
+    Retrieve details of a specific finding belonging to the authenticated user.
     """
-    finding = await finding_service.get_finding_by_id(finding_id, db)
+    user_id = claims.get("sub")
+    finding = await finding_service.get_finding_by_id(finding_id, db, user_id=user_id)
     if not finding:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -96,11 +115,20 @@ async def get_finding(finding_id: str, db: AsyncSession = Depends(get_db)):
 async def update_finding_status(
     finding_id: str,
     req: UpdateFindingStatusRequest,
+    claims: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Update finding status and record verification history entry.
+    Update finding status and record verification history entry for the authenticated user.
     """
+    user_id = claims.get("sub")
+    finding = await finding_service.get_finding_by_id(finding_id, db, user_id=user_id)
+    if not finding:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Finding with ID '{finding_id}' not found."
+        )
+
     model = await db.get(FindingModel, finding_id)
     if not model:
         raise HTTPException(
@@ -114,21 +142,26 @@ async def update_finding_status(
         "id": f"VER-{int(now.timestamp())}",
         "timestamp": now.isoformat(),
         "status": "passed" if req.status == "verified_fix" else "pending",
-        "verifiedBy": "Security Auditor (API action)",
+        "verifiedBy": f"{claims.get('fullName', 'Security Auditor')} ({claims.get('role', 'dpo').upper()})",
         "notes": f"Status updated to {req.status} via API."
     })
     model.verification_history = hist
     await db.commit()
     await db.refresh(model)
-    return await finding_service.get_finding_by_id(finding_id, db)
+    return await finding_service.get_finding_by_id(finding_id, db, user_id=user_id)
 
 
 @router.get("/{finding_id}/evidence", response_model=ObservedEvidenceSchema)
-async def get_finding_evidence(finding_id: str, db: AsyncSession = Depends(get_db)):
+async def get_finding_evidence(
+    finding_id: str,
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Retrieve forensic observed evidence for a specific finding.
+    Retrieve forensic observed evidence for a specific finding belonging to the authenticated user.
     """
-    finding = await finding_service.get_finding_by_id(finding_id, db)
+    user_id = claims.get("sub")
+    finding = await finding_service.get_finding_by_id(finding_id, db, user_id=user_id)
     if not finding:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -141,6 +174,7 @@ async def get_finding_evidence(finding_id: str, db: AsyncSession = Depends(get_d
 async def verify_finding(
     finding_id: str,
     req: VerifyFindingRequest,
+    claims: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -148,7 +182,8 @@ async def verify_finding(
     Evaluates PASS or FAIL based on actual status codes and responses.
     Persists audit trail and updates finding status if remediated.
     """
-    finding = await finding_service.get_finding_by_id(finding_id, db)
+    user_id = claims.get("sub")
+    finding = await finding_service.get_finding_by_id(finding_id, db, user_id=user_id)
     if not finding:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -162,6 +197,7 @@ async def verify_finding(
     audit_id = f"AUDIT-HIST-{int(now.timestamp() * 1000)}"
     audit_entry = AuditRecordModel(
         id=audit_id,
+        user_id=user_id,
         finding_id=finding_id,
         finding_title=finding.title,
         test_case_id=probe_result.testCaseId,
@@ -186,7 +222,7 @@ async def verify_finding(
                 "id": f"VER-{int(now.timestamp())}",
                 "timestamp": now.isoformat(),
                 "status": "passed",
-                "verifiedBy": "DPDP-Guard Automated Sandbox",
+                "verifiedBy": f"{claims.get('fullName', 'Security Auditor')} ({claims.get('role', 'dpo').upper()})",
                 "notes": "Automated verification probe confirmed tenant isolation safeguard (HTTP 403 Forbidden)."
             })
             model.verification_history = hist

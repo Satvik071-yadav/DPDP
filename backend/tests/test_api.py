@@ -89,8 +89,8 @@ async def test_controlled_testbed_browser_observation(live_server):
 
 
 @pytest.mark.asyncio
-async def test_create_and_get_scan():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_create_and_get_scan(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         payload = {
             "targetUrl": "https://paysecure-india.in",
             "profile": "privacy_audit",
@@ -116,8 +116,8 @@ async def test_create_and_get_scan():
 
 
 @pytest.mark.asyncio
-async def test_unauthorized_target_rejected():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_unauthorized_target_rejected(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         payload = {
             "targetUrl": "https://unauthorized-evil-target.com",
             "profile": "privacy_audit"
@@ -177,8 +177,8 @@ async def test_redaction_pipeline():
 
 
 @pytest.mark.asyncio
-async def test_verify_finding_vulnerable_and_patched():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_verify_finding_vulnerable_and_patched(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         # Unpatched probe: BOLA reproduces -> FAIL with HTTP 200 exposing PII
         unpatched_res = await client.post("/api/v1/findings/DPDP-HIGH-007/verify", json={"isPatched": False})
         assert unpatched_res.status_code == 200
@@ -215,8 +215,8 @@ async def test_verify_finding_vulnerable_and_patched():
 
 
 @pytest.mark.asyncio
-async def test_audit_history_clear_requires_explicit_confirmation():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_audit_history_clear_requires_explicit_confirmation(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         # First ensure an audit record exists
         await client.post("/api/v1/findings/DPDP-HIGH-007/verify", json={"isPatched": True})
 
@@ -290,8 +290,8 @@ async def test_fix_verify_malformed_and_unrelated_responses_cannot_produce_false
 
 
 @pytest.mark.asyncio
-async def test_copilot_chat():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_copilot_chat(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         req = {
             "findingContext": {
                 "findingId": "DPDP-HIGH-007",
@@ -420,8 +420,8 @@ async def test_scan_concurrency_semaphore():
 
 
 @pytest.mark.asyncio
-async def test_live_testbed_scan_findings_and_no_fixture_substitution(live_server):
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_live_testbed_scan_findings_and_no_fixture_substitution(live_server, auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         # Run real scan on local testbed
         res = await client.post(
             "/api/v1/scans",
@@ -460,8 +460,8 @@ async def test_live_testbed_scan_findings_and_no_fixture_substitution(live_serve
 
 
 @pytest.mark.asyncio
-async def test_scan_failure_handling():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_scan_failure_handling(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         # Target an unreachable port on allowed localhost
         res = await client.post(
             "/api/v1/scans",
@@ -477,8 +477,8 @@ async def test_scan_failure_handling():
 
 
 @pytest.mark.asyncio
-async def test_scan_lifecycle_and_status_endpoint():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_scan_lifecycle_and_status_endpoint(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         # Create a scan
         res = await client.post(
             "/api/v1/scans",
@@ -499,12 +499,13 @@ async def test_scan_lifecycle_and_status_endpoint():
 
 
 @pytest.mark.asyncio
-async def test_scan_duplicate_submission_prevention():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        # Manually create a running scan in DB
+async def test_scan_duplicate_submission_prevention(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
+        # Manually create a running scan in DB scoped to the same user
         async with AsyncSessionLocal() as session:
             running_job = ScanJob(
                 id="SCAN-IN-FLIGHT-TEST",
+                user_id="usr_dpo_001",
                 target_url="https://paysecure-india.in",
                 status="running",
                 progress_stage="inspecting_network",
@@ -532,12 +533,13 @@ async def test_scan_duplicate_submission_prevention():
 
 
 @pytest.mark.asyncio
-async def test_scan_cancellation_lifecycle():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        # Create an in-flight scan
+async def test_scan_cancellation_lifecycle(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
+        # Create an in-flight scan scoped to user
         async with AsyncSessionLocal() as session:
             job = ScanJob(
                 id="SCAN-CANCEL-TEST",
+                user_id="usr_dpo_001",
                 target_url="https://retail-bharat.store",
                 status="running",
                 progress_stage="running_auth_tests",
@@ -570,7 +572,7 @@ async def test_scan_cancellation_lifecycle():
 
 
 @pytest.mark.asyncio
-async def test_active_background_task_cancellation_preserves_terminal_cancelled_status():
+async def test_active_background_task_cancellation_preserves_terminal_cancelled_status(auth_headers):
     """
     Verifies that cancelling an active in-flight background scan task:
     1. Cancels the underlying asyncio.Task
@@ -580,7 +582,7 @@ async def test_active_background_task_cancellation_preserves_terminal_cancelled_
     """
     from app.services.scan_service import scan_service
 
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         # Create an async scan on paysecure (demo target with simulated delay)
         create_res = await client.post(
             "/api/v1/scans?asyncMode=true",
@@ -621,8 +623,8 @@ async def test_security_headers_middleware():
 
 
 @pytest.mark.asyncio
-async def test_settings_get_and_update():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_settings_get_and_update(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         # 1. GET settings
         get_res = await client.get("/api/v1/settings")
         assert get_res.status_code == 200
@@ -682,8 +684,8 @@ async def test_auth_login_success_and_failure():
 
 
 @pytest.mark.asyncio
-async def test_notifications_endpoint():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+async def test_notifications_endpoint(auth_headers):
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=auth_headers) as client:
         res = await client.get("/api/v1/notifications")
         assert res.status_code == 200
         items = res.json()

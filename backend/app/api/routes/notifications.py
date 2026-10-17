@@ -4,6 +4,7 @@ from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
+from app.core.auth import get_current_user
 from app.models.entities import ScanJob, FindingModel, AuditRecordModel
 from app.schemas.contracts import NotificationItemSchema
 
@@ -11,16 +12,23 @@ router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
 
 @router.get("", response_model=List[NotificationItemSchema])
-async def get_notifications(db: AsyncSession = Depends(get_db)):
+async def get_notifications(
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     Returns an aggregated, real-time audit event stream
-    derived from persisted scans, findings, and verification audit records.
+    scoped to the authenticated user's scans, findings, and verification audit records.
     """
     items: List[NotificationItemSchema] = []
+    user_id = claims.get("sub")
 
-    # 1. Recent scans
+    # 1. User's Recent scans
     scans_res = await db.execute(
-        select(ScanJob).order_by(desc(ScanJob.initiated_at)).limit(5)
+        select(ScanJob)
+        .where(ScanJob.user_id == user_id)
+        .order_by(desc(ScanJob.initiated_at))
+        .limit(5)
     )
     for s in scans_res.scalars().all():
         ts_str = s.completed_at.isoformat() if s.completed_at else s.initiated_at.isoformat()
@@ -37,10 +45,14 @@ async def get_notifications(db: AsyncSession = Depends(get_db)):
             )
         )
 
-    # 2. Critical & High Findings
+    # 2. User's Critical & High Findings
     findings_res = await db.execute(
         select(FindingModel)
-        .where(FindingModel.severity.in_(["critical", "high"]))
+        .join(ScanJob, FindingModel.scan_id == ScanJob.id)
+        .where(
+            ScanJob.user_id == user_id,
+            FindingModel.severity.in_(["critical", "high"])
+        )
         .order_by(desc(FindingModel.detected_at))
         .limit(5)
     )
@@ -58,9 +70,12 @@ async def get_notifications(db: AsyncSession = Depends(get_db)):
             )
         )
 
-    # 3. Verified Audit Records
+    # 3. User's Verified Audit Records
     audits_res = await db.execute(
-        select(AuditRecordModel).order_by(desc(AuditRecordModel.timestamp)).limit(5)
+        select(AuditRecordModel)
+        .where(AuditRecordModel.user_id == user_id)
+        .order_by(desc(AuditRecordModel.timestamp))
+        .limit(5)
     )
     for a in audits_res.scalars().all():
         items.append(

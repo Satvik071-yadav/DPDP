@@ -119,3 +119,17 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"}
         )
     return user
+
+
+def require_role(*roles: str):
+    """Factory creating dependency to enforce RBAC roles (e.g. 'dpo', 'admin')."""
+    async def role_checker(claims: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
+        user_role = claims.get("role", "dpo")
+        if user_role not in roles:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Forbidden: Insufficient privileges. Required role in {roles}."
+            )
+        return claims
+    return role_checker
+

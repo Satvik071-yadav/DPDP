@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
+from app.core.auth import get_current_user
 from app.schemas.contracts import CreateScanRequest, ScanResultSchema, FindingSchema, ScanStatusResponseSchema
 from app.schemas.observation_schemas import BrowserObservationSchema, ConsentComparisonSummary
 from app.services.scan_service import scan_service
@@ -17,32 +18,43 @@ router = APIRouter(prefix="/scans", tags=["Scans"])
 async def create_scan(
     req: CreateScanRequest,
     asyncMode: bool = False,
+    claims: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Creates and executes a controlled scan.
+    Creates and executes a controlled scan scoped to the authenticated user.
     If targeting local testbed, uses Playwright headless browser observation.
     Persists scan job, findings, and recorded observations in the database.
     """
     if asyncMode:
         req.asyncMode = True
-    return await scan_service.create_scan(req, db)
+    user_id = claims.get("sub")
+    return await scan_service.create_scan(req, db, user_id=user_id)
 
 
 @router.get("", response_model=List[ScanResultSchema])
-async def list_scans(db: AsyncSession = Depends(get_db)):
+async def list_scans(
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Retrieves history of executed scan jobs.
+    Retrieves history of executed scan jobs for the authenticated user.
     """
-    return await scan_service.list_scans(db)
+    user_id = claims.get("sub")
+    return await scan_service.list_scans(db, user_id=user_id)
 
 
 @router.get("/{scan_id}", response_model=ScanResultSchema)
-async def get_scan(scan_id: str, db: AsyncSession = Depends(get_db)):
+async def get_scan(
+    scan_id: str,
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Retrieves a specific scan job and its status.
+    Retrieves a specific scan job and its status belonging to the authenticated user.
     """
-    scan = await scan_service.get_scan_by_id(scan_id, db)
+    user_id = claims.get("sub")
+    scan = await scan_service.get_scan_by_id(scan_id, db, user_id=user_id)
     if not scan:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -52,11 +64,16 @@ async def get_scan(scan_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{scan_id}/status", response_model=ScanStatusResponseSchema)
-async def get_scan_status(scan_id: str, db: AsyncSession = Depends(get_db)):
+async def get_scan_status(
+    scan_id: str,
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     Retrieves the authoritative lifecycle status and progress of a scan.
     """
-    status_resp = await scan_service.get_scan_status(scan_id, db)
+    user_id = claims.get("sub")
+    status_resp = await scan_service.get_scan_status(scan_id, db, user_id=user_id)
     if not status_resp:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -66,11 +83,16 @@ async def get_scan_status(scan_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/{scan_id}/cancel", response_model=ScanStatusResponseSchema)
-async def cancel_scan(scan_id: str, db: AsyncSession = Depends(get_db)):
+async def cancel_scan(
+    scan_id: str,
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Cancels an in-flight scan job.
+    Cancels an in-flight scan job belonging to the authenticated user.
     """
-    cancelled = await scan_service.cancel_scan(scan_id, db)
+    user_id = claims.get("sub")
+    cancelled = await scan_service.cancel_scan(scan_id, db, user_id=user_id)
     if not cancelled:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -80,24 +102,40 @@ async def cancel_scan(scan_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{scan_id}/findings", response_model=List[FindingSchema])
-async def get_scan_findings(scan_id: str, db: AsyncSession = Depends(get_db)):
+async def get_scan_findings(
+    scan_id: str,
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Retrieves all findings detected during a specific scan.
+    Retrieves all findings detected during a specific scan belonging to the authenticated user.
     """
-    scan = await scan_service.get_scan_by_id(scan_id, db)
+    user_id = claims.get("sub")
+    scan = await scan_service.get_scan_by_id(scan_id, db, user_id=user_id)
     if not scan:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Scan with ID '{scan_id}' not found."
         )
-    return await finding_service.get_findings_for_scan(scan_id, db)
+    return await finding_service.get_findings_for_scan(scan_id, db, user_id=user_id)
 
 
 @router.get("/{scan_id}/observations", response_model=List[BrowserObservationSchema])
-async def get_scan_observations(scan_id: str, db: AsyncSession = Depends(get_db)):
+async def get_scan_observations(
+    scan_id: str,
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Retrieves all browser network observations recorded during a scan.
+    Retrieves all browser network observations recorded during a scan belonging to the authenticated user.
     """
+    user_id = claims.get("sub")
+    scan = await scan_service.get_scan_by_id(scan_id, db, user_id=user_id)
+    if not scan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scan with ID '{scan_id}' not found."
+        )
     res = await db.execute(
         select(BrowserObservationModel)
         .where(BrowserObservationModel.scan_id == scan_id)
@@ -126,11 +164,19 @@ async def get_scan_observations(scan_id: str, db: AsyncSession = Depends(get_db)
 
 
 @router.get("/{scan_id}/consent-comparison", response_model=ConsentComparisonSummary)
-async def get_consent_comparison(scan_id: str, db: AsyncSession = Depends(get_db)):
+async def get_consent_comparison(
+    scan_id: str,
+    claims: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     Produces structured comparison of network connections observed across consent states.
     """
-    scan = await db.get(ScanJob, scan_id)
+    user_id = claims.get("sub")
+    scan_res = await db.execute(
+        select(ScanJob).where(ScanJob.id == scan_id, ScanJob.user_id == user_id)
+    )
+    scan = scan_res.scalar_one_or_none()
     if not scan:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Scan '{scan_id}' not found.")
 

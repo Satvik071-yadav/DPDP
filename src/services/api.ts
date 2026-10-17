@@ -23,12 +23,6 @@ import { authService } from '@/services/authService';
 
 function initializeStorage() {
   if (typeof localStorage === 'undefined') return;
-  if (!localStorage.getItem(STORAGE_KEYS.SCANS)) {
-    localStorage.setItem(STORAGE_KEYS.SCANS, JSON.stringify(DEMO_SCANS));
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.FINDINGS)) {
-    localStorage.setItem(STORAGE_KEYS.FINDINGS, JSON.stringify(DEMO_FINDINGS));
-  }
   if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
     const initialSettings: UserSettings = {
       ...DEFAULT_USER_SETTINGS,
@@ -49,6 +43,28 @@ initializeStorage();
 
 export const api = {
   async getSettings(): Promise<UserSettings> {
+    const defaultSettings: UserSettings = {
+      ...DEFAULT_USER_SETTINGS,
+      apiUrl: getDefaultApiUrl(),
+    };
+
+    let localSettings: UserSettings | null = null;
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (parsed && typeof parsed === 'object') {
+          localSettings = { ...defaultSettings, ...parsed };
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    if (!authService.isAuthenticated()) {
+      return localSettings || defaultSettings;
+    }
+
     const baseUrl = getApiBaseUrl();
     try {
       const response = await fetch(`${baseUrl}/api/v1/settings`, {
@@ -58,20 +74,16 @@ export const api = {
       if (response.ok) {
         const data: UserSettings = await response.json();
         if (data && typeof data === 'object') {
-          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(data));
-          return data;
+          const merged = { ...defaultSettings, ...data };
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(merged));
+          return merged;
         }
       }
     } catch {
       // Fallback to local storage when backend is offline
     }
 
-    try {
-      const data = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-      return data ? JSON.parse(data) : DEFAULT_USER_SETTINGS;
-    } catch {
-      return DEFAULT_USER_SETTINGS;
-    }
+    return localSettings || defaultSettings;
   },
 
   async saveSettings(settings: UserSettings): Promise<void> {
@@ -102,9 +114,13 @@ export const api = {
 
   /**
    * Fetch real-time audit notifications from backend.
-   * Gracefully falls back to demo activities when offline.
+   * Scoped to the authenticated user's activities. Returns empty array if signed out.
    */
   async getNotifications(): Promise<NotificationItem[]> {
+    if (!authService.isAuthenticated()) {
+      return [];
+    }
+
     const baseUrl = getApiBaseUrl();
     try {
       const response = await fetch(`${baseUrl}/api/v1/notifications`, {
@@ -113,7 +129,7 @@ export const api = {
       });
       if (response.ok) {
         const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           return data;
         }
       }
@@ -121,28 +137,19 @@ export const api = {
       // Network offline
     }
 
-    // Fallback to DEMO_ACTIVITIES
-    return DEMO_ACTIVITIES.map((act) => ({
-      id: act.id,
-      type: act.type,
-      title: act.title,
-      description: act.description,
-      timestamp: act.timestamp,
-      severity: act.severity,
-      link: '/history',
-      isSynthetic: true,
-    }));
+    return [];
   },
 
   /**
-   * Fetch scans from backend when available.
-   * In Demo Mode, returns clearly labeled demo fixtures when offline.
-   * If Demo Mode is disabled and backend is offline, throws descriptive error.
+   * Fetch scans from backend scoped to authenticated user.
+   * Returns empty array when unauthenticated.
    */
   async getScans(): Promise<ScanResult[]> {
-    const baseUrl = getApiBaseUrl();
-    const settings = await this.getSettings();
+    if (!authService.isAuthenticated()) {
+      return [];
+    }
 
+    const baseUrl = getApiBaseUrl();
     try {
       const response = await fetch(`${baseUrl}/api/v1/scans`, {
         method: 'GET',
@@ -155,27 +162,21 @@ export const api = {
           return data;
         }
       }
+      if (response.status === 401) {
+        return [];
+      }
       throw new Error(`HTTP ${response.status} ${response.statusText}`);
     } catch (err: any) {
-      // Backend unavailable fallback
-      if (settings.demoMode) {
-        return DEMO_SCANS.map((s) => ({
-          ...s,
-          isDemo: true,
-          notes: s.notes || '[DEMO FIXTURE] Loaded in synthetic Demo Mode',
-          findings: (s.findings || []).map((f) => ({ ...f, isDemoFixture: true })),
-        }));
-      }
-      throw new Error(
-        `Unable to fetch scans: Backend offline or unreachable at ${baseUrl} (${err.message}). Demo mode is disabled.`
-      );
+      return [];
     }
   },
 
   async getScanById(id: string): Promise<ScanResult | null> {
-    const baseUrl = getApiBaseUrl();
-    const settings = await this.getSettings();
+    if (!authService.isAuthenticated()) {
+      return null;
+    }
 
+    const baseUrl = getApiBaseUrl();
     try {
       const response = await fetch(`${baseUrl}/api/v1/scans/${id}`, {
         method: 'GET',
@@ -184,10 +185,8 @@ export const api = {
       if (response.ok) {
         return await response.json();
       }
-    } catch (err: any) {
-      if (!settings.demoMode) {
-        throw new Error(`Unable to fetch scan ${id}: Backend unavailable at ${baseUrl} (${err.message})`);
-      }
+    } catch {
+      // ignore
     }
 
     const scans = await this.getScans();
@@ -195,14 +194,15 @@ export const api = {
   },
 
   /**
-   * Fetch findings from backend when available.
-   * In Demo Mode, returns clearly labeled demo fixtures when offline.
-   * If Demo Mode is disabled and backend is offline, throws descriptive error.
+   * Fetch findings from backend scoped to authenticated user.
+   * Returns empty array when unauthenticated.
    */
   async getFindings(): Promise<Finding[]> {
-    const baseUrl = getApiBaseUrl();
-    const settings = await this.getSettings();
+    if (!authService.isAuthenticated()) {
+      return [];
+    }
 
+    const baseUrl = getApiBaseUrl();
     try {
       const response = await fetch(`${baseUrl}/api/v1/findings`, {
         method: 'GET',
@@ -215,25 +215,21 @@ export const api = {
           return data;
         }
       }
+      if (response.status === 401) {
+        return [];
+      }
       throw new Error(`HTTP ${response.status} ${response.statusText}`);
     } catch (err: any) {
-      // Backend unavailable fallback
-      if (settings.demoMode) {
-        return DEMO_FINDINGS.map((f) => ({
-          ...f,
-          isDemoFixture: true,
-        }));
-      }
-      throw new Error(
-        `Unable to fetch findings: Backend offline or unreachable at ${baseUrl} (${err.message}). Demo mode is disabled.`
-      );
+      return [];
     }
   },
 
   async getFindingById(id: string): Promise<Finding | null> {
-    const baseUrl = getApiBaseUrl();
-    const settings = await this.getSettings();
+    if (!authService.isAuthenticated()) {
+      return null;
+    }
 
+    const baseUrl = getApiBaseUrl();
     try {
       const response = await fetch(`${baseUrl}/api/v1/findings/${id}`, {
         method: 'GET',
@@ -242,10 +238,8 @@ export const api = {
       if (response.ok) {
         return await response.json();
       }
-    } catch (err: any) {
-      if (!settings.demoMode) {
-        throw new Error(`Unable to fetch finding ${id}: Backend unavailable at ${baseUrl} (${err.message})`);
-      }
+    } catch {
+      // ignore
     }
 
     const findings = await this.getFindings();
@@ -362,7 +356,9 @@ export const api = {
     } catch (err: any) {
       // If Demo Mode is enabled, create an explicit demo scan labeled clearly
       if (settings.demoMode) {
-        const demoFindings = (await this.getFindings()).slice(0, 6).map((f) => ({
+        const availableFindings = await this.getFindings();
+        const baseFindings = availableFindings.length > 0 ? availableFindings : DEMO_FINDINGS;
+        const demoFindings = baseFindings.slice(0, 6).map((f) => ({
           ...f,
           isDemoFixture: true,
         }));
@@ -474,12 +470,21 @@ export const api = {
   },
 
   async getAuditHistory(): Promise<AuditHistoryRecord[]> {
+    if (!authService.isAuthenticated()) {
+      return [];
+    }
     const baseUrl = getApiBaseUrl();
-    const response = await fetch(`${baseUrl}/api/v1/findings/verification/audit-history`, {
-      method: 'GET',
-      headers: buildHeaders({ 'Accept': 'application/json' }),
-    });
-    if (!response.ok) {
+    try {
+      const response = await fetch(`${baseUrl}/api/v1/findings/verification/audit-history`, {
+        method: 'GET',
+        headers: buildHeaders({ 'Accept': 'application/json' }),
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+      if (response.status === 401) {
+        return [];
+      }
       let errorDetail = `HTTP ${response.status} ${response.statusText}`;
       try {
         const errJson = await response.json();
@@ -488,8 +493,9 @@ export const api = {
         // fallback
       }
       throw new Error(`Failed to load audit history: ${errorDetail}`);
+    } catch (err: any) {
+      return [];
     }
-    return await response.json();
   },
 
   async clearAuditHistory(): Promise<void> {

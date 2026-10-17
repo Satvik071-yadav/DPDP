@@ -23,6 +23,39 @@ async def init_db():
     # Seed baseline fixtures if table is empty
     from app.db.session import AsyncSessionLocal
     async with AsyncSessionLocal() as session:
+        # Seed default DPO user if not present (must precede dependent foreign keys)
+        user_res = await session.execute(select(UserModel).where(UserModel.username == "aditi.deshmukh"))
+        default_user = user_res.scalars().first()
+        if not default_user:
+            import os
+            import secrets
+            from app.core.config import settings
+            dpo_pass = os.getenv("DPO_INITIAL_PASSWORD")
+            if settings.APP_ENV == "production":
+                if dpo_pass:
+                    pwd_hash = hash_password(dpo_pass)
+                    is_active = True
+                else:
+                    # In production without an explicit DPO_INITIAL_PASSWORD, generate an unguessable
+                    # random hash and deactivate the account so default credentials cannot be used.
+                    pwd_hash = hash_password(secrets.token_urlsafe(32))
+                    is_active = False
+            else:
+                pwd_hash = hash_password("dpdp_guard_demo_2026")
+                is_active = True
+
+            default_user = UserModel(
+                id="usr_dpo_001",
+                username="aditi.deshmukh",
+                email="dpo@bharatprivacy.in",
+                full_name="Aditi Deshmukh",
+                role="dpo",
+                password_hash=pwd_hash,
+                is_active=is_active
+            )
+            session.add(default_user)
+            await session.commit()
+
         result = await session.execute(select(FindingModel))
         existing = result.scalars().first()
         if not existing:
@@ -30,6 +63,7 @@ async def init_db():
             # Seed Scan Job
             scan_job = ScanJob(
                 id="SCAN-2026-1014-01",
+                user_id="usr_dpo_001",
                 target_url="https://paysecure-india.in",
                 profile="deep_audit",
                 status="completed",
@@ -77,6 +111,7 @@ async def init_db():
             # Seed Initial Audit Record
             audit = AuditRecordModel(
                 id="AUDIT-HIST-102",
+                user_id="usr_dpo_001",
                 finding_id="DPDP-HIGH-007",
                 finding_title="Broken Object-Level Authorization (BOLA/IDOR) on Customer KYC Profile API",
                 test_case_id="TC-BOLA-AUTH-001",
@@ -96,6 +131,7 @@ async def init_db():
         if not settings_res.scalars().first():
             default_settings = SettingsModel(
                 id="default",
+                user_id="usr_dpo_001",
                 organization_name="Bharat Privacy Labs Ltd.",
                 dpo_name="Aditi Deshmukh, CISSP",
                 dpo_email="dpo@bharatprivacy.in",
@@ -111,21 +147,6 @@ async def init_db():
                 }
             )
             session.add(default_settings)
-            await session.commit()
-
-        # Seed default DPO user if not present
-        user_res = await session.execute(select(UserModel).where(UserModel.username == "aditi.deshmukh"))
-        if not user_res.scalars().first():
-            default_user = UserModel(
-                id="usr_dpo_001",
-                username="aditi.deshmukh",
-                email="dpo@bharatprivacy.in",
-                full_name="Aditi Deshmukh",
-                role="dpo",
-                password_hash=hash_password("dpdp_guard_demo_2026"),
-                is_active=True
-            )
-            session.add(default_user)
             await session.commit()
 
         # Sanitize any historical copilot interactions on startup

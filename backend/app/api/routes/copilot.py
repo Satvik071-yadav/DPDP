@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
+from app.core.auth import get_current_user
 from app.schemas.contracts import (
     CopilotChatRequest,
     CopilotChatResponse,
@@ -9,6 +10,7 @@ from app.schemas.contracts import (
 )
 from app.core.redaction import redact_text
 from app.models.entities import CopilotInteractionModel
+from app.services.finding_service import finding_service
 import datetime
 import uuid
 
@@ -18,14 +20,29 @@ router = APIRouter(prefix="/copilot", tags=["Copilot"])
 @router.post("/chat", response_model=CopilotChatResponse)
 async def copilot_chat(
     req: CopilotChatRequest,
+    claims: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
     AI Investigation Copilot endpoint.
-    Processes user inquiries grounded strictly in redacted finding context.
+    Processes user inquiries grounded strictly in redacted finding context for the authenticated user.
     Returns 5 structured analytical sections without inventing facts.
     """
+    user_id = claims.get("sub")
     ctx = req.findingContext
+
+    # If finding is registered in the database, verify it belongs to the authenticated user
+    from app.models.entities import FindingModel
+    from sqlalchemy import select
+    existing_res = await db.execute(select(FindingModel).where(FindingModel.id == ctx.findingId))
+    if existing_res.scalar_one_or_none():
+        finding = await finding_service.get_finding_by_id(ctx.findingId, db, user_id=user_id)
+        if not finding:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Finding with ID '{ctx.findingId}' not found."
+            )
+
     last_user_message = req.messages[-1].content if req.messages else "Explain this finding."
     
     # Task 2: Redact user prompt before persistence and analysis to prevent PII leakage
@@ -93,6 +110,7 @@ async def copilot_chat(
     # Persist interaction with sanitized prompt
     interaction = CopilotInteractionModel(
         id=f"COPILOT-{uuid.uuid4().hex[:8].upper()}",
+        user_id=user_id,
         finding_id=ctx.findingId,
         user_prompt=redacted_user_prompt,
         provider_used="demo",

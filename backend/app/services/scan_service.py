@@ -134,18 +134,23 @@ class ScanService:
     @staticmethod
     async def create_scan(
         req: CreateScanRequest,
-        session: AsyncSession
+        session: AsyncSession,
+        user_id: Optional[str] = None
     ) -> ScanResultSchema:
         validated_url = ScanService.validate_target_url(req.targetUrl)
         now = get_now_utc()
         scan_id = f"SCAN-{now.strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}"
 
-        # Enforce duplicate check: prevent duplicate submissions for target already in-flight
+        # Enforce duplicate check: prevent duplicate submissions for target already in-flight for this user
+        dup_conditions = [
+            ScanJob.target_url == validated_url,
+            ScanJob.status.in_(["queued", "running"])
+        ]
+        if user_id:
+            dup_conditions.append(ScanJob.user_id == user_id)
+
         active_res = await session.execute(
-            select(ScanJob).where(
-                ScanJob.target_url == validated_url,
-                ScanJob.status.in_(["queued", "running"])
-            )
+            select(ScanJob).where(*dup_conditions)
         )
         active_scan = active_res.scalar_one_or_none()
         if active_scan:
@@ -160,6 +165,7 @@ class ScanService:
         # Persist initial scan record in DB immediately so status endpoint and duplicate check work
         scan_job = ScanJob(
             id=scan_id,
+            user_id=user_id,
             target_url=validated_url,
             profile=req.profile,
             status="running",
@@ -550,11 +556,13 @@ class ScanService:
     @staticmethod
     async def get_scan_status(
         scan_id: str,
-        session: AsyncSession
+        session: AsyncSession,
+        user_id: Optional[str] = None
     ) -> Optional[ScanStatusResponseSchema]:
-        result = await session.execute(
-            select(ScanJob).where(ScanJob.id == scan_id)
-        )
+        query = select(ScanJob).where(ScanJob.id == scan_id)
+        if user_id:
+            query = query.where(ScanJob.user_id == user_id)
+        result = await session.execute(query)
         job = result.scalar_one_or_none()
         if not job:
             return None
@@ -572,11 +580,13 @@ class ScanService:
     @staticmethod
     async def cancel_scan(
         scan_id: str,
-        session: AsyncSession
+        session: AsyncSession,
+        user_id: Optional[str] = None
     ) -> Optional[ScanStatusResponseSchema]:
-        result = await session.execute(
-            select(ScanJob).where(ScanJob.id == scan_id)
-        )
+        query = select(ScanJob).where(ScanJob.id == scan_id)
+        if user_id:
+            query = query.where(ScanJob.user_id == user_id)
+        result = await session.execute(query)
         job = result.scalar_one_or_none()
         if not job:
             return None
@@ -610,11 +620,13 @@ class ScanService:
     @staticmethod
     async def get_scan_by_id(
         scan_id: str,
-        session: AsyncSession
+        session: AsyncSession,
+        user_id: Optional[str] = None
     ) -> Optional[ScanResultSchema]:
-        result = await session.execute(
-            select(ScanJob).where(ScanJob.id == scan_id)
-        )
+        query = select(ScanJob).where(ScanJob.id == scan_id)
+        if user_id:
+            query = query.where(ScanJob.user_id == user_id)
+        result = await session.execute(query)
         job = result.scalar_one_or_none()
         if not job:
             return None
@@ -627,11 +639,14 @@ class ScanService:
 
     @staticmethod
     async def list_scans(
-        session: AsyncSession
+        session: AsyncSession,
+        user_id: Optional[str] = None
     ) -> List[ScanResultSchema]:
-        result = await session.execute(
-            select(ScanJob).order_by(ScanJob.initiated_at.desc())
-        )
+        query = select(ScanJob)
+        if user_id:
+            query = query.where(ScanJob.user_id == user_id)
+        query = query.order_by(ScanJob.initiated_at.desc())
+        result = await session.execute(query)
         jobs = result.scalars().all()
         schemas = []
         for job in jobs:
