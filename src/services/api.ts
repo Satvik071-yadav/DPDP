@@ -19,6 +19,7 @@ import {
   setApiBaseUrl, 
   STORAGE_KEYS 
 } from '@/services/apiConfig';
+import { authService } from '@/services/authService';
 
 function initializeStorage() {
   if (typeof localStorage === 'undefined') return;
@@ -37,6 +38,13 @@ function initializeStorage() {
   }
 }
 
+function buildHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
+  return {
+    ...authService.getAuthHeaders(),
+    ...extraHeaders,
+  };
+}
+
 initializeStorage();
 
 export const api = {
@@ -45,7 +53,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/settings`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         const data: UserSettings = await response.json();
@@ -81,10 +89,10 @@ export const api = {
     try {
       await fetch(`${baseUrl}/api/v1/settings`, {
         method: 'PUT',
-        headers: {
+        headers: buildHeaders({
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-        },
+        }),
         body: JSON.stringify(settings),
       });
     } catch {
@@ -101,7 +109,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/notifications`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         const data = await response.json();
@@ -138,7 +146,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/scans`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         const data: ScanResult[] = await response.json();
@@ -171,7 +179,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/scans/${id}`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         return await response.json();
@@ -198,7 +206,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/findings`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         const data: Finding[] = await response.json();
@@ -229,7 +237,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/findings/${id}`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         return await response.json();
@@ -252,10 +260,10 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/findings/${id}/status`, {
         method: 'PATCH',
-        headers: {
+        headers: buildHeaders({
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-        },
+        }),
         body: JSON.stringify({ status }),
       });
       if (response.ok) {
@@ -318,10 +326,10 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/scans`, {
         method: 'POST',
-        headers: {
+        headers: buildHeaders({
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-        },
+        }),
         body: JSON.stringify({
           targetUrl,
           profile,
@@ -405,7 +413,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/scans/${scanId}/status`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         return await response.json();
@@ -426,7 +434,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/scans/${scanId}/cancel`, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         return await response.json();
@@ -446,10 +454,10 @@ export const api = {
     const baseUrl = getApiBaseUrl();
     const response = await fetch(`${baseUrl}/api/v1/findings/${findingId}/verify`, {
       method: 'POST',
-      headers: {
+      headers: buildHeaders({
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-      },
+      }),
       body: JSON.stringify({ isPatched }),
     });
     if (!response.ok) {
@@ -469,7 +477,7 @@ export const api = {
     const baseUrl = getApiBaseUrl();
     const response = await fetch(`${baseUrl}/api/v1/findings/verification/audit-history`, {
       method: 'GET',
-      headers: { 'Accept': 'application/json' },
+      headers: buildHeaders({ 'Accept': 'application/json' }),
     });
     if (!response.ok) {
       let errorDetail = `HTTP ${response.status} ${response.statusText}`;
@@ -488,7 +496,7 @@ export const api = {
     const baseUrl = getApiBaseUrl();
     const response = await fetch(`${baseUrl}/api/v1/findings/verification/audit-history?confirm=true`, {
       method: 'DELETE',
-      headers: { 'Accept': 'application/json' },
+      headers: buildHeaders({ 'Accept': 'application/json' }),
     });
     if (!response.ok) {
       throw new Error(`Failed to clear audit history: HTTP ${response.status}`);
@@ -502,7 +510,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/scans/${scanId}/observations`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         return await response.json();
@@ -532,7 +540,7 @@ export const api = {
     try {
       const response = await fetch(`${baseUrl}/api/v1/scans/${scanId}/consent-comparison`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
+        headers: buildHeaders({ 'Accept': 'application/json' }),
       });
       if (response.ok) {
         return await response.json();

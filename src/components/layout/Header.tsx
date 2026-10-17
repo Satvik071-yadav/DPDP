@@ -58,6 +58,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu, onOpenCommandP
 
   const [isBackendHealthy, setIsBackendHealthy] = useState<boolean | null>(null);
 
+  // Subscribe to auth state updates across the app
+  useEffect(() => {
+    const unsubscribe = authService.onAuthStateChange((user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Load live notifications and verify user session and backend connection
   useEffect(() => {
     async function loadHeaderData() {
@@ -73,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu, onOpenCommandP
       setNotifications(notifs);
 
       const user = await authService.fetchCurrentUser().catch(() => null);
-      if (user) setCurrentUser(user);
+      setCurrentUser(user);
     }
     loadHeaderData();
     const interval = setInterval(loadHeaderData, 25000);
@@ -107,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu, onOpenCommandP
 
   const handleLogout = () => {
     authService.logout();
-    setCurrentUser(authService.getCurrentUser());
+    setCurrentUser(null);
     setShowProfileMenu(false);
   };
 
@@ -300,78 +308,94 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu, onOpenCommandP
           <span className="hidden sm:inline">New Scan</span>
         </button>
 
-        {/* User Profile Dropdown */}
-        <div className="relative" ref={profileRef}>
+        {/* User Profile Dropdown or Sign In CTA */}
+        {currentUser ? (
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="flex items-center gap-2 pl-2 border-l border-white/10 text-left hover:opacity-90 transition-opacity"
+              title="User Profile & Session"
+            >
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-violet-500 p-[1px]">
+                <div className="w-full h-full rounded-[11px] bg-obsidian-900 flex items-center justify-center text-cyan-300 text-xs font-bold font-mono">
+                  {userInitials}
+                </div>
+              </div>
+              <div className="hidden xl:flex flex-col">
+                <span className="text-xs font-semibold text-slate-200 leading-tight">
+                  {currentUser.fullName}
+                </span>
+                <span className="text-[10px] text-cyan-400 font-mono uppercase">
+                  {currentUser.role === 'dpo' ? 'Data Protection Officer' : currentUser.role}
+                </span>
+              </div>
+            </button>
+
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-obsidian-900 border border-white/10 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150 text-xs space-y-2">
+                <div className="p-2.5 rounded-xl bg-obsidian-850 border border-white/[0.08]">
+                  <div className="font-semibold text-white">{currentUser.fullName}</div>
+                  <div className="text-[11px] text-slate-400">{currentUser.email}</div>
+                  <div className="text-[10px] text-cyan-400 font-mono mt-1">Bharat Privacy Labs Ltd.</div>
+                </div>
+
+                <div className="space-y-0.5">
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      setShowLoginModal(true);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-obsidian-800 transition-colors text-left"
+                  >
+                    <User className="w-4 h-4 text-cyan-400" />
+                    <span>Switch Account / Re-authenticate</span>
+                  </button>
+                  <Link
+                    to="/settings"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-obsidian-800 transition-colors"
+                  >
+                    <Sliders className="w-4 h-4 text-cyan-400" />
+                    <span>DPO Designation & Ruleset</span>
+                  </Link>
+                  <Link
+                    to="/history"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-obsidian-800 transition-colors"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>Verified Audit Archive</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-left font-medium"
+                    title="Sign out and destroy session"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+
+                <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between px-2 text-[11px] text-slate-500">
+                  <span>DPDP-Guard IN</span>
+                  <span className="font-mono text-emerald-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Authenticated
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
           <button
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-2 pl-2 border-l border-white/10 text-left hover:opacity-90 transition-opacity"
+            onClick={() => setShowLoginModal(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-obsidian-900 hover:bg-obsidian-850 border border-white/10 hover:border-cyan-500/40 text-slate-200 hover:text-white font-semibold text-xs transition-all shadow-sm active:scale-95"
+            title="Sign in as Data Protection Officer or Auditor"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-violet-500 p-[1px]">
-              <div className="w-full h-full rounded-[11px] bg-obsidian-900 flex items-center justify-center text-cyan-300 text-xs font-bold font-mono">
-                {userInitials}
-              </div>
-            </div>
-            <div className="hidden xl:flex flex-col">
-              <span className="text-xs font-semibold text-slate-200 leading-tight">
-                {currentUser?.fullName || 'Aditi Deshmukh'}
-              </span>
-              <span className="text-[10px] text-cyan-400 font-mono uppercase">
-                {currentUser?.role === 'dpo' ? 'Data Protection Officer' : (currentUser?.role || 'Auditor')}
-              </span>
-            </div>
+            <User className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Sign In</span>
           </button>
-
-          {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-obsidian-900 border border-white/10 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150 text-xs space-y-2">
-              <div className="p-2.5 rounded-xl bg-obsidian-850 border border-white/[0.08]">
-                <div className="font-semibold text-white">{currentUser?.fullName || 'Aditi Deshmukh'}</div>
-                <div className="text-[11px] text-slate-400">{currentUser?.email || 'dpo@bharatprivacy.in'}</div>
-                <div className="text-[10px] text-cyan-400 font-mono mt-1">Bharat Privacy Labs Ltd.</div>
-              </div>
-
-              <div className="space-y-0.5">
-                <button
-                  onClick={() => {
-                    setShowProfileMenu(false);
-                    setShowLoginModal(true);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-obsidian-800 transition-colors text-left"
-                >
-                  <User className="w-4 h-4 text-cyan-400" />
-                  <span>Switch Account / Sign In</span>
-                </button>
-                <Link
-                  to="/settings"
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-obsidian-800 transition-colors"
-                >
-                  <Sliders className="w-4 h-4 text-cyan-400" />
-                  <span>DPO Designation & Ruleset</span>
-                </Link>
-                <Link
-                  to="/history"
-                  onClick={() => setShowProfileMenu(false)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-obsidian-800 transition-colors"
-                >
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>Verified Audit Archive</span>
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors text-left"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </button>
-              </div>
-
-              <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between px-2 text-[11px] text-slate-500">
-                <span>DPDP-Guard IN</span>
-                <span className="font-mono text-emerald-400">Authenticated</span>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
 
