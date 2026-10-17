@@ -1,0 +1,48 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies & Build artifacts
+node_modules
+dist
+dist-ssr
+venv
+backend/venv
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+backend/.env
+!backend/.env.example
+
+# Private Keys & Credentials
+*.pem
+*.key
+*.cert
+*.crt
+credentials.json
+
+# Local databases & logs
+*.db
+*.sqlite
+*.sqlite3
+dpdp_guard.db
+backend/dpdp_guard.db
+*.log
+logs/
+
+# Testing & caches
+.pytest_cache
+.coverage
+htmlcov
+.playwright
+
+# Reports, screenshots & documentation archive
+reports/
+docs/archive/

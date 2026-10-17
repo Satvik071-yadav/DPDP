@@ -1,0 +1,39 @@
+# Render Infrastructure as Code Blueprint for DPDP-Guard SaaS
+# Complete full-stack deployment: React SPA frontend, FastAPI backend, Playwright runner, and PostgreSQL database.
+
+services:
+  - type: web
+    name: dpdp-guard-saas
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: API_V1_PREFIX
+        value: /api/v1
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dpdp-guard-postgres
+          property: connectionString
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: ALLOWED_LOCAL_DOMAINS
+        value: paysecure-india.in,apollo-telemed.co.in,retail-bharat.store,localhost,127.0.0.1,demo.dpdpguard.in
+      - key: MAX_SCAN_CONCURRENCY
+        value: "3"
+      - key: ENABLE_TESTBED
+        value: "false"
+      - key: COPILOT_PROVIDER
+        value: demo
+
+databases:
+  - name: dpdp-guard-postgres
+    databaseName: dpdp_guard
+    user: dpdp_admin
+    plan: free

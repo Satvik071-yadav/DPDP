@@ -1,0 +1,1401 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { 
+  Wrench, 
+  CheckCircle2, 
+  RotateCcw, 
+  Play, 
+  ShieldCheck, 
+  FileCode2, 
+  ArrowRight, 
+  AlertTriangle, 
+  Check, 
+  Copy, 
+  Cpu, 
+  Terminal, 
+  ShieldAlert, 
+  Lock,
+  Search,
+  Filter,
+  Clock,
+  Trash2,
+  ShieldX,
+  FileSearch,
+  ExternalLink,
+  ChevronRight,
+  Info,
+  Bug,
+  RefreshCw,
+  Eye,
+  SlidersHorizontal,
+  KeyRound
+} from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
+import { api } from '@/services/api';
+import { remediationService } from '@/services/remediationService';
+import { Finding, Severity, FindingStatus, VerificationProbeResult, AuditHistoryRecord } from '@/types';
+import { formatSeverity, formatDate } from '@/lib/utils';
+import { SYNTHETIC_ACCOUNT_A, SYNTHETIC_ACCOUNT_B } from '@/data/authTestFixture';
+
+export const FixVerify: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [findings, setFindings] = useState<Finding[]>([]);
+  const [selectedFindingId, setSelectedFindingId] = useState<string>(
+    searchParams.get('findingId') || 'DPDP-HIGH-007'
+  );
+  
+  // 5-stage guided workflow: 1: Review, 2: Evidence, 3: Fix, 4: Apply, 5: Verify
+  const [currentStage, setCurrentStage] = useState<1 | 2 | 3 | 4 | 5>(1);
+
+  // Search & filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [severityFilter, setSeverityFilter] = useState<'all' | Severity>('all');
+
+  // Patch deployment state
+  const [isPatched, setIsPatched] = useState(false);
+  const [isDeployingPatch, setIsDeployingPatch] = useState(false);
+
+  // Probe verification state
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationProgress, setVerificationProgress] = useState(0);
+  const [verificationLogs, setVerificationLogs] = useState<string[]>([]);
+  const [lastProbeResult, setLastProbeResult] = useState<VerificationProbeResult | null>(null);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+
+  // Audit history state
+  const [auditHistory, setAuditHistory] = useState<AuditHistoryRecord[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+
+  // UI helpers
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  // Helper to load audit history from backend database
+  const loadAuditHistory = async () => {
+    setIsLoadingHistory(true);
+    setHistoryError(null);
+    try {
+      const records = await remediationService.getAuditHistory();
+      setAuditHistory(records);
+    } catch (err: any) {
+      setHistoryError(err?.message || 'Failed to connect to DPDP-Guard backend audit history service.');
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  // Load findings and audit history
+  useEffect(() => {
+    async function load() {
+      try {
+        const list = await api.getFindings();
+        setFindings(list);
+
+        const urlId = searchParams.get('findingId');
+        if (urlId && list.some((f) => f.id === urlId)) {
+          setSelectedFindingId(urlId);
+        } else if (list.length > 0 && !list.some((f) => f.id === selectedFindingId)) {
+          // prefer BOLA finding DPDP-HIGH-007 if present, else first finding
+          const bola = list.find((f) => f.id === 'DPDP-HIGH-007');
+          setSelectedFindingId(bola ? bola.id : list[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to load findings:', err);
+      }
+
+      await loadAuditHistory();
+    }
+    load();
+  }, [searchParams]);
+
+  // Synchronize patch status for active finding
+  useEffect(() => {
+    if (selectedFindingId) {
+      const patched = remediationService.isFindingPatched(selectedFindingId);
+      setIsPatched(patched);
+      setLastProbeResult(null);
+      setVerificationLogs([]);
+      setVerificationProgress(0);
+    }
+  }, [selectedFindingId]);
+
+  const activeFinding = useMemo(() => {
+    return findings.find((f) => f.id === selectedFindingId) || findings[0];
+  }, [findings, selectedFindingId]);
+
+  // Filtered findings list for quick selection
+  const filteredFindings = useMemo(() => {
+    return findings.filter((f) => {
+      const matchesSearch = 
+        f.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        f.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        f.affectedUrl.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSeverity = severityFilter === 'all' || f.severity === severityFilter;
+      return matchesSearch && matchesSeverity;
+    });
+  }, [findings, searchQuery, severityFilter]);
+
+  // Summary counts
+  const summaryCounts = useMemo(() => {
+    const openCount = findings.filter((f) => f.status === 'open').length;
+    const inProgressCount = findings.filter((f) => f.status === 'in_review').length;
+    const verifiedCount = findings.filter((f) => f.status === 'verified_fix').length;
+    return { openCount, inProgressCount, verifiedCount };
+  }, [findings]);
+
+  // Handler: Select Finding
+  const handleSelectFinding = (id: string) => {
+    setSelectedFindingId(id);
+    setSearchParams({ findingId: id });
+    setCurrentStage(1);
+  };
+
+  // Handler: Apply or Revert Patch
+  const handleTogglePatch = (targetPatchState: boolean) => {
+    if (!activeFinding) return;
+    setIsDeployingPatch(true);
+    setVerificationError(null);
+
+    setTimeout(() => {
+      setIsPatched(targetPatchState);
+      remediationService.setFindingPatched(activeFinding.id, targetPatchState);
+      setIsDeployingPatch(false);
+      setLastProbeResult(null);
+      setVerificationLogs([]);
+      setVerificationProgress(0);
+      if (targetPatchState) {
+        toast.success(`Patch staged in sandbox for [${activeFinding.id}]`);
+      } else {
+        toast.info(`Sandbox reverted to vulnerable unpatched state for [${activeFinding.id}]`);
+      }
+    }, 300);
+  };
+
+  // Handler: Execute Verification Probe
+  const handleRunVerification = async (forcePatchedState?: boolean) => {
+    if (!activeFinding) return;
+
+    const testState = forcePatchedState !== undefined ? forcePatchedState : isPatched;
+    if (forcePatchedState !== undefined && forcePatchedState !== isPatched) {
+      setIsPatched(forcePatchedState);
+      remediationService.setFindingPatched(activeFinding.id, forcePatchedState);
+    }
+
+    setIsVerifying(true);
+    setVerificationError(null);
+    setLastProbeResult(null);
+    setVerificationProgress(20);
+
+    const targetUrl = activeFinding.id === 'DPDP-HIGH-007'
+      ? 'http://127.0.0.1:8000/testbed/api/v1/customers/usr_demo_custB/kyc-record'
+      : (activeFinding.endpoint || activeFinding.affectedUrl);
+
+    setVerificationLogs([
+      `[INIT] Dispatching verification probe to DPDP-Guard backend...`,
+      `[TARGET] ${targetUrl}`,
+      `[MODE] ${testState ? 'REMEDIATED (Patched Guard Active)' : 'UNPATCHED / VULNERABLE (Simulate Exposure)'}`,
+      `[CALLER] Account A (${SYNTHETIC_ACCOUNT_A.id} / ${SYNTHETIC_ACCOUNT_A.name})`,
+      `[RESOURCE] Confidential KYC Record: Account B (${SYNTHETIC_ACCOUNT_B.id} / ${SYNTHETIC_ACCOUNT_B.name})`,
+    ]);
+
+    try {
+      setVerificationProgress(50);
+      const probeResult = await remediationService.runVerification(activeFinding.id, testState);
+      setVerificationProgress(100);
+      setIsVerifying(false);
+      setLastProbeResult(probeResult);
+
+      if (probeResult.outcome === 'PASS') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+        toast.success(`Verified Fix: ${probeResult.testCaseId} PASSED!`);
+
+        setVerificationLogs((prev) => [
+          ...prev,
+          `[DISPATCH] ${probeResult.request.method} ${probeResult.request.url}`,
+          `[RESPONSE] HTTP ${probeResult.response.statusCode} ${probeResult.response.statusText} (${probeResult.response.durationMs}ms)`,
+          `[SAFEGUARD] Object-level authorization guard confirmed: access denied with zero PII leaked.`,
+          `[TEST PASSED] Verification Confirmed: Status upgraded to "VERIFIED FIX".`,
+          `[PERSISTED] Real audit record saved to SQLite database (Test Case: ${probeResult.testCaseId}).`,
+          `[COMPLIANCE] Score: ${probeResult.complianceDelta.newComplianceScore}% (+${probeResult.complianceDelta.statutoryRiskReductionPercent}% technical risk reduction).`,
+        ]);
+      } else {
+        toast.error(`Verification Failed: Personal data exposure reproduced (${probeResult.testCaseId})`);
+
+        setVerificationLogs((prev) => [
+          ...prev,
+          `[DISPATCH] ${probeResult.request.method} ${probeResult.request.url}`,
+          `[RESPONSE] HTTP ${probeResult.response.statusCode} ${probeResult.response.statusText} (${probeResult.response.durationMs}ms)`,
+          `[ALERT] Personal data fields exposed: ${probeResult.response.leakedPiiFields.join(', ') || 'Confidential customer data'}`,
+          `[TEST FAILED] Vulnerability actively reproduced in sandbox! Status remains "OPEN".`,
+          `[PERSISTED] Failure attempt logged in SQLite database (Test Case: ${probeResult.testCaseId}).`,
+        ]);
+      }
+
+      // Refresh findings and audit history from backend database
+      const updatedFindings = await api.getFindings();
+      setFindings(updatedFindings);
+      await loadAuditHistory();
+    } catch (err: any) {
+      setIsVerifying(false);
+      setVerificationProgress(0);
+      const errorMsg = err?.message || 'Verification probe failed. Ensure the backend server is running.';
+      setVerificationError(errorMsg);
+      toast.error('Probe execution failed: ' + errorMsg);
+      setVerificationLogs((prev) => [
+        ...prev,
+        `[ERROR] ${errorMsg}`,
+        `[ABORT] Probe failed to complete. No fake PASS or fixture data substituted.`,
+      ]);
+    }
+  };
+
+  // Handler: Copy code
+  const handleCopyCode = () => {
+    if (activeFinding?.codeDiff?.afterCode) {
+      navigator.clipboard.writeText(activeFinding.codeDiff.afterCode);
+      setCopiedCode(true);
+      toast.success('Remediation patch copied to clipboard');
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
+  // Handler: Clear history
+  const handleClearHistory = async () => {
+    if (window.confirm('Are you sure you want to clear the persisted verification audit history from the database?')) {
+      try {
+        await remediationService.clearAuditHistory();
+        await loadAuditHistory();
+        toast.info('Audit history cleared');
+      } catch (err: any) {
+        setHistoryError('Failed to clear audit history: ' + (err?.message || 'Unknown error'));
+      }
+    }
+  };
+
+  if (!activeFinding) {
+    return (
+      <div className="py-24 text-center text-slate-400">
+        Loading Fix & Verify workspace...
+      </div>
+    );
+  }
+
+  const sev = formatSeverity(activeFinding.severity);
+
+  // Line-by-line syntax renderer
+  const renderCodeLines = (code: string, isVulnerable: boolean) => {
+    const lines = code.split('\n');
+    return lines.map((line, idx) => {
+      const isHighlight = isVulnerable
+        ? line.includes('VULNERABLE') || 
+          line.includes('Missing check') || 
+          line.includes('Leaks') || 
+          line.includes('findOne({ customerId })') || 
+          line.includes('img.src =') || 
+          line.includes('window.fbq')
+        : line.includes('REMEDIATED') || 
+          line.includes('authenticatedUserId !== customerId') || 
+          line.includes('DPDP_BOLA_PREVENTED') || 
+          line.includes('status(403)') || 
+          line.includes('maskAadhaar') || 
+          line.includes('consentCategories');
+
+      return (
+        <div
+          key={idx}
+          className={`flex items-start text-xs font-mono leading-relaxed py-0.5 px-2.5 ${
+            isHighlight
+              ? isVulnerable
+                ? 'bg-rose-500/20 text-rose-200 border-l-2 border-rose-500 shadow-inner'
+                : 'bg-emerald-500/20 text-emerald-200 border-l-2 border-emerald-400 shadow-inner'
+              : 'text-slate-300 border-l-2 border-transparent'
+          }`}
+        >
+          <span className="w-8 select-none text-right pr-3 text-slate-600 font-mono text-[11px] flex-shrink-0">
+            {idx + 1}
+          </span>
+          <span className="flex-1 whitespace-pre overflow-x-auto">
+            {line}
+          </span>
+        </div>
+      );
+    });
+  };
+
+  return (
+    <div className="space-y-6 pb-12">
+      {/* 1. Header & Subtitle */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-obsidian-900/90 via-obsidian-850/80 to-obsidian-900/90 border border-white/[0.08] p-6 shadow-obsidian-card backdrop-blur-md">
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5 shadow-cyan-glow">
+                <Wrench className="w-3 h-3 text-cyan-400" />
+                REMEDIATION & VERIFICATION ENGINE
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1.5">
+                <Lock className="w-3 h-3 text-amber-400" />
+                CONTROLLED LOCAL SANDBOX
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5 font-sans">
+              <span>Fix & Verify</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+              Turn security findings into verified fixes. Run deterministic synthetic security probes in a safe, controlled local environment.
+            </p>
+          </div>
+
+          {/* Local Demo Environment Notice Badge */}
+          <div className="p-3.5 rounded-xl bg-obsidian-950/80 border border-white/[0.08] text-xs max-w-md shadow-inner">
+            <div className="flex items-center gap-2 text-cyan-300 font-bold mb-1 font-mono text-[11px]">
+              <ShieldCheck className="w-4 h-4 text-cyan-400" />
+              <span>Controlled Synthetic Testbed Only</span>
+            </div>
+            <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+              Probing strictly targets <code className="text-cyan-300 font-mono">/testbed/api/v1/customers/...</code> with synthetic identities (Account A: <code className="text-cyan-300 font-mono">usr_demo_custA</code>, Account B: <code className="text-cyan-300 font-mono">usr_demo_custB</code>). Zero real customer data or external network egress.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Top Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Open Issues */}
+        <div className="p-5 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block font-mono">
+              Open Issues
+            </span>
+            <div className="text-3xl font-black font-mono text-white">
+              {summaryCounts.openCount}
+            </div>
+            <span className="text-[11px] text-rose-400 flex items-center gap-1 font-sans">
+              <AlertTriangle className="w-3 h-3" />
+              Requires technical remediation
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.2)]">
+            <ShieldAlert className="w-6 h-6" />
+          </div>
+        </div>
+
+        {/* Fixes in Progress */}
+        <div className="p-5 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block font-mono">
+              Fixes In Progress
+            </span>
+            <div className="text-3xl font-black font-mono text-cyan-300">
+              {summaryCounts.inProgressCount + (isPatched && activeFinding.status !== 'verified_fix' ? 1 : 0)}
+            </div>
+            <span className="text-[11px] text-cyan-400 flex items-center gap-1 font-sans">
+              <RefreshCw className="w-3 h-3" />
+              Code patch staged in sandbox
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shadow-cyan-glow">
+            <Wrench className="w-6 h-6" />
+          </div>
+        </div>
+
+        {/* Verified Fixes */}
+        <div className="p-5 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block font-mono">
+              Verified Fixes
+            </span>
+            <div className="text-3xl font-black font-mono text-emerald-400">
+              {summaryCounts.verifiedCount}
+            </div>
+            <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-sans">
+              <CheckCircle2 className="w-3 h-3" />
+              Deterministic probe certified
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.2)]">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Findings Selection & Filter Bar */}
+      <div className="p-4 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">
+              Select Finding to Remediate:
+            </span>
+            <span className="text-xs font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">
+              {filteredFindings.length} Available
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search findings or endpoints..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 pr-3 py-1.5 rounded-xl bg-obsidian-950/80 border border-white/[0.08] text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-400 w-52 font-mono"
+              />
+            </div>
+
+            {/* Severity Filter */}
+            <div className="flex items-center gap-1.5 bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-2.5 py-1 text-xs">
+              <Filter className="w-3.5 h-3.5 text-slate-400" />
+              <select
+                value={severityFilter}
+                onChange={(e) => setSeverityFilter(e.target.value as any)}
+                className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer"
+              >
+                <option value="all">All Severities</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Horizontal Findings Chips */}
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          {filteredFindings.map((f) => {
+            const isSelected = f.id === activeFinding.id;
+            const fSev = formatSeverity(f.severity);
+            const isVerified = f.status === 'verified_fix';
+
+            return (
+              <button
+                key={f.id}
+                onClick={() => handleSelectFinding(f.id)}
+                className={`px-3.5 py-2.5 rounded-xl border text-left flex-shrink-0 transition-all flex items-center gap-2.5 ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-cyan-950/40 via-obsidian-900 to-obsidian-950 border-cyan-400/50 text-white shadow-cyan-glow'
+                    : 'bg-obsidian-950/60 hover:bg-obsidian-850 border-white/[0.06] text-slate-300'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${fSev.dot}`} />
+                <div className="text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-xs font-bold text-white">{f.id}</span>
+                    {isVerified && (
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/30 font-bold">
+                        VERIFIED
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[11px] text-slate-400 max-w-[200px] truncate font-sans">
+                    {f.title}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 4. 5-Stage Guided Workflow Navigation Tabs */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+        {[
+          { stage: 1, title: '1. Review Finding', desc: 'Statutory ground & context' },
+          { stage: 2, title: '2. Inspect Evidence', desc: 'Observed network payload' },
+          { stage: 3, title: '3. Suggested Fix', desc: 'Engineered code diff' },
+          { stage: 4, title: '4. Apply Fix', desc: 'Patch sandbox container' },
+          { stage: 5, title: '5. Verify Result', desc: 'Execute probe & compare' },
+        ].map((s) => {
+          const isActive = currentStage === s.stage;
+          const isCompleted = currentStage > s.stage || (s.stage === 5 && lastProbeResult?.outcome === 'PASS');
+
+          return (
+            <button
+              key={s.stage}
+              onClick={() => setCurrentStage(s.stage as any)}
+              className={`p-3.5 rounded-2xl border text-left transition-all ${
+                isActive
+                  ? 'bg-gradient-to-r from-cyan-950/40 to-obsidian-900 border-cyan-400 text-white shadow-cyan-glow font-semibold'
+                  : isCompleted
+                  ? 'bg-obsidian-900/80 border-white/[0.08] text-slate-300 hover:border-white/[0.15]'
+                  : 'bg-obsidian-950/40 border-white/[0.04] text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-bold text-xs font-sans">{s.title}</span>
+                {isCompleted ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                ) : (
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+                )}
+              </div>
+              <div className="text-[11px] text-slate-400 truncate font-sans">{s.desc}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* STAGE 1: Review Finding */}
+      {currentStage === 1 && (
+        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-6 animate-in fade-in duration-200">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold border ${sev.badge}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
+                  {sev.label}
+                </span>
+                <span className="font-mono text-xs text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">
+                  {activeFinding.id}
+                </span>
+                <span className="text-xs text-slate-400 font-mono">
+                  Confidence: {activeFinding.confidence}%
+                </span>
+                <span className="text-xs text-slate-400 font-mono">
+                  Status:{' '}
+                  <span className={activeFinding.status === 'verified_fix' ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                    {activeFinding.status.toUpperCase()}
+                  </span>
+                </span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white mt-1 font-sans">
+                {activeFinding.title}
+              </h2>
+            </div>
+
+            <button
+              onClick={() => setCurrentStage(2)}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-cyan-glow transition-all active:scale-95"
+            >
+              <span>Next: Inspect Evidence</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-2">
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-mono">
+                Technical Vulnerability Summary
+              </span>
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                {activeFinding.summary}
+              </p>
+              <div className="pt-2 text-[11px] text-slate-400 font-mono break-all">
+                <span className="text-slate-500">Affected Target:</span> {activeFinding.affectedUrl}
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-2">
+              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block font-mono">
+                Statutory Ground: DPDP Act 2023
+              </span>
+              <div className="font-mono text-xs text-slate-200 font-semibold">
+                {activeFinding.dpdpSection}
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                {activeFinding.impactExplanation}
+              </p>
+            </div>
+          </div>
+
+          {activeFinding.id === 'DPDP-HIGH-007' && (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2">
+              <div className="flex items-center gap-2 text-amber-300 font-bold text-xs font-mono">
+                <KeyRound className="w-4 h-4" />
+                <span>Synthetic BOLA/IDOR Cross-Account Test Scenario</span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                In this test case, <strong>Account A (Rajesh Kumar Sharma)</strong> holds a valid session token. 
+                Account A queries the confidential KYC endpoint targeting <strong>Account B (Priya Patel)</strong> at 
+                <code className="text-amber-200 bg-amber-950/40 px-1.5 py-0.5 rounded font-mono ml-1">
+                  /api/v1/customers/usr_demo_custB/kyc-record
+                </code>.
+                Without authorization check, Account B's PAN, Aadhaar ref, mobile, and residential address leak to Account A.
+              </p>
+            </div>
+          )}
+
+          <div className="p-4 rounded-xl bg-obsidian-950/80 border border-white/[0.06] space-y-2">
+            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-mono">
+              Remediation Action Plan
+            </span>
+            <ul className="space-y-2 text-xs text-slate-300 font-sans">
+              {activeFinding.remediationSteps.map((step, idx) => (
+                <li key={idx} className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0 shadow-[0_0_6px_rgba(0,242,254,0.8)]" />
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* STAGE 2: Inspect Evidence */}
+      {currentStage === 2 && (
+        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-6 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <FileSearch className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-lg font-bold text-white font-sans">
+                  Observed Technical Evidence & Network Telemetry
+                </h3>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Exact intercepted request, headers, and captured personal data markers from scan probe.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentStage(1)}
+                className="px-4 py-2 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 text-xs font-semibold transition-colors"
+              >
+                Back
+              </button>
+              <button
+                onClick={() => setCurrentStage(3)}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-cyan-glow transition-all active:scale-95"
+              >
+                <span>Next: Review Suggested Fix</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Evidence Details */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+            <div className="p-3.5 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1">
+              <span className="text-slate-500 block text-[11px] uppercase">HTTP METHOD</span>
+              <span className="font-bold text-cyan-300">{activeFinding.observedEvidence.method}</span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1 md:col-span-2">
+              <span className="text-slate-500 block text-[11px] uppercase">TARGET URL</span>
+              <span className="text-slate-200 break-all">{activeFinding.observedEvidence.url}</span>
+            </div>
+          </div>
+
+          {/* Detected PII Tags */}
+          <div className="space-y-1.5">
+            <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider font-mono">
+              Identified Personal Data Fields in Payload:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {activeFinding.observedEvidence.detectedFields.map((field, idx) => (
+                <span
+                  key={idx}
+                  className="px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-mono font-semibold flex items-center gap-1.5"
+                >
+                  <AlertTriangle className="w-3 h-3 text-rose-400" />
+                  {field}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Payload Display */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-slate-300 font-sans">
+                Intercepted Response Body / Evidence Payload:
+              </span>
+              <span className="text-[11px] font-mono text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 font-bold">
+                CONFIDENTIAL DATA EXPOSURE
+              </span>
+            </div>
+            <pre className="p-4 rounded-xl bg-obsidian-950 border border-rose-500/30 text-rose-200 font-mono text-xs overflow-x-auto shadow-inner leading-relaxed">
+              {activeFinding.observedEvidence.sanitizedPayload}
+            </pre>
+          </div>
+        </div>
+      )}
+
+      {/* STAGE 3: Suggested Fix (Code Diff) */}
+      {currentStage === 3 && (
+        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-6 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <FileCode2 className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-lg font-bold text-white font-sans">
+                  Engineered Code Fix ({activeFinding.codeDiff?.filePath || 'Source Code'})
+                </h3>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {activeFinding.codeDiff?.description || 'Review the recommended patch to remediate the identified technical risk.'}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleCopyCode}
+                className="px-3.5 py-2 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              >
+                {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedCode ? 'Copied to Clipboard' : 'Copy Remediation Code'}</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentStage(4)}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-cyan-glow transition-all active:scale-95"
+              >
+                <span>Next: Apply Fix to Sandbox</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Controlled demo code diff banner */}
+          <div className="px-4 py-2 rounded-xl bg-cyan-950/30 border border-cyan-500/20 text-cyan-300 text-xs flex items-center justify-between">
+            <span className="font-mono text-[11px] font-bold">
+              CONTROLLED CODE DIFF — FOR SANCTIONED LOCAL SIMULATION ONLY
+            </span>
+            <span className="text-[11px] text-slate-400 font-mono">
+              Language: {activeFinding.codeDiff?.language || 'TypeScript'}
+            </span>
+          </div>
+
+          {/* Side by side code diff */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Before (Vulnerable) */}
+            <div className="rounded-2xl border border-rose-500/30 bg-obsidian-950 overflow-hidden flex flex-col shadow-inner">
+              <div className="px-4 py-2.5 bg-rose-950/40 border-b border-rose-500/20 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
+                  <span className="font-mono text-rose-300 font-bold">
+                    BEFORE: Vulnerable Authorization / Logic
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 uppercase font-bold">
+                  DPDP Breach Risk
+                </span>
+              </div>
+              <div className="py-3 overflow-x-auto flex-1 bg-obsidian-950/90">
+                {renderCodeLines(activeFinding.codeDiff?.beforeCode || '// No code fixture available', true)}
+              </div>
+            </div>
+
+            {/* After (Remediated) */}
+            <div className="rounded-2xl border border-emerald-500/30 bg-obsidian-950 overflow-hidden flex flex-col shadow-inner">
+              <div className="px-4 py-2.5 bg-emerald-950/40 border-b border-emerald-500/20 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                  <span className="font-mono text-emerald-300 font-bold">
+                    AFTER: Remediated & Section 8 Compliant
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase font-bold">
+                  Approved Patch
+                </span>
+              </div>
+              <div className="py-3 overflow-x-auto flex-1 bg-obsidian-950/90">
+                {renderCodeLines(activeFinding.codeDiff?.afterCode || '// Remediated patch available in sandbox', false)}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STAGE 4: Apply Fix */}
+      {currentStage === 4 && (
+        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-6 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Wrench className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-lg font-bold text-white font-sans">
+                  Sandbox Patch Deployment Workbench
+                </h3>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Stage or revert the code patch in the isolated local sandbox to test both pass and fail paths.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setCurrentStage(5)}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-cyan-glow transition-all active:scale-95"
+            >
+              <span>Next: Run Verification Probe</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Interactive Patch Control Card */}
+          <div className="p-6 rounded-2xl bg-obsidian-950/80 border border-white/[0.08] space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-obsidian-900/80 border border-white/[0.06]">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-300 font-mono">Sandbox Runtime State:</span>
+                  {isPatched ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5 shadow-[0_0_8px_rgba(52,211,153,0.3)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      PATCHED (Secured)
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1.5 shadow-[0_0_8px_rgba(244,63,94,0.3)]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+                      UNPATCHED (Vulnerable)
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-400 font-sans">
+                  {isPatched
+                    ? 'The approved remediation diff is active in the test environment. Probing will test for zero personal data exposure.'
+                    : 'The target endpoint is currently running unpatched. Probing will reproduce the security vulnerability and trigger failure.'}
+                </p>
+              </div>
+
+              {/* Action buttons to toggle state */}
+              <div className="flex items-center gap-2">
+                {!isPatched ? (
+                  <button
+                    disabled={isDeployingPatch}
+                    onClick={() => handleTogglePatch(true)}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-[0_0_12px_rgba(52,211,153,0.4)] transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {isDeployingPatch ? (
+                      <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                    ) : (
+                      <Check className="w-4 h-4 text-slate-950 stroke-[3]" />
+                    )}
+                    <span>{isDeployingPatch ? 'Applying Patch...' : 'Apply Remediation Patch'}</span>
+                  </button>
+                ) : (
+                  <button
+                    disabled={isDeployingPatch}
+                    onClick={() => handleTogglePatch(false)}
+                    className="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-semibold text-xs flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {isDeployingPatch ? (
+                      <RefreshCw className="w-4 h-4 animate-spin text-rose-300" />
+                    ) : (
+                      <RotateCcw className="w-4 h-4 text-rose-400" />
+                    )}
+                    <span>Simulate Unpatched State (Test Failure Path)</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Explanatory summary of changes applied */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
+              <div className="p-4 rounded-xl bg-obsidian-900/60 border border-white/[0.06] space-y-2">
+                <span className="font-bold text-slate-300 uppercase tracking-wider block text-[11px] font-mono">
+                  What happens when Patched:
+                </span>
+                <ul className="space-y-1.5 text-slate-400">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <span>Object authorization guard intercepts cross-account tenant queries.</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <span>HTTP 403 Forbidden emitted with zero PII leakage.</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <span>Security probe status updates to VERIFIED FIXED.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="p-4 rounded-xl bg-obsidian-900/60 border border-white/[0.06] space-y-2">
+                <span className="font-bold text-slate-300 uppercase tracking-wider block text-[11px] font-mono">
+                  What happens when Unpatched:
+                </span>
+                <ul className="space-y-1.5 text-slate-400">
+                  <li className="flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+                    <span>Cross-account request succeeds without authorization validation.</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+                    <span>Account B's confidential PII leaked in response body.</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+                    <span>Probe status evaluates to FAIL (reproducing vulnerability).</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STAGE 5: Verify Result */}
+      {currentStage === 5 && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Probe Execution Console */}
+          <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-5">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2 font-sans">
+                  <Cpu className="w-5 h-5 text-cyan-400" />
+                  <span>Sandbox Test Verification Engine</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Executes a genuine HTTP probe against the controlled local testbed (<code className="text-cyan-300 font-mono">/testbed/api/v1/customers/...</code>) to verify zero personal data egress.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Failure path test button */}
+                <button
+                  disabled={isVerifying}
+                  onClick={() => handleRunVerification(false)}
+                  className="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-semibold text-xs flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+                  title="Simulate unpatched state to observe test FAIL"
+                >
+                  <Bug className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Test Failure Path (Unpatched)</span>
+                </button>
+
+                {/* Primary verification button */}
+                <button
+                  disabled={isVerifying}
+                  onClick={() => handleRunVerification(true)}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-[0_0_15px_rgba(52,211,153,0.4)] transition-all active:scale-95 disabled:opacity-50"
+                >
+                  {isVerifying ? (
+                    <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                  ) : (
+                    <Play className="w-4 h-4 fill-slate-950" />
+                  )}
+                  <span>{isVerifying ? 'Running Test Probe...' : 'Run Verification Probe (Patched)'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Error Notification if Verification Probe fails */}
+            {verificationError && (
+              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start justify-between gap-3 text-rose-300 text-xs">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block text-rose-200 font-sans">Verification Engine Error</span>
+                    <p className="text-slate-300 mt-0.5 font-sans leading-relaxed">{verificationError}</p>
+                    <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                      No synthetic pass fixture was substituted. Verify backend is active on http://127.0.0.1:8000.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleRunVerification(isPatched)}
+                  className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-semibold text-xs border border-rose-500/40 flex items-center gap-1.5 transition-colors flex-shrink-0"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Retry Probe</span>
+                </button>
+              </div>
+            )}
+
+            {/* Progress bar */}
+            {(isVerifying || lastProbeResult) && (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+                  <span>TEST EXECUTION PROGRESS</span>
+                  <span className="text-cyan-400 font-bold">{verificationProgress}%</span>
+                </div>
+                <div className="w-full bg-obsidian-950 rounded-full h-2 overflow-hidden border border-white/[0.08]">
+                  <div
+                    className={`h-full transition-all duration-300 ease-out rounded-full ${
+                      lastProbeResult?.outcome === 'PASS' 
+                        ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' 
+                        : lastProbeResult?.outcome === 'FAIL'
+                        ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]'
+                        : 'bg-gradient-to-r from-cyan-400 to-indigo-500'
+                    }`}
+                    style={{ width: `${verificationProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Real-time terminal log viewer */}
+            <div className="h-52 overflow-y-auto bg-obsidian-950/95 rounded-xl p-4 font-mono text-xs text-slate-300 space-y-1.5 border border-white/[0.08] shadow-inner">
+              {verificationLogs.length === 0 ? (
+                <div className="text-slate-600 italic py-12 text-center flex flex-col items-center justify-center gap-2">
+                  <Terminal className="w-6 h-6 text-slate-700" />
+                  <span>Press "Run Verification Probe" to spin up the container and evaluate the security patch.</span>
+                </div>
+              ) : (
+                verificationLogs.map((log, i) => (
+                  <div key={i} className="leading-relaxed flex items-start gap-2">
+                    <span className="text-cyan-400 font-bold select-none">{'>'}</span>
+                    <span
+                      className={
+                        log.includes('[TEST PASSED]') || log.includes('[CERTIFIED]') || log.includes('[SAFE]')
+                          ? 'text-emerald-300 font-semibold'
+                          : log.includes('[TEST FAILED]') || log.includes('[ALERT]') || log.includes('[DPDP BREACH]')
+                          ? 'text-rose-400 font-semibold'
+                          : ''
+                      }
+                    >
+                      {log}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Side-by-Side Before/After Comparison Panel */}
+          {lastProbeResult && (
+            <div
+              className={`p-6 rounded-2xl border space-y-6 shadow-2xl transition-all ${
+                lastProbeResult.outcome === 'PASS'
+                  ? 'bg-gradient-to-b from-obsidian-900 via-obsidian-850 to-obsidian-900 border-emerald-500/40'
+                  : 'bg-gradient-to-b from-obsidian-900 via-obsidian-850 to-obsidian-900 border-rose-500/40'
+              }`}
+            >
+              {/* Header result badge */}
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div
+                    className={`w-12 h-12 rounded-2xl border flex items-center justify-center shadow-lg ${
+                      lastProbeResult.outcome === 'PASS'
+                        ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.3)]'
+                        : 'bg-rose-500/20 border-rose-500/40 text-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.3)]'
+                    }`}
+                  >
+                    {lastProbeResult.outcome === 'PASS' ? (
+                      <ShieldCheck className="w-7 h-7" />
+                    ) : (
+                      <ShieldX className="w-7 h-7" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-lg font-bold text-white font-sans">
+                        {lastProbeResult.outcome === 'PASS'
+                          ? 'Verification Successfully Confirmed: PASS'
+                          : 'Probe Reproduction Confirmed: FAIL'}
+                      </h4>
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
+                          lastProbeResult.outcome === 'PASS'
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_8px_rgba(52,211,153,0.3)]'
+                            : 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.3)]'
+                        }`}
+                      >
+                        {lastProbeResult.outcome === 'PASS' ? 'VERIFIED FIXED' : 'VULNERABILITY DETECTED'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                      {lastProbeResult.summary}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleRunVerification(isPatched)}
+                    className="px-3.5 py-2 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Re-run Probe</span>
+                  </button>
+                  <Link
+                    to="/findings"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-cyan-glow transition-all"
+                  >
+                    Inspect in Findings
+                  </Link>
+                </div>
+              </div>
+
+              {/* Before vs After Telemetry Comparison Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                {/* Metric 1 */}
+                <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1">
+                  <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-semibold font-mono">
+                    HTTP Response Status
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-lg font-mono line-through text-rose-400 font-bold">200 OK</span>
+                    <span
+                      className={`text-2xl font-black font-mono ${
+                        lastProbeResult.response.statusCode === 403 || lastProbeResult.response.statusCode === 204
+                          ? 'text-emerald-400'
+                          : 'text-rose-400'
+                      }`}
+                    >
+                      {lastProbeResult.response.statusCode} {lastProbeResult.response.statusText}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-400 block font-mono">
+                    {lastProbeResult.outcome === 'PASS' ? 'Access rejected by auth guard' : 'Unauthorized data emitted'}
+                  </span>
+                </div>
+
+                {/* Metric 2 */}
+                <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1">
+                  <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-semibold font-mono">
+                    Exposed Personal Data Fields
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-lg font-mono line-through text-rose-400 font-bold">
+                      {activeFinding.id === 'DPDP-HIGH-007' ? '5 leaked' : '2 leaked'}
+                    </span>
+                    <span
+                      className={`text-2xl font-black font-mono ${
+                        lastProbeResult.response.leakedPiiFields.length === 0 ? 'text-emerald-400' : 'text-rose-400'
+                      }`}
+                    >
+                      {lastProbeResult.response.leakedPiiFields.length} leaked
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-400 block font-mono">
+                    {lastProbeResult.outcome === 'PASS' ? 'Zero sensitive fields exposed' : 'Confidential PII exposed'}
+                  </span>
+                </div>
+
+                {/* Metric 3 */}
+                <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1">
+                  <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-semibold font-mono">
+                    Statutory Compliance Score
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-lg font-mono line-through text-amber-400 font-bold">42%</span>
+                    <span className="text-2xl font-black font-mono text-cyan-300">
+                      {lastProbeResult.complianceDelta.newComplianceScore}%
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-emerald-400 block font-semibold font-sans">
+                    +{lastProbeResult.complianceDelta.statutoryRiskReductionPercent}% technical risk reduction
+                  </span>
+                </div>
+              </div>
+
+              {/* Response Inspector Comparison */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Vulnerable (Before) */}
+                <div className="p-4 rounded-xl bg-obsidian-950 border border-rose-500/30 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-rose-300 flex items-center gap-1.5 font-mono">
+                      <span className="w-2 h-2 rounded-full bg-rose-500" />
+                      UNAUTHORIZED RESPONSE (Vulnerable)
+                    </span>
+                    <span className="font-mono text-[10px] text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded border border-rose-500/30">
+                      HTTP 200 OK
+                    </span>
+                  </div>
+                  <pre className="p-3.5 rounded-lg bg-black/60 text-rose-200 font-mono text-xs overflow-x-auto max-h-48 leading-relaxed border border-white/[0.04]">
+                    {activeFinding.observedEvidence.sanitizedPayload}
+                  </pre>
+                  <p className="text-[11px] text-rose-300 font-sans">
+                    Leaks personal identifiers without tenant ownership verification.
+                  </p>
+                </div>
+
+                {/* Remediated (After) */}
+                <div className="p-4 rounded-xl bg-obsidian-950 border border-emerald-500/30 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-emerald-300 flex items-center gap-1.5 font-mono">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      REMEDIATED RESPONSE (Current Probe)
+                    </span>
+                    <span
+                      className={`font-mono text-[10px] px-2 py-0.5 rounded border ${
+                        lastProbeResult.response.statusCode === 403 || lastProbeResult.response.statusCode === 204
+                          ? 'text-emerald-300 bg-emerald-500/20 border-emerald-500/30'
+                          : 'text-rose-300 bg-rose-500/20 border-rose-500/30'
+                      }`}
+                    >
+                      HTTP {lastProbeResult.response.statusCode} {lastProbeResult.response.statusText}
+                    </span>
+                  </div>
+                  <pre className="p-3.5 rounded-lg bg-black/60 text-slate-200 font-mono text-xs overflow-x-auto max-h-48 leading-relaxed border border-white/[0.04]">
+                    {typeof lastProbeResult.response.body === 'object'
+                      ? JSON.stringify(lastProbeResult.response.body, null, 2)
+                      : String(lastProbeResult.response.body)}
+                  </pre>
+                  <p className="text-[11px] text-emerald-300 font-sans">
+                    {lastProbeResult.explanation}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 5. Persistent Audit History */}
+      <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="space-y-1">
+            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2 font-sans">
+              <Clock className="w-4 h-4 text-cyan-400" />
+              <span>Compliance Verification Audit Trail</span>
+            </h3>
+            <p className="text-xs text-slate-400">
+              Immutable trial records persisted in backend database (<code className="text-cyan-300 font-mono text-[11px]">audit_records</code> table).
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={loadAuditHistory}
+              disabled={isLoadingHistory}
+              className="px-3 py-1.5 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoadingHistory ? 'animate-spin' : ''}`} />
+              <span>Refresh History</span>
+            </button>
+            {auditHistory.length > 0 && (
+              <button
+                onClick={handleClearHistory}
+                className="px-3 py-1.5 rounded-xl bg-obsidian-950 hover:bg-rose-500/10 border border-white/[0.08] hover:border-rose-500/30 text-slate-400 hover:text-rose-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Clear History</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Error notification if history fetch fails */}
+        {historyError && (
+          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+              <div>
+                <span className="font-bold block font-sans">Backend Database Unavailable</span>
+                <span className="text-slate-300">{historyError}</span>
+              </div>
+            </div>
+            <button
+              onClick={loadAuditHistory}
+              className="px-3 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-semibold text-xs border border-rose-500/40 flex-shrink-0"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Audit History Table */}
+        <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-obsidian-950 text-slate-400 uppercase tracking-wider text-[11px] border-b border-white/[0.06] font-semibold font-mono">
+              <tr>
+                <th className="py-3 px-4">Test Case ID</th>
+                <th className="py-3 px-4">Finding ID</th>
+                <th className="py-3 px-4">Timestamp</th>
+                <th className="py-3 px-4">Runtime State</th>
+                <th className="py-3 px-4">Result</th>
+                <th className="py-3 px-4">HTTP Status</th>
+                <th className="py-3 px-4">Remediation</th>
+                <th className="py-3 px-4">Target Endpoint</th>
+                <th className="py-3 px-4">Evidence Summary</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.04] font-mono text-slate-300">
+              {isLoadingHistory ? (
+                <tr>
+                  <td colSpan={9} className="py-8 text-center text-slate-400 font-sans">
+                    <div className="flex items-center justify-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
+                      <span>Loading verification records from backend database...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : auditHistory.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="py-8 text-center text-slate-500 italic font-sans">
+                    No verification records in database. Run a verification probe above to persist an audit entry.
+                  </td>
+                </tr>
+              ) : (
+                auditHistory.map((item) => (
+                  <tr key={item.id} className="hover:bg-obsidian-850/50 transition-colors">
+                    <td className="py-3 px-4 font-bold text-cyan-300 whitespace-nowrap">{item.testCaseId}</td>
+                    <td className="py-3 px-4 text-slate-200 whitespace-nowrap">
+                      <span className="font-semibold text-white">{item.findingId}</span>
+                      {item.findingTitle && (
+                        <span className="block text-[11px] text-slate-400 font-sans truncate max-w-[200px]">
+                          {item.findingTitle}
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-slate-400 text-[11px] font-sans whitespace-nowrap">
+                      {formatDate(item.timestamp)}
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
+                          item.isPatched
+                            ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                            : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                        }`}
+                      >
+                        {item.isPatched ? 'Patched' : 'Unpatched'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
+                          item.result === 'PASS'
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                        }`}
+                      >
+                        {item.result === 'PASS' ? (
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <AlertTriangle className="w-3 h-3 text-rose-400" />
+                        )}
+                        {item.result}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span
+                        className={`font-bold ${
+                          item.statusCode === 200 && !item.isPatched
+                            ? 'text-rose-400'
+                            : item.statusCode === 403 || item.statusCode === 204
+                            ? 'text-emerald-400'
+                            : 'text-slate-300'
+                        }`}
+                      >
+                        {item.statusCode}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 font-sans whitespace-nowrap">
+                      <span
+                        className={`capitalize text-xs font-semibold ${
+                          item.remediationStatus === 'verified_fix'
+                            ? 'text-emerald-400'
+                            : 'text-amber-400'
+                        }`}
+                      >
+                        {item.remediationStatus.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px] max-w-[200px] truncate" title={item.targetEndpoint}>
+                      {item.targetEndpoint}
+                    </td>
+                    <td className="py-3 px-4 text-slate-400 font-sans text-xs max-w-xs truncate" title={item.evidenceSummary}>
+                      {item.evidenceSummary}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};

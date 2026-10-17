@@ -1,0 +1,50 @@
+services:
+  dpdp-guard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dpdp-guard-saas
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - DEBUG=false
+      - API_V1_PREFIX=/api/v1
+      - SECRET_KEY=dpdp_production_secret_key_88192038102
+      - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:////data/dpdp_guard.db}
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:8000,http://127.0.0.1:8000
+      - MAX_SCAN_CONCURRENCY=3
+      - ALLOWED_LOCAL_DOMAINS=paysecure-india.in,apollo-telemed.co.in,retail-bharat.store,localhost,127.0.0.1,demo.dpdpguard.in
+      - COPILOT_PROVIDER=demo
+      - ENABLE_TESTBED=false
+    volumes:
+      - dpdp-guard-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: dpdp-guard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dpdp_guard
+      POSTGRES_USER: dpdp_admin
+      POSTGRES_PASSWORD: dpdp_secure_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    profiles:
+      - with-postgres
+
+volumes:
+  dpdp-guard-data:
+    driver: local
+  pgdata:
+    driver: local
+
