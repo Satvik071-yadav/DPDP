@@ -19,7 +19,6 @@ import {
   Zap,
   Check,
   Shield,
-  LogIn,
   UserPlus,
   FileText,
   Eye,
@@ -307,13 +306,6 @@ export const Overview: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
-            <button
-              onClick={() => { setLoginModalMode('login'); setShowLoginModal(true); }}
-              className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-cyan-sm"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Sign In</span>
-            </button>
             <button
               onClick={() => { setLoginModalMode('register'); setShowLoginModal(true); }}
               className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"

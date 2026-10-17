@@ -12,6 +12,8 @@ class ScanJob(Base):
     __tablename__ = "scan_jobs"
 
     id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True, index=True)
+    website_id = Column(String, ForeignKey("websites.id", ondelete="SET NULL"), nullable=True, index=True)
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True)
     target_url = Column(String, nullable=False, index=True)
     profile = Column(String, nullable=False, default="privacy_audit")
@@ -31,6 +33,7 @@ class ScanJob(Base):
     is_demo = Column(Boolean, default=True)
     provenance = Column(String, default="controlled_demo")  # controlled_demo, live_browser_observation
     error_message = Column(Text, nullable=True)
+    quota_reserved = Column(Boolean, default=False)
 
     findings = relationship("FindingModel", back_populates="scan_job", cascade="all, delete-orphan")
     observations = relationship("BrowserObservationModel", back_populates="scan_job", cascade="all, delete-orphan")
@@ -158,3 +161,78 @@ class UserModel(Base):
     is_active = Column(Boolean, default=True)
 
 
+class OrganizationModel(Base):
+    __tablename__ = "organizations"
+
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    slug = Column(String, unique=True, index=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+    updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)
+
+    members = relationship("OrganizationMemberModel", back_populates="organization", cascade="all, delete-orphan")
+    websites = relationship("WebsiteModel", back_populates="organization", cascade="all, delete-orphan")
+    subscription = relationship("SubscriptionModel", back_populates="organization", uselist=False, cascade="all, delete-orphan")
+    scan_usages = relationship("ScanUsageModel", back_populates="organization", cascade="all, delete-orphan")
+
+
+class OrganizationMemberModel(Base):
+    __tablename__ = "organization_members"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    role = Column(String, nullable=False, default="auditor")  # owner, admin, auditor, member
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+
+    organization = relationship("OrganizationModel", back_populates="members")
+    user = relationship("UserModel")
+
+
+class WebsiteModel(Base):
+    __tablename__ = "websites"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    hostname = Column(String, nullable=False, index=True)
+    verification_status = Column(String, nullable=False, default="pending", index=True)  # pending, verified, failed, expired
+    verification_method = Column(String, nullable=False, default="dns_txt")  # dns_txt, http_file
+    verification_token_hash = Column(String, nullable=False)
+    verification_token_expiry = Column(DateTime(timezone=True), nullable=False)
+    verification_attempts = Column(Integer, default=0)
+    last_verification_attempt = Column(DateTime(timezone=True), nullable=True)
+    verified_at = Column(DateTime(timezone=True), nullable=True)
+    last_scanned_at = Column(DateTime(timezone=True), nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+    updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)
+
+    organization = relationship("OrganizationModel", back_populates="websites")
+
+
+class SubscriptionModel(Base):
+    __tablename__ = "subscriptions"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
+    plan_id = Column(String, nullable=False, default="starter", index=True)  # starter, growth, business
+    status = Column(String, nullable=False, default="active", index=True)  # active, trialing, past_due, cancelled, expired
+    billing_period_start = Column(DateTime(timezone=True), default=get_utc_now)
+    billing_period_end = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+    updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)
+
+    organization = relationship("OrganizationModel", back_populates="subscription")
+
+
+class ScanUsageModel(Base):
+    __tablename__ = "scan_usage"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    billing_period_start = Column(DateTime(timezone=True), nullable=False)
+    billing_period_end = Column(DateTime(timezone=True), nullable=False)
+    scans_used = Column(Integer, default=0, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)
+
+    organization = relationship("OrganizationModel", back_populates="scan_usages")

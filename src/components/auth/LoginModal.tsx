@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   User, 
   X, 
   AlertCircle, 
   KeyRound, 
-  Sparkles,
   ArrowRight,
   Shield,
   Mail,
@@ -35,6 +35,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       setErrorMessage(null);
     }
   }, [isOpen, initialMode]);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
   
   // Login fields
   const [username, setUsername] = useState('');
@@ -104,21 +115,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
-  const fillDpoCredentials = () => {
-    setUsername('aditi.deshmukh');
-    setPassword('dpdp_guard_demo_2026');
-    setErrorMessage(null);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
-      <div 
-        className="fixed inset-0" 
-        onClick={onClose} 
+  const modalContent = (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Security Access"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150"
+    >
+      <div
+        className="fixed inset-0 bg-transparent"
+        onClick={onClose}
+        aria-hidden="true"
       />
-      <div className="relative z-10 w-full max-w-md bg-obsidian-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="relative z-10 w-full max-w-md my-auto bg-obsidian-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]">
         {/* Modal Header */}
-        <div className="p-6 border-b border-white/[0.08] bg-obsidian-950/70 flex items-start justify-between">
+        <div className="p-6 border-b border-white/[0.08] bg-obsidian-950/70 flex items-start justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-cyan-sm">
               <Shield className="w-5 h-5" />
@@ -139,7 +150,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         </div>
 
         {/* Tab Selector */}
-        <div className="grid grid-cols-2 border-b border-white/[0.08] bg-obsidian-950/40">
+        <div className="grid grid-cols-2 border-b border-white/[0.08] bg-obsidian-950/40 flex-shrink-0">
           <button
             type="button"
             onClick={() => { setMode('login'); setErrorMessage(null); }}
@@ -167,7 +178,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         </div>
 
         {/* Modal Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs overflow-y-auto flex-1">
           {errorMessage && (
             <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -185,7 +196,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="e.g. aditi.deshmukh"
+                    placeholder="e.g. priya.sharma or dpo@org.in"
                     className="w-full bg-obsidian-850 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
                   />
                 </div>
@@ -204,21 +215,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   />
                 </div>
               </div>
-
-              {/* Quick Dev Credential Preset (only rendered in development environments) */}
-              {!(import.meta as unknown as { env?: { PROD?: boolean } })?.env?.PROD && (
-                <div className="p-3 rounded-xl bg-obsidian-950/60 border border-white/[0.08] flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">Local Dev Account Preset</span>
-                  <button
-                    type="button"
-                    onClick={fillDpoCredentials}
-                    className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 group font-mono"
-                  >
-                    <span>Auto-fill Dev DPO</span>
-                    <Sparkles className="w-3 h-3 group-hover:rotate-12 transition-transform" />
-                  </button>
-                </div>
-              )}
             </>
           ) : (
             <>
@@ -303,5 +299,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+
+  return modalContent;
 };
 

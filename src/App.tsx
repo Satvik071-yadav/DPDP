@@ -10,6 +10,8 @@ import { FixVerify } from '@/pages/FixVerify';
 import { Copilot } from '@/pages/Copilot';
 import { History } from '@/pages/History';
 import { Settings } from '@/pages/Settings';
+import { Domains } from '@/pages/Domains';
+import { Subscription } from '@/pages/Subscription';
 
 export function App() {
   return (
@@ -27,6 +29,8 @@ export function App() {
           <Route path="/" element={<Overview />} />
           <Route path="/overview" element={<Navigate to="/" replace />} />
           <Route path="/scan" element={<Scan />} />
+          <Route path="/domains" element={<Domains />} />
+          <Route path="/subscription" element={<Subscription />} />
           <Route path="/findings" element={<Findings />} />
           <Route path="/privacy-flow" element={<PrivacyFlow />} />
           <Route path="/fix-verify" element={<FixVerify />} />
@@ -39,6 +43,7 @@ export function App() {
     </BrowserRouter>
   );
 }
+
 
 export default App;
 

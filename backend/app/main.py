@@ -46,16 +46,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS setup
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origin_list,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
 # Security Headers Middleware
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
@@ -66,6 +56,16 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
     return response
+
+
+# CORS setup - mounted after add_security_headers so CORSMiddleware is the outermost ASGI middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origin_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Global Exception Handler so internal stack traces are never exposed to clients
@@ -90,6 +90,10 @@ from app.api.routes.testbed import router as testbed_router
 # Mount testbed for controlled local observations
 app.include_router(testbed_router)
 
+from app.api.routes.organizations import router as organizations_router
+from app.api.routes.websites import router as websites_router
+from app.api.routes.subscriptions import router as subscriptions_router
+
 # Mount API v1 routes
 app.include_router(scans_router, prefix=settings.API_V1_PREFIX)
 app.include_router(findings_router, prefix=settings.API_V1_PREFIX)
@@ -97,6 +101,9 @@ app.include_router(copilot_router, prefix=settings.API_V1_PREFIX)
 app.include_router(settings_router, prefix=settings.API_V1_PREFIX)
 app.include_router(auth_router, prefix=settings.API_V1_PREFIX)
 app.include_router(notifications_router, prefix=settings.API_V1_PREFIX)
+app.include_router(organizations_router, prefix=settings.API_V1_PREFIX)
+app.include_router(websites_router, prefix=settings.API_V1_PREFIX)
+app.include_router(subscriptions_router, prefix=settings.API_V1_PREFIX)
 
 
 

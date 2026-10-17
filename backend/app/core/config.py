@@ -14,7 +14,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./dpdp_guard.db"
 
     # CORS
-    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    CORS_ORIGINS: str = (
+        "http://localhost:5173,http://127.0.0.1:5173,"
+        "http://localhost:4173,http://127.0.0.1:4173,"
+        "http://localhost:8000,http://127.0.0.1:8000"
+    )
 
     # Scope & Security
     ALLOWED_LOCAL_DOMAINS: str = "paysecure-india.in,apollo-telemed.co.in,retail-bharat.store,localhost,127.0.0.1,demo.dpdpguard.in"
@@ -34,7 +38,22 @@ class Settings(BaseSettings):
 
     @property
     def cors_origin_list(self) -> List[str]:
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        configured = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        if self.APP_ENV != "production":
+            local_dev_origins = [
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "http://localhost:4173",
+                "http://127.0.0.1:4173",
+                "http://localhost:8000",
+                "http://127.0.0.1:8000",
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+            ]
+            for origin in local_dev_origins:
+                if origin not in configured:
+                    configured.append(origin)
+        return configured
 
     @property
     def allowed_domain_list(self) -> List[str]:
@@ -166,6 +185,12 @@ class Settings(BaseSettings):
                 raise RuntimeError(
                     "Production configuration error: TLS/SSL encryption cannot be disabled in production. "
                     "DATABASE_URL must require TLS for database connections."
+                )
+
+            if "*" in self.cors_origin_list:
+                raise RuntimeError(
+                    "Production configuration error: Wildcard CORS origin ('*') cannot be used in production "
+                    "with credentialed authentication. Specify exact allowed domains in CORS_ORIGINS."
                 )
 
 

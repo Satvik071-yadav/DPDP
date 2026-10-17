@@ -22,7 +22,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: CORS_ORIGINS
-        value: "*"
+        value: "https://dpdp-guard-saas.onrender.com"
       - key: ALLOWED_LOCAL_DOMAINS
         value: paysecure-india.in,apollo-telemed.co.in,retail-bharat.store,localhost,127.0.0.1,demo.dpdpguard.in
       - key: MAX_SCAN_CONCURRENCY

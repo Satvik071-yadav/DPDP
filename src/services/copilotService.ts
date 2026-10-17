@@ -11,6 +11,7 @@ import {
 } from '@/data/copilotFixtures';
 
 import { getApiBaseUrl } from '@/services/apiConfig';
+import { authService } from '@/services/authService';
 
 export const copilotService = {
   /**
@@ -131,6 +132,7 @@ export const copilotService = {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          ...authService.getAuthHeaders(),
         },
         body: JSON.stringify({
           findingContext: sanitizedContext,

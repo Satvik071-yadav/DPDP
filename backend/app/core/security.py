@@ -14,12 +14,16 @@ BLOCKED_IP_NETWORKS = [
     ipaddress.ip_network("172.16.0.0/12"),     # Private network RFC 1918
     ipaddress.ip_network("192.168.0.0/16"),    # Private network RFC 1918
     ipaddress.ip_network("169.254.0.0/16"),    # Link-local / Cloud metadata (e.g. AWS/GCP 169.254.169.254)
+    ipaddress.ip_network("100.64.0.0/10"),     # Carrier-grade NAT RFC 6598
+    ipaddress.ip_network("198.18.0.0/15"),     # Benchmarking RFC 2544
     ipaddress.ip_network("0.0.0.0/8"),         # Current network
     ipaddress.ip_network("224.0.0.0/4"),       # Multicast
     ipaddress.ip_network("240.0.0.0/4"),       # Reserved
     ipaddress.ip_network("::1/128"),           # IPv6 loopback
+    ipaddress.ip_network("::/128"),            # IPv6 unspecified
     ipaddress.ip_network("fc00::/7"),          # IPv6 unique local
     ipaddress.ip_network("fe80::/10"),         # IPv6 link-local
+    ipaddress.ip_network("ff00::/8"),          # IPv6 multicast
 ]
 
 
@@ -110,10 +114,14 @@ def resolve_and_validate_destination(
         return False, f"Destination resolution failed for '{clean_host}': {str(e)}", []
 
 
-def validate_and_resolve_url(raw_url: str, allow_controlled_local: bool = True) -> Tuple[str, str]:
+def validate_and_resolve_url(
+    raw_url: str,
+    allow_controlled_local: bool = True,
+    verified_hostname: Optional[str] = None
+) -> Tuple[str, str]:
     """
-    Validates scan target URL, prevents SSRF, checks domain allowlist,
-    and resolves DNS to ensure target cannot hit cloud metadata or private addresses.
+    Validates scan target URL, prevents SSRF, checks domain authorization (allowed demo domains
+    or verified customer domain), and resolves DNS to ensure target cannot hit cloud metadata or private addresses.
     """
     if not raw_url or not raw_url.strip():
         raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
@@ -133,17 +141,21 @@ def validate_and_resolve_url(raw_url: str, allow_controlled_local: bool = True) 
 
     hostname = parsed.hostname.lower()
 
-    # Scope check: Must belong to permitted demo target domains
+    # Scope check: Must belong to permitted demo target domains OR verified customer hostname
     allowed = settings.allowed_domain_list
-    is_allowed_domain = any(
+    is_demo_domain = any(
         hostname == d or hostname.endswith(f".{d}")
         for d in allowed
     )
+    is_verified_domain = False
+    if verified_hostname:
+        vh = verified_hostname.strip().lower()
+        is_verified_domain = (hostname == vh)
 
-    if not is_allowed_domain:
+    if not (is_demo_domain or is_verified_domain):
         raise HTTPException(
             status_code=403,
-            detail=f"Target '{hostname}' is not in authorized demo scope. Permitted targets: {', '.join(allowed)}"
+            detail=f"Target '{hostname}' is not an authorized domain. Please register and verify domain ownership in Domain Management."
         )
 
     # Prevent embedded credentials in URL (e.g. http://user:pass@domain)

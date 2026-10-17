@@ -29,9 +29,12 @@ import {
   getApiBaseUrl,
   setApiBaseUrl,
   resetApiUrlOverride,
+  isLocalHostname,
+  isLocalFrontendServer,
   STORAGE_KEYS
 } from '../src/services/apiConfig.js';
 import { api } from '../src/services/api.js';
+import { authService } from '../src/services/authService.js';
 
 test('URL Normalization', async (t) => {
   await t.test('strips trailing slashes from origin', () => {
@@ -324,5 +327,212 @@ test('Offline Behavior & Demo Mode Distinction', async (t) => {
     assert.match(demoScan.notes || '', /DEMO FIXTURE/i);
     assert.ok(demoScan.findings.length > 0);
     assert.equal(demoScan.findings[0].isDemoFixture, true);
+  });
+});
+
+test('Production Preview and Local Port 4173 Exclusion Suite', async (t) => {
+  const originalWindow = (globalThis as any).window;
+
+  t.beforeEach(() => {
+    storage.clear();
+    resetApiUrlOverride();
+  });
+
+  t.afterEach(() => {
+    (globalThis as any).window = originalWindow;
+    resetApiUrlOverride();
+  });
+
+  await t.test('isLocalFrontendServer correctly identifies local dev and preview origins', () => {
+    assert.equal(isLocalFrontendServer('http://127.0.0.1:4173'), true);
+    assert.equal(isLocalFrontendServer('http://localhost:4173'), true);
+    assert.equal(isLocalFrontendServer('http://127.0.0.1:5173'), true);
+    assert.equal(isLocalFrontendServer('http://localhost:3000'), true);
+    // Backend port 8000 is NOT a frontend server
+    assert.equal(isLocalFrontendServer('http://127.0.0.1:8000'), false);
+    assert.equal(isLocalFrontendServer('http://localhost:8000'), false);
+    // Production domain is NOT a local frontend server
+    assert.equal(isLocalFrontendServer('https://dpdp-guard-saas.onrender.com'), false);
+    // Other custom IP is NOT a local frontend server
+    assert.equal(isLocalFrontendServer('http://192.168.1.100:8080'), false);
+  });
+
+  await t.test('getDefaultApiUrl resolves to 127.0.0.1:8000 when running under Vite preview at 127.0.0.1:4173', () => {
+    (globalThis as any).window = {
+      location: {
+        protocol: 'http:',
+        hostname: '127.0.0.1',
+        origin: 'http://127.0.0.1:4173',
+        port: '4173',
+      },
+      dispatchEvent: () => true,
+    };
+
+    const defaultUrl = getDefaultApiUrl();
+    assert.equal(defaultUrl, 'http://127.0.0.1:8000');
+    assert.notEqual(defaultUrl, 'http://127.0.0.1:4173');
+  });
+
+  await t.test('getDefaultApiUrl resolves to 127.0.0.1:8000 when running under localhost:4173', () => {
+    (globalThis as any).window = {
+      location: {
+        protocol: 'http:',
+        hostname: 'localhost',
+        origin: 'http://localhost:4173',
+        port: '4173',
+      },
+      dispatchEvent: () => true,
+    };
+
+    const defaultUrl = getDefaultApiUrl();
+    assert.equal(defaultUrl, 'http://127.0.0.1:8000');
+    assert.notEqual(defaultUrl, 'http://localhost:4173');
+  });
+
+  await t.test('getApiBaseUrl ignores stale port 4173 saved in localStorage and falls back to port 8000', () => {
+    (globalThis as any).window = {
+      location: {
+        protocol: 'http:',
+        hostname: '127.0.0.1',
+        origin: 'http://127.0.0.1:4173',
+        port: '4173',
+      },
+      dispatchEvent: () => true,
+    };
+
+    // Stale settings left behind by previous preview run
+    storage.set(STORAGE_KEYS.SETTINGS, JSON.stringify({
+      apiUrl: 'http://127.0.0.1:4173',
+      organizationName: 'Stale Preview Org',
+    }));
+
+    const resolved = getApiBaseUrl();
+    assert.equal(resolved, 'http://127.0.0.1:8000');
+    assert.notEqual(resolved, 'http://127.0.0.1:4173');
+  });
+
+  await t.test('api.getSettings heals stale port 4173 in localStorage to default backend URL', async () => {
+    (globalThis as any).window = {
+      location: {
+        protocol: 'http:',
+        hostname: '127.0.0.1',
+        origin: 'http://127.0.0.1:4173',
+        port: '4173',
+      },
+      dispatchEvent: () => true,
+    };
+
+    storage.set(STORAGE_KEYS.SETTINGS, JSON.stringify({
+      apiUrl: 'http://127.0.0.1:4173',
+      organizationName: 'Auto Healed Org',
+    }));
+
+    const settings = await api.getSettings();
+    assert.equal(settings.apiUrl, 'http://127.0.0.1:8000');
+    assert.notEqual(settings.apiUrl, 'http://127.0.0.1:4173');
+  });
+
+  await t.test('api.checkHealth dispatches to backend port 8000 and never to port 4173', async () => {
+    (globalThis as any).window = {
+      location: {
+        protocol: 'http:',
+        hostname: '127.0.0.1',
+        origin: 'http://127.0.0.1:4173',
+        port: '4173',
+      },
+      dispatchEvent: () => true,
+    };
+
+    let requestedUrl = '';
+    const originalFetch = globalThis.fetch;
+    (globalThis as any).fetch = async (url: string) => {
+      requestedUrl = url;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ status: 'healthy', service: 'dpdp-guard-backend' }),
+      };
+    };
+
+    try {
+      const res = await api.checkHealth();
+      assert.equal(res.status, 'healthy');
+      assert.ok(requestedUrl.startsWith('http://127.0.0.1:8000/api/health'));
+      assert.ok(!requestedUrl.includes(':4173'));
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  await t.test('authService.register dispatches to backend port 8000 and never to port 4173', async () => {
+    (globalThis as any).window = {
+      location: {
+        protocol: 'http:',
+        hostname: '127.0.0.1',
+        origin: 'http://127.0.0.1:4173',
+        port: '4173',
+      },
+      dispatchEvent: () => true,
+    };
+
+    let requestedUrl = '';
+    let requestBody: any = null;
+    const originalFetch = globalThis.fetch;
+    (globalThis as any).fetch = async (url: string, init?: RequestInit) => {
+      requestedUrl = url;
+      requestBody = init?.body ? JSON.parse(String(init.body)) : null;
+      return {
+        ok: true,
+        status: 201,
+        json: async () => ({
+          accessToken: 'test_token_123',
+          tokenType: 'bearer',
+          user: {
+            id: 'usr_new_01',
+            username: 'previewuser',
+            email: 'preview@dpdpguard.in',
+            fullName: 'Preview User',
+            role: 'auditor',
+            isActive: true,
+          },
+        }),
+      };
+    };
+
+    try {
+      const user = await authService.register({
+        username: 'previewuser',
+        email: 'preview@dpdpguard.in',
+        password: 'Password123!',
+        fullName: 'Preview User',
+      });
+
+      assert.equal(user.username, 'previewuser');
+      assert.equal(requestedUrl, 'http://127.0.0.1:8000/api/v1/auth/register');
+      assert.ok(!requestedUrl.includes(':4173'));
+      assert.equal(requestBody?.username, 'previewuser');
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  await t.test('Preserves intentional custom backend override (e.g. 192.168.1.150:8000)', () => {
+    (globalThis as any).window = {
+      location: {
+        protocol: 'http:',
+        hostname: '127.0.0.1',
+        origin: 'http://127.0.0.1:4173',
+        port: '4173',
+      },
+      dispatchEvent: () => true,
+    };
+
+    storage.set(STORAGE_KEYS.SETTINGS, JSON.stringify({
+      apiUrl: 'http://192.168.1.150:8000',
+      organizationName: 'Custom Fiduciary',
+    }));
+
+    const resolved = getApiBaseUrl();
+    assert.equal(resolved, 'http://192.168.1.150:8000');
   });
 });

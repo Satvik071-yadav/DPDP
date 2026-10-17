@@ -354,3 +354,102 @@ export interface AuthTokenResponse {
   user: UserProfile;
 }
 
+// --- Multi-Tenant SaaS, Domain Verification & Subscription Types ---
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt?: string;
+  updatedAt?: string;
+  role?: 'owner' | 'admin' | 'auditor' | 'member';
+}
+
+export interface OrganizationMember {
+  id: string;
+  userId: string;
+  username: string;
+  email: string;
+  fullName?: string;
+  role: 'owner' | 'admin' | 'auditor' | 'member';
+  joinedAt: string;
+}
+
+export type VerificationMethod = 'dns_txt' | 'http_file';
+export type VerificationStatus = 'pending' | 'verified' | 'failed' | 'expired';
+
+export interface Website {
+  id: string;
+  organizationId: string;
+  hostname: string;
+  verificationStatus: VerificationStatus;
+  verificationMethod: VerificationMethod;
+  verificationToken?: string;
+  tokenExpiresAt?: string;
+  dnsTxtHost?: string;
+  dnsTxtExpectedValue?: string;
+  httpFilePath?: string;
+  httpExpectedContent?: string;
+  verificationAttempts?: number;
+  lastVerificationAttempt?: string;
+  verifiedAt?: string;
+  lastScannedAt?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface VerifyWebsiteResult {
+  success: boolean;
+  verificationStatus: VerificationStatus;
+  message: string;
+  verifiedAt?: string;
+  diagnostic?: string;
+}
+
+export interface PlanFeature {
+  code: string;
+  name: string;
+  description: string;
+}
+
+export interface PlanTier {
+  id: 'starter' | 'growth' | 'business';
+  name: string;
+  tagline: string;
+  priceInrMonth: number;
+  priceInrMonthly?: number;
+  priceInrAnnual: number;
+  priceInrAnnualMonthlyEquivalent?: number;
+  scansPerMonth: number;
+  maxWebsites: number;
+  maxMembers: number;
+  dataRetentionDays: number;
+  features: string[];
+  isPopular?: boolean;
+}
+
+export interface PlanRecommendation {
+  recommendedPlan: 'starter' | 'growth' | 'business';
+  recommendedPlanName: string;
+  reasoning: string[];
+  summary: string;
+  answersGiven: Record<string, string>;
+}
+
+export interface SubscriptionOverview {
+  organizationId: string;
+  plan: PlanTier;
+  status: 'active' | 'trialing' | 'past_due' | 'cancelled';
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  scansUsed: number;
+  scansLimit: number;
+  scansRemaining: number;
+  websitesCount: number;
+  websitesLimit: number;
+  membersCount: number;
+  membersLimit: number;
+  dataRetentionDays: number;
+  isDowngradePending?: boolean;
+}

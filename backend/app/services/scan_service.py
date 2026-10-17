@@ -4,8 +4,9 @@ import asyncio
 import logging
 from typing import List, Optional, Dict, Any
 from urllib.parse import urlparse
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from fastapi import HTTPException, status
 
 logger = logging.getLogger("dpdp_guard.scan_service")
@@ -108,8 +109,12 @@ def convert_scanjob_to_schema(job: ScanJob, findings: List[FindingModel]) -> Sca
         provenance=job.provenance,
         progressStage=getattr(job, "progress_stage", "completed") or "completed",
         progressPercent=getattr(job, "progress_percent", 100) or 100,
-        logMessage=getattr(job, "log_message", None)
+        logMessage=getattr(job, "log_message", None),
+        organizationId=job.organization_id,
+        websiteId=job.website_id,
+        userId=job.user_id
     )
+
 
 
 _scan_semaphore: Optional[asyncio.Semaphore] = None
@@ -137,48 +142,106 @@ class ScanService:
         session: AsyncSession,
         user_id: Optional[str] = None
     ) -> ScanResultSchema:
-        validated_url = ScanService.validate_target_url(req.targetUrl)
-        now = get_now_utc()
-        scan_id = f"SCAN-{now.strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}"
+        # 1. Determine and enforce organization tenancy
+        if req.organizationId:
+            org_id = req.organizationId
+            if user_id:
+                from app.services.organization_service import OrganizationService
+                await OrganizationService.require_membership(org_id, user_id, session)
+        else:
+            if user_id:
+                from app.services.organization_service import OrganizationService
+                org, _ = await OrganizationService.get_or_create_primary_organization(user_id, session)
+                org_id = org.id
+            else:
+                org_id = "org_default"
 
-        # Enforce duplicate check: prevent duplicate submissions for target already in-flight for this user
-        dup_conditions = [
-            ScanJob.target_url == validated_url,
-            ScanJob.status.in_(["queued", "running"])
-        ]
-        if user_id:
-            dup_conditions.append(ScanJob.user_id == user_id)
-
-        active_res = await session.execute(
-            select(ScanJob).where(*dup_conditions)
+        # 2. Enforce scan entitlements (Subscription status, Domain verification, Scan quotas)
+        from app.services.subscription_service import SubscriptionService
+        is_entitled, error_msg, website_obj, is_live_scan = await SubscriptionService.validate_scan_entitlement(
+            org_id=org_id,
+            user_id=user_id or "usr_anonymous",
+            target_url=req.targetUrl,
+            session=session
         )
-        active_scan = active_res.scalar_one_or_none()
-        if active_scan:
+        if not is_entitled:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"A scan is already in progress for target '{validated_url}' (Scan ID: {active_scan.id})."
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=error_msg
             )
 
-        # Check if scanning the local controlled testbed
-        is_testbed_target = "/testbed" in validated_url or "localhost" in validated_url or "127.0.0.1" in validated_url
+        # Reserve scan quota atomically before queueing or launching execution
+        reserved, reserve_err = await SubscriptionService.reserve_scan_quota(org_id, session)
+        if not reserved:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=reserve_err
+            )
 
-        # Persist initial scan record in DB immediately so status endpoint and duplicate check work
-        scan_job = ScanJob(
-            id=scan_id,
-            user_id=user_id,
-            target_url=validated_url,
-            profile=req.profile,
-            status="running",
-            progress_stage="preparing_env",
-            progress_percent=15,
-            log_message=f"Initializing scanner environment for {validated_url}",
-            initiated_at=now,
-            consent_mode_enabled=req.consentModeEnabled,
-            is_demo=not is_testbed_target,
-            provenance="live_browser_observation" if is_testbed_target else "controlled_demo"
-        )
-        session.add(scan_job)
-        await session.commit()
+        try:
+            # 3. Validate URL with SSRF protection, authorizing verified domain if applicable
+            from app.core.security import validate_and_resolve_url
+            verified_host = website_obj.hostname if website_obj else None
+            validated_url, _ = validate_and_resolve_url(
+                req.targetUrl,
+                allow_controlled_local=True,
+                verified_hostname=verified_host
+            )
+            now = get_now_utc()
+            scan_id = f"SCAN-{now.strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
+
+            # 4. Enforce duplicate check
+            owner_filter = []
+            if org_id:
+                owner_filter.append(ScanJob.organization_id == org_id)
+            if user_id:
+                owner_filter.append(ScanJob.user_id == user_id)
+
+            dup_conditions = [
+                ScanJob.target_url == validated_url,
+                ScanJob.status.in_(["queued", "running"])
+            ]
+            if owner_filter:
+                dup_conditions.append(or_(*owner_filter))
+
+            active_res = await session.execute(
+                select(ScanJob).where(*dup_conditions)
+            )
+            active_scan = active_res.scalar_one_or_none()
+            if active_scan:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"A scan is already in progress for target '{validated_url}' (Scan ID: {active_scan.id})."
+                )
+
+            # Check execution profile
+            is_testbed_target = "/testbed" in validated_url or "localhost" in validated_url or "127.0.0.1" in validated_url
+            is_real_execution = is_live_scan or is_testbed_target
+            website_id = website_obj.id if website_obj else None
+
+            # Persist initial scan record in DB immediately so status endpoint and duplicate check work
+            scan_job = ScanJob(
+                id=scan_id,
+                organization_id=org_id,
+                website_id=website_id,
+                user_id=user_id,
+                target_url=validated_url,
+                profile=req.profile,
+                status="running",
+                progress_stage="preparing_env",
+                progress_percent=15,
+                log_message=f"Initializing scanner environment for {validated_url}",
+                initiated_at=now,
+                consent_mode_enabled=req.consentModeEnabled,
+                is_demo=not is_real_execution,
+                provenance="live_browser_observation" if is_real_execution else "controlled_demo",
+                quota_reserved=True
+            )
+            session.add(scan_job)
+            await session.commit()
+        except Exception:
+            await SubscriptionService.release_scan_quota(org_id, session)
+            raise
 
         if req.asyncMode:
             # Launch background execution task and track it
@@ -188,7 +251,9 @@ class ScanService:
                     validated_url=validated_url,
                     profile=req.profile,
                     consent_mode_enabled=req.consentModeEnabled,
-                    is_testbed_target=is_testbed_target,
+                    is_real_execution=is_real_execution,
+                    org_id=org_id,
+                    website_id=website_id,
                     now=now
                 )
             )
@@ -201,7 +266,9 @@ class ScanService:
                 validated_url=validated_url,
                 profile=req.profile,
                 consent_mode_enabled=req.consentModeEnabled,
-                is_testbed_target=is_testbed_target,
+                is_real_execution=is_real_execution,
+                org_id=org_id,
+                website_id=website_id,
                 now=now,
                 session=session
             )
@@ -216,19 +283,21 @@ class ScanService:
         validated_url: str,
         profile: str,
         consent_mode_enabled: bool,
-        is_testbed_target: bool,
+        is_real_execution: bool,
+        org_id: str,
+        website_id: Optional[str],
         now: datetime.datetime,
         session: Optional[AsyncSession] = None
     ) -> None:
         try:
             if session is not None:
                 await ScanService._run_stages_logic(
-                    session, scan_id, validated_url, profile, consent_mode_enabled, is_testbed_target, now
+                    session, scan_id, validated_url, profile, consent_mode_enabled, is_real_execution, org_id, website_id, now
                 )
             else:
                 async with AsyncSessionLocal() as bg_session:
                     await ScanService._run_stages_logic(
-                        bg_session, scan_id, validated_url, profile, consent_mode_enabled, is_testbed_target, now
+                        bg_session, scan_id, validated_url, profile, consent_mode_enabled, is_real_execution, org_id, website_id, now
                     )
         finally:
             _active_scan_tasks.pop(scan_id, None)
@@ -240,7 +309,9 @@ class ScanService:
         validated_url: str,
         profile: str,
         consent_mode_enabled: bool,
-        is_testbed_target: bool,
+        is_real_execution: bool,
+        org_id: str,
+        website_id: Optional[str],
         now: datetime.datetime
     ) -> None:
         res = await session.execute(select(ScanJob).where(ScanJob.id == scan_id))
@@ -250,7 +321,7 @@ class ScanService:
 
         semaphore = get_scan_semaphore()
         async with semaphore:
-            if is_testbed_target:
+            if is_real_execution:
                 try:
                     # Stage 2: Checking Endpoints
                     scan_job.progress_stage = "checking_endpoints"
@@ -383,6 +454,12 @@ class ScanService:
                     scan_job.log_message = f"Scan completed successfully with {total} findings in {duration_sec}s."
                     await session.commit()
 
+                    try:
+                        from app.services.subscription_service import SubscriptionService
+                        await SubscriptionService.record_scan_consumed(org_id, website_id, session)
+                    except Exception as usg_err:
+                        logger.warning(f"Could not update scan usage for org {org_id}: {usg_err}")
+
                 except asyncio.CancelledError:
                     logger.info(f"Scan {scan_id} task was cancelled; releasing resources and ensuring terminal status.")
                     try:
@@ -395,6 +472,10 @@ class ScanService:
                             curr_job.completed_at = now_c
                             curr_job.duration_seconds = safe_duration_seconds(now_c, curr_job.initiated_at)
                             curr_job.log_message = "Scan cancelled by user."
+                            if getattr(curr_job, "quota_reserved", False) and curr_job.organization_id:
+                                from app.services.subscription_service import SubscriptionService
+                                await SubscriptionService.release_scan_quota(curr_job.organization_id, session)
+                                curr_job.quota_reserved = False
                             await session.commit()
                     except Exception:
                         pass
@@ -421,6 +502,10 @@ class ScanService:
                     }
                     scan_job.error_message = sanitized_err
                     scan_job.log_message = f"Scan failed: {sanitized_err}"
+                    if getattr(scan_job, "quota_reserved", False) and scan_job.organization_id:
+                        from app.services.subscription_service import SubscriptionService
+                        await SubscriptionService.release_scan_quota(scan_job.organization_id, session)
+                        scan_job.quota_reserved = False
                     await session.commit()
 
             else:
@@ -522,6 +607,13 @@ class ScanService:
                     scan_job.error_message = None
                     scan_job.log_message = f"Controlled scenario scan finished with {total} findings."
                     await session.commit()
+
+                    try:
+                        from app.services.subscription_service import SubscriptionService
+                        await SubscriptionService.record_scan_consumed(org_id, website_id, session)
+                    except Exception as usg_err:
+                        logger.warning(f"Could not update scan usage for org {org_id}: {usg_err}")
+
                 except asyncio.CancelledError:
                     logger.info(f"Demo scan {scan_id} task was cancelled; releasing resources.")
                     try:
@@ -534,6 +626,10 @@ class ScanService:
                             curr_job.completed_at = now_c
                             curr_job.duration_seconds = safe_duration_seconds(now_c, curr_job.initiated_at)
                             curr_job.log_message = "Scan cancelled by user."
+                            if getattr(curr_job, "quota_reserved", False) and curr_job.organization_id:
+                                from app.services.subscription_service import SubscriptionService
+                                await SubscriptionService.release_scan_quota(curr_job.organization_id, session)
+                                curr_job.quota_reserved = False
                             await session.commit()
                     except Exception:
                         pass
@@ -551,16 +647,23 @@ class ScanService:
                     scan_job.completed_at = get_now_utc()
                     scan_job.error_message = sanitized_err
                     scan_job.log_message = f"Scan failed: {sanitized_err}"
+                    if getattr(scan_job, "quota_reserved", False) and scan_job.organization_id:
+                        from app.services.subscription_service import SubscriptionService
+                        await SubscriptionService.release_scan_quota(scan_job.organization_id, session)
+                        scan_job.quota_reserved = False
                     await session.commit()
 
     @staticmethod
     async def get_scan_status(
         scan_id: str,
         session: AsyncSession,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        organization_id: Optional[str] = None
     ) -> Optional[ScanStatusResponseSchema]:
         query = select(ScanJob).where(ScanJob.id == scan_id)
-        if user_id:
+        if organization_id:
+            query = query.where(ScanJob.organization_id == organization_id)
+        elif user_id:
             query = query.where(ScanJob.user_id == user_id)
         result = await session.execute(query)
         job = result.scalar_one_or_none()
@@ -581,10 +684,13 @@ class ScanService:
     async def cancel_scan(
         scan_id: str,
         session: AsyncSession,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        organization_id: Optional[str] = None
     ) -> Optional[ScanStatusResponseSchema]:
         query = select(ScanJob).where(ScanJob.id == scan_id)
-        if user_id:
+        if organization_id:
+            query = query.where(ScanJob.organization_id == organization_id)
+        elif user_id:
             query = query.where(ScanJob.user_id == user_id)
         result = await session.execute(query)
         job = result.scalar_one_or_none()
@@ -599,6 +705,10 @@ class ScanService:
         job.completed_at = now
         job.duration_seconds = safe_duration_seconds(now, job.initiated_at)
         job.log_message = "Scan cancelled by user."
+        if getattr(job, "quota_reserved", False) and job.organization_id:
+            from app.services.subscription_service import SubscriptionService
+            await SubscriptionService.release_scan_quota(job.organization_id, session)
+            job.quota_reserved = False
         await session.commit()
 
         # Safely terminate in-flight background task
@@ -621,10 +731,13 @@ class ScanService:
     async def get_scan_by_id(
         scan_id: str,
         session: AsyncSession,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        organization_id: Optional[str] = None
     ) -> Optional[ScanResultSchema]:
         query = select(ScanJob).where(ScanJob.id == scan_id)
-        if user_id:
+        if organization_id:
+            query = query.where(ScanJob.organization_id == organization_id)
+        elif user_id:
             query = query.where(ScanJob.user_id == user_id)
         result = await session.execute(query)
         job = result.scalar_one_or_none()
@@ -640,10 +753,13 @@ class ScanService:
     @staticmethod
     async def list_scans(
         session: AsyncSession,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
+        organization_id: Optional[str] = None
     ) -> List[ScanResultSchema]:
         query = select(ScanJob)
-        if user_id:
+        if organization_id:
+            query = query.where(ScanJob.organization_id == organization_id)
+        elif user_id:
             query = query.where(ScanJob.user_id == user_id)
         query = query.order_by(ScanJob.initiated_at.desc())
         result = await session.execute(query)

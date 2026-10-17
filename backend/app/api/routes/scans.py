@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
@@ -9,9 +9,34 @@ from app.schemas.observation_schemas import BrowserObservationSchema, ConsentCom
 from app.services.scan_service import scan_service
 from app.services.finding_service import finding_service
 from app.services.observation_service import observation_service
+from app.services.organization_service import organization_service
 from app.models.entities import BrowserObservationModel, ScanJob
 
 router = APIRouter(prefix="/scans", tags=["Scans"])
+
+
+async def _ensure_scan_access(scan_id: str, user_id: str, db: AsyncSession) -> ScanResultSchema:
+    scan = await scan_service.get_scan_by_id(scan_id, db)
+    if not scan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Scan with ID '{scan_id}' not found."
+        )
+    if scan.userId != user_id:
+        if scan.organizationId:
+            try:
+                await organization_service.require_membership(scan.organizationId, user_id, db)
+            except HTTPException:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Scan with ID '{scan_id}' not found."
+                )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Scan with ID '{scan_id}' not found."
+            )
+    return scan
 
 
 @router.post("", response_model=ScanResultSchema, status_code=status.HTTP_201_CREATED)
@@ -22,8 +47,8 @@ async def create_scan(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Creates and executes a controlled scan scoped to the authenticated user.
-    If targeting local testbed, uses Playwright headless browser observation.
+    Creates and executes a controlled scan scoped to the authenticated user and organization.
+    If targeting local testbed or verified customer domain, uses Playwright headless browser observation.
     Persists scan job, findings, and recorded observations in the database.
     """
     if asyncMode:
@@ -34,13 +59,17 @@ async def create_scan(
 
 @router.get("", response_model=List[ScanResultSchema])
 async def list_scans(
+    org_id: Optional[str] = Query(None, alias="orgId"),
     claims: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Retrieves history of executed scan jobs for the authenticated user.
+    Retrieves history of executed scan jobs for the authenticated user or their organization.
     """
     user_id = claims.get("sub")
+    if org_id:
+        await organization_service.require_membership(org_id, user_id, db)
+        return await scan_service.list_scans(db, organization_id=org_id)
     return await scan_service.list_scans(db, user_id=user_id)
 
 
@@ -51,16 +80,10 @@ async def get_scan(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Retrieves a specific scan job and its status belonging to the authenticated user.
+    Retrieves a specific scan job and its status belonging to the authenticated user or their organization.
     """
     user_id = claims.get("sub")
-    scan = await scan_service.get_scan_by_id(scan_id, db, user_id=user_id)
-    if not scan:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Scan with ID '{scan_id}' not found."
-        )
-    return scan
+    return await _ensure_scan_access(scan_id, user_id, db)
 
 
 @router.get("/{scan_id}/status", response_model=ScanStatusResponseSchema)
@@ -73,7 +96,8 @@ async def get_scan_status(
     Retrieves the authoritative lifecycle status and progress of a scan.
     """
     user_id = claims.get("sub")
-    status_resp = await scan_service.get_scan_status(scan_id, db, user_id=user_id)
+    scan = await _ensure_scan_access(scan_id, user_id, db)
+    status_resp = await scan_service.get_scan_status(scan_id, db)
     if not status_resp:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -89,10 +113,11 @@ async def cancel_scan(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Cancels an in-flight scan job belonging to the authenticated user.
+    Cancels an in-flight scan job belonging to the authenticated user or organization.
     """
     user_id = claims.get("sub")
-    cancelled = await scan_service.cancel_scan(scan_id, db, user_id=user_id)
+    await _ensure_scan_access(scan_id, user_id, db)
+    cancelled = await scan_service.cancel_scan(scan_id, db)
     if not cancelled:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -108,16 +133,11 @@ async def get_scan_findings(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Retrieves all findings detected during a specific scan belonging to the authenticated user.
+    Retrieves all findings detected during a specific scan belonging to the authenticated user or organization.
     """
     user_id = claims.get("sub")
-    scan = await scan_service.get_scan_by_id(scan_id, db, user_id=user_id)
-    if not scan:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Scan with ID '{scan_id}' not found."
-        )
-    return await finding_service.get_findings_for_scan(scan_id, db, user_id=user_id)
+    await _ensure_scan_access(scan_id, user_id, db)
+    return await finding_service.get_findings_for_scan(scan_id, db)
 
 
 @router.get("/{scan_id}/observations", response_model=List[BrowserObservationSchema])
@@ -127,15 +147,10 @@ async def get_scan_observations(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Retrieves all browser network observations recorded during a scan belonging to the authenticated user.
+    Retrieves all browser network observations recorded during a scan belonging to the authenticated user or organization.
     """
     user_id = claims.get("sub")
-    scan = await scan_service.get_scan_by_id(scan_id, db, user_id=user_id)
-    if not scan:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Scan with ID '{scan_id}' not found."
-        )
+    await _ensure_scan_access(scan_id, user_id, db)
     res = await db.execute(
         select(BrowserObservationModel)
         .where(BrowserObservationModel.scan_id == scan_id)
@@ -173,15 +188,10 @@ async def get_consent_comparison(
     Produces structured comparison of network connections observed across consent states.
     """
     user_id = claims.get("sub")
-    scan_res = await db.execute(
-        select(ScanJob).where(ScanJob.id == scan_id, ScanJob.user_id == user_id)
-    )
-    scan = scan_res.scalar_one_or_none()
-    if not scan:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Scan '{scan_id}' not found.")
+    scan = await _ensure_scan_access(scan_id, user_id, db)
 
     res = await db.execute(
         select(BrowserObservationModel).where(BrowserObservationModel.scan_id == scan_id)
     )
     models = list(res.scalars().all())
-    return observation_service.compare_consent_sessions(scan_id, scan.target_url, models)
+    return observation_service.compare_consent_sessions(scan_id, scan.targetUrl, models)

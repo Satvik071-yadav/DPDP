@@ -9,26 +9,48 @@ import {
   BrowserObservation,
   ConsentComparisonSummary,
   ScanStatusResponse,
-  NotificationItem
+  NotificationItem,
+  Organization,
+  OrganizationMember,
+  Website,
+  VerifyWebsiteResult,
+  PlanTier,
+  PlanRecommendation,
+  SubscriptionOverview
 } from '@/types';
+
 import { DEMO_SCANS, DEMO_FINDINGS, DEFAULT_USER_SETTINGS, DEMO_ACTIVITIES } from '@/data/mockData';
 import { 
   getApiBaseUrl, 
   getDefaultApiUrl,
   validateApiUrl, 
   setApiBaseUrl, 
+  isLocalFrontendServer,
   STORAGE_KEYS 
 } from '@/services/apiConfig';
 import { authService } from '@/services/authService';
 
 function initializeStorage() {
   if (typeof localStorage === 'undefined') return;
-  if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
+  const existing = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+  if (!existing) {
     const initialSettings: UserSettings = {
       ...DEFAULT_USER_SETTINGS,
       apiUrl: getDefaultApiUrl(),
     };
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(initialSettings));
+  } else {
+    try {
+      const parsed = JSON.parse(existing);
+      if (parsed && typeof parsed === 'object' && parsed.apiUrl) {
+        if (isLocalFrontendServer(parsed.apiUrl)) {
+          parsed.apiUrl = getDefaultApiUrl();
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(parsed));
+        }
+      }
+    } catch {
+      // ignore
+    }
   }
 }
 
@@ -54,6 +76,9 @@ export const api = {
       if (data) {
         const parsed = JSON.parse(data);
         if (parsed && typeof parsed === 'object') {
+          if (parsed.apiUrl && isLocalFrontendServer(parsed.apiUrl)) {
+            parsed.apiUrl = defaultSettings.apiUrl;
+          }
           localSettings = { ...defaultSettings, ...parsed };
         }
       }
@@ -619,5 +644,159 @@ export const api = {
         normalizedUrl: baseUrl,
       };
     }
+  },
+
+
+  // --- Organizations ---
+  async getOrganizations(): Promise<Organization[]> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations`, {
+      headers: buildHeaders(),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch organizations: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  async createOrganization(name: string): Promise<Organization> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations`, {
+      method: 'POST',
+      headers: buildHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ name }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to create organization');
+    }
+    return res.json();
+  },
+
+  async getOrganizationMembers(orgId: string): Promise<OrganizationMember[]> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations/${orgId}/members`, {
+      headers: buildHeaders(),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch members: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  async addOrganizationMember(orgId: string, email: string, role = 'auditor'): Promise<OrganizationMember> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations/${orgId}/members`, {
+      method: 'POST',
+      headers: buildHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ email, role }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to add member');
+    }
+    return res.json();
+  },
+
+  // --- Websites & Domain Verification ---
+  async getWebsites(orgId: string): Promise<Website[]> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations/${orgId}/websites`, {
+      headers: buildHeaders(),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch websites: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  async createWebsite(orgId: string, hostname: string, verificationMethod: 'dns_txt' | 'http_file' = 'dns_txt'): Promise<Website> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations/${orgId}/websites`, {
+      method: 'POST',
+      headers: buildHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ hostname, verificationMethod }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to add website');
+    }
+    return res.json();
+  },
+
+  async verifyWebsite(orgId: string, websiteId: string): Promise<VerifyWebsiteResult> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations/${orgId}/websites/${websiteId}/verify`, {
+      method: 'POST',
+      headers: buildHeaders(),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.detail || data.message || 'Verification attempt failed');
+    }
+    return data;
+  },
+
+  async regenerateWebsiteToken(orgId: string, websiteId: string): Promise<Website> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations/${orgId}/websites/${websiteId}/regenerate-token`, {
+      method: 'POST',
+      headers: buildHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to regenerate verification token');
+    }
+    return res.json();
+  },
+
+  async deleteWebsite(orgId: string, websiteId: string): Promise<void> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations/${orgId}/websites/${websiteId}`, {
+      method: 'DELETE',
+      headers: buildHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to delete website');
+    }
+  },
+
+  // --- Subscriptions & Plans ---
+  async getPlans(): Promise<PlanTier[]> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/plans`, {
+      headers: buildHeaders(),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch plans: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  async recommendPlan(answers: Record<string, string>): Promise<PlanRecommendation> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/plans/recommend`, {
+      method: 'POST',
+      headers: buildHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ answers }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to compute plan recommendation');
+    }
+    return res.json();
+  },
+
+  async getSubscription(orgId: string): Promise<SubscriptionOverview> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations/${orgId}/subscription`, {
+      headers: buildHeaders(),
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch subscription: ${res.statusText}`);
+    }
+    return res.json();
+  },
+
+  async changePlan(orgId: string, planId: 'starter' | 'growth' | 'business'): Promise<SubscriptionOverview> {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/organizations/${orgId}/subscription/change-plan`, {
+      method: 'POST',
+      headers: buildHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ planId }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to change subscription plan');
+    }
+    return res.json();
   },
 };

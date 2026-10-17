@@ -14,7 +14,9 @@ import {
   Lock,
   Sparkles,
   Zap,
-  Activity
+  Activity,
+  Globe,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +28,8 @@ interface SidebarProps {
 const navItems = [
   { name: 'Overview', path: '/', icon: LayoutDashboard, tooltip: 'Security & Compliance Overview' },
   { name: 'Scan Target', path: '/scan', icon: Radar, tooltip: 'Live Browser & Protocol Audit' },
+  { name: 'Domains', path: '/domains', icon: Globe, tooltip: 'Website & Ownership Verification' },
+  { name: 'Subscription', path: '/subscription', icon: CreditCard, tooltip: 'Plans & Audit Quotas' },
   { name: 'Findings', path: '/findings', icon: AlertTriangle, badge: '6', tooltip: 'Forensic Privacy Findings' },
   { name: 'Privacy Flow', path: '/privacy-flow', icon: Network, highlightText: 'Interactive', tooltip: 'Visual Data Flow & Consent Graph' },
   { name: 'Fix & Verify', path: '/fix-verify', icon: Wrench, highlightText: 'Workbench', tooltip: 'Patch & Live Verification Sandbox' },
@@ -33,6 +37,7 @@ const navItems = [
   { name: 'Scan History', path: '/history', icon: History, tooltip: 'Compliance Audit Logs & Reports' },
   { name: 'Settings', path: '/settings', icon: Settings, tooltip: 'DPO Profile & API Settings' },
 ];
+
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);

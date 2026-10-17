@@ -28,8 +28,8 @@ export function normalizeApiUrl(rawUrl: string): string {
   let url = rawUrl.trim();
   // Strip trailing slashes
   url = url.replace(/\/+$/, '');
-  // Strip trailing /api/v1 if included by user in base URL
-  url = url.replace(/\/api\/v1\/?$/i, '');
+  // Strip redundant trailing /api/v1 or /api if included by user in base URL
+  url = url.replace(/\/api(?:\/v1)?\/?$/i, '');
   // Strip any remaining trailing slashes
   url = url.replace(/\/+$/, '');
   return url;
@@ -110,6 +110,68 @@ export function validateApiUrl(rawUrl: string): UrlValidationResult {
 }
 
 /**
+ * Identifies loopback and local development hostnames.
+ */
+export function isLocalHostname(hostname: string): boolean {
+  if (!hostname || typeof hostname !== 'string') return false;
+  const h = hostname.trim().toLowerCase();
+  return (
+    h === 'localhost' ||
+    h === '127.0.0.1' ||
+    h === '0.0.0.0' ||
+    h === '::1' ||
+    h === '[::1]' ||
+    h.endsWith('.localhost') ||
+    h.endsWith('.local')
+  );
+}
+
+/**
+ * Identifies standard frontend development and preview ports (Vite dev: 5173, preview: 4173, CRA: 3000, etc.)
+ */
+export function isFrontendDevOrPreviewPort(port: string | number): boolean {
+  const p = String(port).trim();
+  return p === '4173' || p === '5173' || p === '3000' || p === '5174' || p === '4174' || p === '3001';
+}
+
+/**
+ * Checks whether a URL or window.location represents a local frontend dev or preview server
+ * (which serves static HTML/assets, NOT the FastAPI backend).
+ */
+export function isLocalFrontendServer(
+  urlOrLocation?: string | Location | { hostname?: string; port?: string; origin?: string }
+): boolean {
+  if (!urlOrLocation) return false;
+  try {
+    let hostname = '';
+    let port = '';
+
+    if (typeof urlOrLocation === 'string') {
+      const parsed = new URL(urlOrLocation.trim());
+      hostname = parsed.hostname;
+      port = parsed.port;
+    } else {
+      hostname = urlOrLocation.hostname || '';
+      port = urlOrLocation.port || '';
+    }
+
+    if (!isLocalHostname(hostname)) {
+      return false;
+    }
+
+    // Port 8000 is the standard FastAPI backend port
+    if (port === '8000') {
+      return false;
+    }
+
+    // On local hostname, any dev/preview port or any non-8000 port is a frontend server
+    return isFrontendDevOrPreviewPort(port) || (Boolean(port) && port !== '8000');
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Gets the default API URL from Vite environment (VITE_API_BASE_URL) or localhost:8000 fallback
  */
 export function getDefaultApiUrl(): string {
@@ -137,11 +199,11 @@ export function getDefaultApiUrl(): string {
   }
 
   // In production browser environments when served from the same host,
-  // window.location.origin automatically provides the backend origin without hardcoded hostnames
+  // window.location.origin automatically provides the backend origin without hardcoded hostnames.
+  // We strictly exclude local frontend development (5173, 3000) and production preview (4173) servers.
   if (typeof window !== 'undefined' && window.location && window.location.origin) {
     if (window.location.origin.startsWith('http://') || window.location.origin.startsWith('https://')) {
-      const isLocalViteDev = window.location.port === '5173' || window.location.port === '3000';
-      if (!isLocalViteDev) {
+      if (!isLocalFrontendServer(window.location)) {
         return normalizeApiUrl(window.location.origin);
       }
     }
@@ -158,7 +220,7 @@ let runtimeApiUrlOverride: string | null = null;
  * Resolves the active API Base URL.
  * Priority order:
  * 1. Runtime in-memory override (e.g. updated in current session via Settings save)
- * 2. Saved settings URL from localStorage ('dpdp_settings_v1') if valid
+ * 2. Saved settings URL from localStorage ('dpdp_settings_v1') if valid and not stale
  * 3. Vite environment variable (VITE_API_BASE_URL)
  * 4. Fallback default ('http://127.0.0.1:8000')
  */
@@ -172,8 +234,7 @@ export function getApiBaseUrl(): string {
     typeof window !== 'undefined' && 
     Boolean(window.location) && 
     window.location.protocol === 'https:' &&
-    window.location.hostname !== 'localhost' &&
-    window.location.hostname !== '127.0.0.1';
+    !isLocalHostname(window.location.hostname);
 
   if (typeof localStorage !== 'undefined') {
     try {
@@ -193,6 +254,13 @@ export function getApiBaseUrl(): string {
               const defaultOrigin = getDefaultApiUrl();
               runtimeApiUrlOverride = defaultOrigin;
               return defaultOrigin;
+            }
+
+            // In local development or local production-preview, ignore stale URLs pointing
+            // to local frontend development/preview servers (such as 4173, 5173, 3000)
+            if (isLocalFrontendServer(val.normalizedUrl)) {
+              const defaultUrl = getDefaultApiUrl();
+              return defaultUrl;
             }
 
             runtimeApiUrlOverride = val.normalizedUrl;

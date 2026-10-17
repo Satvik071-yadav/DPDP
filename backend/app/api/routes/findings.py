@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,13 +26,18 @@ def get_utc_now():
 
 @router.get("", response_model=List[FindingSchema])
 async def list_findings(
+    organization_id: Optional[str] = Query(None, alias="organizationId"),
     claims: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
-    List all detected findings scoped to the authenticated user.
+    List all detected findings scoped to the authenticated user and their organizations.
     """
     user_id = claims.get("sub")
+    if organization_id:
+        from app.services.organization_service import OrganizationService
+        await OrganizationService.require_membership(organization_id, user_id, db)
+        return await finding_service.list_findings(db, organization_id=organization_id)
     return await finding_service.list_findings(db, user_id=user_id)
 
 

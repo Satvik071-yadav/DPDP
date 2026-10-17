@@ -75,6 +75,10 @@ async def register(payload: UserRegisterRequest, db: AsyncSession = Depends(get_
     await db.commit()
     await db.refresh(new_user)
 
+    # Eagerly provision primary organization, membership, and starter subscription
+    from app.services.organization_service import OrganizationService
+    await OrganizationService.get_or_create_primary_organization(new_user.id, db)
+
     token_data = {
         "sub": new_user.id,
         "username": new_user.username,

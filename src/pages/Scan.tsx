@@ -23,12 +23,14 @@ import {
   XCircle,
   Copy,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Building2
 } from 'lucide-react';
-import { ScanProfile, ScanStage, ScanResult, Finding } from '@/types';
+import { ScanProfile, ScanStage, ScanResult, Finding, Website } from '@/types';
 import { DEMO_PRESET_TARGETS } from '@/data/mockData';
 import { scanService, validateScanTarget, AUTHORIZED_DEMO_DOMAINS } from '@/services/scanService';
 import { api } from '@/services/api';
+import { authService } from '@/services/authService';
 import { formatDate } from '@/lib/utils';
 
 interface StageConfig {
@@ -51,12 +53,20 @@ export const Scan: React.FC = () => {
   const isMounted = useRef(true);
   const terminalEndRef = useRef<HTMLDivElement>(null);
 
-  const [targetUrl, setTargetUrl] = useState(searchParams.get('target') || 'https://paysecure-india.in');
+  const domainParam = searchParams.get('domain');
+  const targetParam = searchParams.get('target');
+  const initialTarget = domainParam
+    ? (domainParam.startsWith('http') ? domainParam : `https://${domainParam}`)
+    : (targetParam || 'https://paysecure-india.in');
+
+  const [targetUrl, setTargetUrl] = useState(initialTarget);
+  const [verifiedWebsites, setVerifiedWebsites] = useState<Website[]>([]);
   const [profile, setProfile] = useState<ScanProfile>(
     (searchParams.get('profile') as ScanProfile) || 'privacy_audit'
   );
   const [consentTesting, setConsentTesting] = useState(true);
   const [authorizedConsent, setAuthorizedConsent] = useState(true);
+
 
   // Scan execution state
   const [activeScanId, setActiveScanId] = useState<string | null>(null);
@@ -72,6 +82,21 @@ export const Scan: React.FC = () => {
 
   useEffect(() => {
     isMounted.current = true;
+    if (authService.isAuthenticated()) {
+      api.getOrganizations()
+        .then(orgs => {
+          if (orgs.length > 0) {
+            return api.getWebsites(orgs[0].id);
+          }
+          return [];
+        })
+        .then(sites => {
+          if (isMounted.current) {
+            setVerifiedWebsites(sites);
+          }
+        })
+        .catch(() => {});
+    }
     return () => {
       isMounted.current = false;
     };
@@ -145,12 +170,16 @@ export const Scan: React.FC = () => {
       return;
     }
 
-    // 2. Validate URL and demo boundary
-    const validation = validateScanTarget(targetUrl);
+    // 2. Validate URL against demo boundaries and verified organization domains
+    const verifiedHostnames = verifiedWebsites
+      .filter((w) => w.verificationStatus === 'verified')
+      .map((w) => w.hostname);
+    const validation = validateScanTarget(targetUrl, verifiedHostnames);
     if (!validation.valid) {
       setValidationError(validation.error || 'Invalid target domain.');
       return;
     }
+
 
     const resolvedTarget = validation.normalizedUrl || targetUrl;
     setValidationError('');
@@ -345,11 +374,60 @@ export const Scan: React.FC = () => {
               </div>
             </div>
 
+            {/* Organization Verified Domains */}
+            {verifiedWebsites.filter((w) => w.verificationStatus === 'verified').length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-teal-400 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Your Verified Domains
+                  </label>
+                  <Link to="/domains" className="text-[10px] text-slate-400 hover:text-teal-300 underline">
+                    Manage Domains
+                  </Link>
+                </div>
+                <div className="space-y-2">
+                  {verifiedWebsites
+                    .filter((w) => w.verificationStatus === 'verified')
+                    .map((w) => {
+                      const fullUrl = `https://${w.hostname}`;
+                      const isSelected = targetUrl === fullUrl || targetUrl === w.hostname;
+                      return (
+                        <button
+                          key={w.id}
+                          type="button"
+                          disabled={isScanning}
+                          onClick={() => {
+                            setTargetUrl(fullUrl);
+                            setValidationError('');
+                          }}
+                          className={`w-full text-left p-3 rounded-xl border text-xs transition-all ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-teal-950/40 to-obsidian-950/60 border-teal-400/50 text-teal-200 shadow-teal-500/10'
+                              : 'bg-obsidian-950/50 border-white/[0.06] text-slate-300 hover:bg-obsidian-850 hover:border-teal-500/30 hover:text-white'
+                          }`}
+                        >
+                          <div className="font-bold flex items-center justify-between">
+                            <span className="font-mono text-xs tracking-wide flex items-center gap-1.5">
+                              <Globe className="w-3.5 h-3.5 text-teal-400" />
+                              {w.hostname}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                              Verified
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
             {/* Authorized Demo Targets */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-semibold text-slate-400">
-                  Authorized Demo Targets
+                  Authorized Demo Sandboxes
                 </label>
                 <span className="text-[10px] text-slate-500 font-mono">3 Presets</span>
               </div>
@@ -453,11 +531,25 @@ export const Scan: React.FC = () => {
 
             {/* Error Message Display */}
             {validationError && (
-              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400 mt-0.5" />
-                <span className="leading-relaxed">{validationError}</span>
+              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs space-y-2">
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400 mt-0.5" />
+                  <span className="leading-relaxed">{validationError}</span>
+                </div>
+                {validationError.includes('Domain Management') && (
+                  <div className="pl-6.5 pt-1">
+                    <Link
+                      to="/domains"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-400 hover:text-teal-300 underline"
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      Go to Domain Management to Verify Ownership
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
+
 
             {/* Action Buttons */}
             <div className="pt-2">

@@ -153,3 +153,13 @@ async def init_db():
         from app.db.cleanup_copilot import sanitize_historical_copilot_interactions
         await sanitize_historical_copilot_interactions(session)
 
+        # Recover any abandoned in-flight scans from prior process termination
+        abandoned_res = await session.execute(
+            select(ScanJob).where(ScanJob.status.in_(["queued", "running"]))
+        )
+        for abandoned in abandoned_res.scalars().all():
+            abandoned.status = "failed"
+            abandoned.progress_stage = "failed"
+            abandoned.error_message = "Scan interrupted by server restart."
+            abandoned.log_message = "Scan execution terminated due to server restart."
+        await session.commit()

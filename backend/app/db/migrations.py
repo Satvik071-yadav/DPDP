@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 logger = logging.getLogger("dpdp_guard.db.migrations")
 
-CURRENT_SCHEMA_VERSION = 4
+CURRENT_SCHEMA_VERSION = 6
 
 
 async def run_migrations(engine: AsyncEngine) -> int:
@@ -198,6 +198,154 @@ async def run_migrations(engine: AsyncEngine) -> int:
                 VALUES (4, 'Add user_id column across resources for strict multi-tenant isolation')
             """))
             current_v = 4
+
+        # Migration v5: Organization accounts, websites, domain ownership verification, subscriptions, quotas
+        if current_v < 5:
+            logger.info("Applying Migration v5: Organization-level tenancy, websites, domain verification, subscriptions...")
+
+            # 1. Organizations table
+            await conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS organizations (
+                    id VARCHAR PRIMARY KEY,
+                    name VARCHAR NOT NULL,
+                    slug VARCHAR UNIQUE NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_organizations_slug ON organizations (slug)"))
+
+            # 2. Organization members table
+            await conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS organization_members (
+                    id VARCHAR PRIMARY KEY,
+                    organization_id VARCHAR NOT NULL,
+                    user_id VARCHAR NOT NULL,
+                    role VARCHAR NOT NULL DEFAULT 'auditor',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_org_members_org_id ON organization_members (organization_id)"))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_org_members_user_id ON organization_members (user_id)"))
+            await conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_org_members_org_user ON organization_members (organization_id, user_id)"))
+
+            # 3. Websites table
+            await conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS websites (
+                    id VARCHAR PRIMARY KEY,
+                    organization_id VARCHAR NOT NULL,
+                    hostname VARCHAR NOT NULL,
+                    verification_status VARCHAR NOT NULL DEFAULT 'pending',
+                    verification_method VARCHAR NOT NULL DEFAULT 'dns_txt',
+                    verification_token_hash VARCHAR NOT NULL,
+                    verification_token_expiry TIMESTAMP NOT NULL,
+                    verification_attempts INTEGER DEFAULT 0,
+                    last_verification_attempt TIMESTAMP,
+                    verified_at TIMESTAMP,
+                    last_scanned_at TIMESTAMP,
+                    is_active BOOLEAN DEFAULT TRUE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_websites_org_id ON websites (organization_id)"))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_websites_hostname ON websites (hostname)"))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_websites_status ON websites (verification_status)"))
+            await conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_websites_org_hostname ON websites (organization_id, hostname)"))
+
+            # 4. Subscriptions table
+            await conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS subscriptions (
+                    id VARCHAR PRIMARY KEY,
+                    organization_id VARCHAR UNIQUE NOT NULL,
+                    plan_id VARCHAR NOT NULL DEFAULT 'starter',
+                    status VARCHAR NOT NULL DEFAULT 'active',
+                    billing_period_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    billing_period_end TIMESTAMP NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_subscriptions_org_id ON subscriptions (organization_id)"))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_subscriptions_status ON subscriptions (status)"))
+
+            # 5. Scan Usage table
+            await conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS scan_usage (
+                    id VARCHAR PRIMARY KEY,
+                    organization_id VARCHAR NOT NULL,
+                    billing_period_start TIMESTAMP NOT NULL,
+                    billing_period_end TIMESTAMP NOT NULL,
+                    scans_used INTEGER DEFAULT 0 NOT NULL,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_scan_usage_org_id ON scan_usage (organization_id)"))
+            await conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_scan_usage_org_period ON scan_usage (organization_id, billing_period_start)"))
+
+            # 6. Add organization_id and website_id to scan_jobs
+            scan_cols = await get_existing_columns("scan_jobs")
+            if "organization_id" not in scan_cols:
+                await conn.execute(text("ALTER TABLE scan_jobs ADD COLUMN organization_id VARCHAR"))
+            if "website_id" not in scan_cols:
+                await conn.execute(text("ALTER TABLE scan_jobs ADD COLUMN website_id VARCHAR"))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_scan_jobs_org_id ON scan_jobs (organization_id)"))
+            await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_scan_jobs_website_id ON scan_jobs (website_id)"))
+
+            # 7. Safe backward-compatible seed & backfill for default organization
+            org_check = await conn.execute(text("SELECT id FROM organizations WHERE id = 'org_default' LIMIT 1"))
+            if not org_check.fetchone():
+                await conn.execute(text("""
+                    INSERT INTO organizations (id, name, slug)
+                    VALUES ('org_default', 'Bharat Privacy Enterprise', 'bharat-privacy-enterprise')
+                """))
+
+                # Link all existing users to default organization if they have no memberships
+                users_res = await conn.execute(text("SELECT id, role FROM users"))
+                for u_row in users_res.fetchall():
+                    u_id, u_role = u_row[0], u_row[1]
+                    mem_role = "owner" if u_role in ("dpo", "admin") else "auditor"
+                    mem_id = f"mem_default_{u_id}"
+                    await conn.execute(text("""
+                        INSERT INTO organization_members (id, organization_id, user_id, role)
+                        VALUES (:id, 'org_default', :uid, :role)
+                    """), {"id": mem_id, "uid": u_id, "role": mem_role})
+
+                # Create default growth subscription for existing organization
+                import datetime
+                now_dt = datetime.datetime.now(datetime.timezone.utc)
+                next_year = now_dt + datetime.timedelta(days=365)
+                await conn.execute(text("""
+                    INSERT INTO subscriptions (id, organization_id, plan_id, status, billing_period_start, billing_period_end)
+                    VALUES ('sub_default', 'org_default', 'growth', 'active', :start, :end)
+                """), {"start": now_dt, "end": next_year})
+
+                # Create baseline scan usage
+                await conn.execute(text("""
+                    INSERT INTO scan_usage (id, organization_id, billing_period_start, billing_period_end, scans_used)
+                    VALUES ('usg_default', 'org_default', :start, :end, 0)
+                """), {"start": now_dt, "end": next_year})
+
+            # Backfill existing scan_jobs to default organization
+            await conn.execute(text("UPDATE scan_jobs SET organization_id = 'org_default' WHERE organization_id IS NULL"))
+
+            await conn.execute(text("""
+                INSERT INTO schema_version (version, description)
+                VALUES (5, 'Add organization-level tenancy, websites, domain verification, subscriptions, and scan quotas')
+            """))
+            current_v = 5
+
+        # Migration v6: Add quota_reserved column to scan_jobs
+        if current_v < 6:
+            logger.info("Applying Migration v6: Add quota_reserved flag to scan_jobs...")
+            scan_cols = await get_existing_columns("scan_jobs")
+            if "quota_reserved" not in scan_cols:
+                await conn.execute(text("ALTER TABLE scan_jobs ADD COLUMN quota_reserved BOOLEAN DEFAULT FALSE"))
+            await conn.execute(text("""
+                INSERT INTO schema_version (version, description)
+                VALUES (6, 'Add quota_reserved column to scan_jobs for atomic quota lifecycle')
+            """))
+            current_v = 6
 
         logger.info(f"Database schema migrations successfully verified at version {current_v}.")
         return current_v

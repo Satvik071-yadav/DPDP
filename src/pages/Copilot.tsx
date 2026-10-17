@@ -22,10 +22,15 @@ import {
   Wrench, 
   ExternalLink,
   ShieldAlert,
-  Server
+  Server,
+  Lock,
+  LogIn,
+  UserPlus
 } from 'lucide-react';
 import { api } from '@/services/api';
 import { copilotService } from '@/services/copilotService';
+import { authService } from '@/services/authService';
+import { LoginModal } from '@/components/auth/LoginModal';
 import { Finding, Severity } from '@/types';
 import { CopilotMessage, CopilotMode, CopilotStructuredResponse } from '@/types/copilot';
 import { formatSeverity } from '@/lib/utils';
@@ -41,6 +46,15 @@ const SUGGESTED_QUESTIONS = [
 
 export const Copilot: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Authentication & Session State
+  const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginModalMode, setLoginModalMode] = useState<'login' | 'register'>('login');
+
+  // Page Loading & Error State
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [pageError, setPageError] = useState<string | null>(null);
 
   const [findings, setFindings] = useState<Finding[]>([]);
   const [selectedFindingId, setSelectedFindingId] = useState<string>(
@@ -61,9 +75,18 @@ export const Copilot: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load findings
-  useEffect(() => {
-    async function load() {
+  // Load findings with guaranteed cleanup and error capture
+  const loadFindings = async () => {
+    if (!authService.isAuthenticated()) {
+      setFindings([]);
+      setIsPageLoading(false);
+      setPageError(null);
+      return;
+    }
+
+    setIsPageLoading(true);
+    setPageError(null);
+    try {
       const list = await api.getFindings();
       setFindings(list);
 
@@ -74,8 +97,30 @@ export const Copilot: React.FC = () => {
         const bola = list.find((f) => f.id === 'DPDP-HIGH-007');
         setSelectedFindingId(bola ? bola.id : list[0].id);
       }
+    } catch (err: any) {
+      setPageError(err?.message || 'Failed to load security findings for Copilot analysis.');
+    } finally {
+      setIsPageLoading(false);
     }
-    load();
+  };
+
+  // Sync auth state changes across the application
+  useEffect(() => {
+    const unsubscribe = authService.onAuthStateChange((user) => {
+      setCurrentUser(user);
+      if (user) {
+        loadFindings();
+      } else {
+        setFindings([]);
+        setIsPageLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Reload findings when searchParams change or on initial mount
+  useEffect(() => {
+    loadFindings();
   }, [searchParams]);
 
   const activeFinding = findings.find((f) => f.id === selectedFindingId) || findings[0];
@@ -171,10 +216,136 @@ export const Copilot: React.FC = () => {
     }
   };
 
-  if (!activeFinding) {
+  // 1. Unauthenticated Gateway State
+  if (!currentUser) {
     return (
-      <div className="py-24 text-center text-slate-400">
-        Loading Copilot workspace...
+      <div className="space-y-6 max-w-4xl mx-auto py-12 px-4">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-obsidian-850 via-obsidian-900 to-obsidian-950 border border-white/10 p-8 sm:p-12 shadow-2xl text-center">
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-violet-600/10 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 -mb-24 w-80 h-80 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-xl mx-auto space-y-6">
+            <div className="w-14 h-14 rounded-2xl bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center mx-auto shadow-violet-glow">
+              <Lock className="w-7 h-7" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-mono font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                <span>AI INVESTIGATION COPILOT • TENANT RESTRICTED</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-sans">
+                Sign In to Access Copilot Workspace
+              </h2>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Forensic telemetry, code remediation strategies, and AI-assisted investigation contexts are strictly isolated per tenant. Sign in to analyze your organization's security findings.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => { setLoginModalMode('login'); setShowLoginModal(true); }}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-cyan-500 hover:from-violet-400 hover:to-cyan-400 text-white font-bold text-sm shadow-violet-glow transition-all active:scale-95 flex items-center justify-center gap-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Sign In to Compliance Console</span>
+              </button>
+              <button
+                onClick={() => { setLoginModalMode('register'); setShowLoginModal(true); }}
+                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-obsidian-800 hover:bg-obsidian-750 border border-white/10 text-slate-200 font-semibold text-sm transition-all flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-4 h-4 text-violet-400" />
+                <span>Register Account</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onLoginSuccess={(user) => {
+            setCurrentUser(user);
+            setShowLoginModal(false);
+            loadFindings();
+          }}
+          initialMode={loginModalMode}
+        />
+      </div>
+    );
+  }
+
+  // 2. Active Page Loading State
+  if (isPageLoading) {
+    return (
+      <div className="py-24 text-center space-y-4">
+        <div className="w-12 h-12 rounded-2xl bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center mx-auto animate-pulse shadow-violet-glow">
+          <Sparkles className="w-6 h-6 animate-spin" style={{ animationDuration: '3s' }} />
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-white font-sans">Loading Copilot Workspace...</p>
+          <p className="text-xs text-slate-500 font-mono">Retrieving security findings and forensic telemetry from DPDP-Guard backend</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Page Error State with Retry
+  if (pageError) {
+    return (
+      <div className="max-w-2xl mx-auto py-16 px-4 space-y-4">
+        <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 space-y-4 shadow-obsidian-card">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-6 h-6 text-rose-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1 flex-1">
+              <h3 className="text-sm font-bold text-white font-sans">Unable to Load Copilot Workspace</h3>
+              <p className="text-xs text-rose-200 leading-relaxed font-mono">{pageError}</p>
+            </div>
+          </div>
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={loadFindings}
+              className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-100 font-semibold text-xs transition-colors flex items-center gap-2"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Retry Loading</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. Empty Findings State
+  if (findings.length === 0 || !activeFinding) {
+    return (
+      <div className="max-w-2xl mx-auto py-16 px-4 text-center space-y-5">
+        <div className="w-14 h-14 rounded-2xl bg-obsidian-850 border border-white/10 text-slate-400 flex items-center justify-center mx-auto shadow-obsidian-card">
+          <ShieldAlert className="w-7 h-7 text-slate-500" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold text-white font-sans">No Security Findings Detected</h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+            Your organization has zero active findings or recorded privacy violations. Run an automated compliance scan to detect issues and unlock evidence-grounded AI investigations.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <Link
+            to="/scan"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 text-white font-bold text-xs shadow-violet-glow transition-all flex items-center gap-2"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Launch Privacy Audit Scan</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <button
+            onClick={loadFindings}
+            className="px-4 py-2.5 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-slate-300 font-semibold text-xs transition-colors flex items-center gap-1.5"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -597,6 +768,17 @@ export const Copilot: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          setShowLoginModal(false);
+          loadFindings();
+        }}
+        initialMode={loginModalMode}
+      />
     </div>
   );
 };

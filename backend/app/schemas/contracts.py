@@ -69,6 +69,8 @@ class CreateScanRequest(BaseModel):
     profile: str = "privacy_audit"
     consentModeEnabled: bool = True
     asyncMode: Optional[bool] = False
+    organizationId: Optional[str] = None
+    websiteId: Optional[str] = None
 
 
 class ScanResultSchema(BaseModel):
@@ -90,6 +92,9 @@ class ScanResultSchema(BaseModel):
     progressStage: Optional[str] = "completed"
     progressPercent: Optional[int] = 100
     logMessage: Optional[str] = None
+    organizationId: Optional[str] = None
+    websiteId: Optional[str] = None
+    userId: Optional[str] = None
 
 
 class ScanStatusResponseSchema(BaseModel):
@@ -269,4 +274,177 @@ class NotificationItemSchema(BaseModel):
     severity: str  # critical, high, medium, low, info, success
     link: Optional[str] = None
     isSynthetic: bool = False
+
+
+# --- Organization & Multi-Tenancy Schemas ---
+class CreateOrganizationRequest(BaseModel):
+    name: str
+
+
+class OrganizationResponseSchema(BaseModel):
+    id: str
+    name: str
+    slug: str
+    role: str
+    planId: str
+    planName: str
+    subscriptionStatus: str
+    websiteCount: int = 0
+    memberCount: int = 0
+    createdAt: str
+
+
+class OrganizationMemberResponseSchema(BaseModel):
+    id: str
+    userId: str
+    username: str
+    email: str
+    fullName: str
+    role: str
+    joinedAt: str
+
+
+class AddMemberRequest(BaseModel):
+    email: str
+    role: str = "auditor"
+
+
+# --- Website & Domain Management Schemas ---
+class AddWebsiteRequest(BaseModel):
+    url: Optional[str] = None
+    hostname: Optional[str] = None
+    verificationMethod: str = "dns_txt"
+
+    @property
+    def target_url(self) -> str:
+        return self.hostname or self.url or ""
+
+
+
+class WebsiteResponseSchema(BaseModel):
+    id: str
+    organizationId: str
+    hostname: str
+    verificationStatus: str
+    verificationMethod: str
+    verificationToken: Optional[str] = None
+    dnsRecordName: Optional[str] = None
+    dnsRecordType: Optional[str] = "TXT"
+    dnsTxtHost: Optional[str] = None
+    dnsTxtExpectedValue: Optional[str] = None
+    httpPath: Optional[str] = None
+    httpFilePath: Optional[str] = None
+    httpExpectedContent: Optional[str] = None
+    verificationTokenExpiry: Optional[str] = None
+    tokenExpiresAt: Optional[str] = None
+    verificationAttempts: int = 0
+    verifiedAt: Optional[str] = None
+    lastScannedAt: Optional[str] = None
+    isActive: bool = True
+    createdAt: str
+
+
+class VerifyWebsiteRequest(BaseModel):
+    method: Optional[str] = None
+
+
+class VerifyWebsiteResponse(BaseModel):
+    success: bool
+    verified: bool
+    verificationStatus: str
+    message: str
+    website: WebsiteResponseSchema
+    verifiedAt: Optional[str] = None
+    diagnostic: Optional[str] = None
+
+
+class RegenerateTokenResponse(BaseModel):
+    website: WebsiteResponseSchema
+    token: str
+
+
+# --- Subscription & Plan Schemas ---
+class PlanDefinitionSchema(BaseModel):
+    id: str
+    name: str
+    description: str
+    tagline: str = ""
+    priceInrMonthly: int
+    priceInrMonth: int
+    priceInrAnnual: int = 0
+    priceInrAnnualMonthlyEquivalent: int = 0
+    maxWebsites: int
+    scansPerMonth: int
+    maxMembers: int
+    dataRetentionDays: int = 30
+    features: List[str]
+    isPopular: bool = False
+
+
+class LimitsSchema(BaseModel):
+    maxWebsites: int
+    scansPerMonth: int
+    maxMembers: int
+
+
+class UsageSchema(BaseModel):
+    totalWebsites: int
+    verifiedWebsites: int
+    websiteQuotaUsedPercent: int
+    scansUsed: int
+    scansRemaining: int
+    scanQuotaUsedPercent: int
+    memberCount: int
+    memberQuotaUsedPercent: int
+
+
+class SubscriptionOverviewResponse(BaseModel):
+    organizationId: str
+    planId: str
+    planName: str
+    description: str
+    priceInrMonthly: int
+    status: str
+    billingPeriodStart: str
+    billingPeriodEnd: str
+    limits: LimitsSchema
+    usage: UsageSchema
+    features: List[str]
+    plan: Optional[PlanDefinitionSchema] = None
+    websitesCount: Optional[int] = None
+    websitesLimit: Optional[int] = None
+    scansUsed: Optional[int] = None
+    scansLimit: Optional[int] = None
+    scansRemaining: Optional[int] = None
+    membersCount: Optional[int] = None
+    membersLimit: Optional[int] = None
+    dataRetentionDays: Optional[int] = None
+
+
+
+class ChangePlanRequest(BaseModel):
+    planId: str
+
+
+class PlanRecommendationRequest(BaseModel):
+    websiteType: Optional[str] = "saas"
+    domainCount: Optional[int] = 1
+    scanFrequency: Optional[str] = "monthly"
+    teamMembers: Optional[int] = 1
+    hasTrackers: Optional[bool] = False
+    hasPayments: Optional[bool] = False
+    hasLogin: Optional[bool] = False
+    answers: Optional[Dict[str, Any]] = None
+
+
+class PlanRecommendationResponse(BaseModel):
+    recommendedPlanId: str
+    recommendedPlan: str
+    recommendedPlanName: str
+    plan: Optional[PlanDefinitionSchema] = None
+    reasoning: List[str]
+    summary: str
+    decisionFactors: List[str]
+    suggestedAlternativeId: Optional[str] = None
+    answersGiven: Optional[Dict[str, Any]] = None
 

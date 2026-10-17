@@ -19,7 +19,7 @@ export interface ScanValidationResult {
   isDemoAllowed: boolean;
 }
 
-export function validateScanTarget(rawUrl: string): ScanValidationResult {
+export function validateScanTarget(rawUrl: string, verifiedDomains: string[] = []): ScanValidationResult {
   if (!rawUrl || !rawUrl.trim()) {
     return {
       valid: false,
@@ -43,25 +43,30 @@ export function validateScanTarget(rawUrl: string): ScanValidationResult {
   }
 
   const hostname = parsed.hostname.toLowerCase();
-  const isAuthorized = AUTHORIZED_DEMO_DOMAINS.some(
+  const isDemoAuthorized = AUTHORIZED_DEMO_DOMAINS.some(
     (d) => hostname === d || hostname.endsWith(`.${d}`) || hostname.endsWith('.local')
   );
+  const isVerifiedDomain = verifiedDomains.some(
+    (d) => hostname === d.toLowerCase() || hostname.endsWith(`.${d.toLowerCase()}`)
+  );
 
-  if (!isAuthorized) {
+  if (!isDemoAuthorized && !isVerifiedDomain) {
     return {
       valid: false,
       normalizedUrl: parsed.origin,
-      error: `Demo Environment Policy: Real external domain testing is restricted to protect external web services. Please select an authorized demo target (PaySecure India, Apollo Telemed, Retail Bharat, or localhost), or connect a live backend engine in Settings.`,
+      error: `Demo Environment Policy: Domain '${hostname}' is not in authorized demo scope and is not verified under your organization. In compliance with DPDP audit safeguards, please register and verify domain ownership in Domain Management before running compliance audits.`,
       isDemoAllowed: false,
     };
   }
 
+
   return {
     valid: true,
     normalizedUrl: parsed.origin + (parsed.pathname !== '/' ? parsed.pathname : ''),
-    isDemoAllowed: true,
+    isDemoAllowed: isDemoAuthorized,
   };
 }
+
 
 export const scanService = {
   /**

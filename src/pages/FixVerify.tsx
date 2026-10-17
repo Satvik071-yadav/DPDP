@@ -28,18 +28,32 @@ import {
   RefreshCw,
   Eye,
   SlidersHorizontal,
-  KeyRound
+  KeyRound,
+  Sparkles,
+  LogIn,
+  UserPlus
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { toast } from 'sonner';
 import { api } from '@/services/api';
 import { remediationService } from '@/services/remediationService';
+import { authService } from '@/services/authService';
+import { LoginModal } from '@/components/auth/LoginModal';
 import { Finding, Severity, FindingStatus, VerificationProbeResult, AuditHistoryRecord } from '@/types';
 import { formatSeverity, formatDate } from '@/lib/utils';
 import { SYNTHETIC_ACCOUNT_A, SYNTHETIC_ACCOUNT_B } from '@/data/authTestFixture';
 
 export const FixVerify: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Authentication & Session State
+  const [currentUser, setCurrentUser] = useState(authService.getCurrentUser());
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginModalMode, setLoginModalMode] = useState<'login' | 'register'>('login');
+
+  // Page Loading & Error Lifecycle State
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [pageError, setPageError] = useState<string | null>(null);
 
   const [findings, setFindings] = useState<Finding[]>([]);
   const [selectedFindingId, setSelectedFindingId] = useState<string>(
@@ -86,28 +100,57 @@ export const FixVerify: React.FC = () => {
     }
   };
 
-  // Load findings and audit history
-  useEffect(() => {
-    async function load() {
-      try {
-        const list = await api.getFindings();
-        setFindings(list);
+  // Load findings and audit history with guaranteed lifecycle cleanup
+  const loadAll = async () => {
+    if (!authService.isAuthenticated()) {
+      setFindings([]);
+      setAuditHistory([]);
+      setIsPageLoading(false);
+      setPageError(null);
+      return;
+    }
 
-        const urlId = searchParams.get('findingId');
-        if (urlId && list.some((f) => f.id === urlId)) {
-          setSelectedFindingId(urlId);
-        } else if (list.length > 0 && !list.some((f) => f.id === selectedFindingId)) {
-          // prefer BOLA finding DPDP-HIGH-007 if present, else first finding
-          const bola = list.find((f) => f.id === 'DPDP-HIGH-007');
-          setSelectedFindingId(bola ? bola.id : list[0].id);
-        }
-      } catch (err) {
-        console.error('Failed to load findings:', err);
+    setIsPageLoading(true);
+    setPageError(null);
+    try {
+      const list = await api.getFindings();
+      setFindings(list);
+
+      const urlId = searchParams.get('findingId');
+      if (urlId && list.some((f) => f.id === urlId)) {
+        setSelectedFindingId(urlId);
+      } else if (list.length > 0 && !list.some((f) => f.id === selectedFindingId)) {
+        // prefer BOLA finding DPDP-HIGH-007 if present, else first finding
+        const bola = list.find((f) => f.id === 'DPDP-HIGH-007');
+        setSelectedFindingId(bola ? bola.id : list[0].id);
       }
 
       await loadAuditHistory();
+    } catch (err: any) {
+      setPageError(err?.message || 'Failed to load Fix & Verify workspace data.');
+    } finally {
+      setIsPageLoading(false);
     }
-    load();
+  };
+
+  // Sync auth state changes across the application
+  useEffect(() => {
+    const unsubscribe = authService.onAuthStateChange((user) => {
+      setCurrentUser(user);
+      if (user) {
+        loadAll();
+      } else {
+        setFindings([]);
+        setAuditHistory([]);
+        setIsPageLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Reload findings and audit history when searchParams change or on initial mount
+  useEffect(() => {
+    loadAll();
   }, [searchParams]);
 
   // Synchronize patch status for active finding
@@ -278,10 +321,136 @@ export const FixVerify: React.FC = () => {
     }
   };
 
-  if (!activeFinding) {
+  // 1. Unauthenticated Gateway State
+  if (!currentUser) {
     return (
-      <div className="py-24 text-center text-slate-400">
-        Loading Fix & Verify workspace...
+      <div className="space-y-6 max-w-4xl mx-auto py-12 px-4">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-obsidian-850 via-obsidian-900 to-obsidian-950 border border-white/10 p-8 sm:p-12 shadow-2xl text-center">
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 -mb-24 w-80 h-80 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-xl mx-auto space-y-6">
+            <div className="w-14 h-14 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto shadow-cyan-glow">
+              <Lock className="w-7 h-7" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono font-semibold">
+                <Wrench className="w-3.5 h-3.5 text-cyan-400" />
+                <span>FIX & VERIFY WORKSPACE • TENANT RESTRICTED</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-sans">
+                Sign In to Access Fix & Verify Workspace
+              </h2>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Remediation code patches, sandbox probe verification, and audit trail records are strictly isolated per tenant. Sign in to inspect vulnerability remediation steps and execute live verification probes.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => { setLoginModalMode('login'); setShowLoginModal(true); }}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-bold text-sm shadow-cyan-md transition-all active:scale-95 flex items-center justify-center gap-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Sign In to Compliance Console</span>
+              </button>
+              <button
+                onClick={() => { setLoginModalMode('register'); setShowLoginModal(true); }}
+                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-obsidian-800 hover:bg-obsidian-750 border border-white/10 text-slate-200 font-semibold text-sm transition-all flex items-center justify-center gap-2"
+              >
+                <UserPlus className="w-4 h-4 text-cyan-400" />
+                <span>Register Account</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onLoginSuccess={(user) => {
+            setCurrentUser(user);
+            setShowLoginModal(false);
+            loadAll();
+          }}
+          initialMode={loginModalMode}
+        />
+      </div>
+    );
+  }
+
+  // 2. Active Page Loading State
+  if (isPageLoading) {
+    return (
+      <div className="py-24 text-center space-y-4">
+        <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto animate-pulse shadow-cyan-glow">
+          <Wrench className="w-6 h-6 animate-spin" style={{ animationDuration: '3s' }} />
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-white font-sans">Loading Fix & Verify Workspace...</p>
+          <p className="text-xs text-slate-500 font-mono">Retrieving security findings, remediation patches, and audit verification history</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Page Error State with Retry
+  if (pageError) {
+    return (
+      <div className="max-w-2xl mx-auto py-16 px-4 space-y-4">
+        <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 space-y-4 shadow-obsidian-card">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-6 h-6 text-rose-400 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1 flex-1">
+              <h3 className="text-sm font-bold text-white font-sans">Unable to Load Fix & Verify Workspace</h3>
+              <p className="text-xs text-rose-200 leading-relaxed font-mono">{pageError}</p>
+            </div>
+          </div>
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={loadAll}
+              className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-100 font-semibold text-xs transition-colors flex items-center gap-2"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Retry Loading</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. Empty Findings State
+  if (findings.length === 0 || !activeFinding) {
+    return (
+      <div className="max-w-2xl mx-auto py-16 px-4 text-center space-y-5">
+        <div className="w-14 h-14 rounded-2xl bg-obsidian-850 border border-white/10 text-slate-400 flex items-center justify-center mx-auto shadow-obsidian-card">
+          <ShieldAlert className="w-7 h-7 text-slate-500" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold text-white font-sans">No Findings to Remediate</h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+            Your organization has zero active security findings or compliance issues requiring remediation. Run a privacy audit scan to identify exposure risks and generate automated code patches.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-2">
+          <Link
+            to="/scan"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-cyan-glow transition-all flex items-center gap-2"
+          >
+            <Wrench className="w-3.5 h-3.5" />
+            <span>Launch Privacy Audit Scan</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <button
+            onClick={loadAll}
+            className="px-4 py-2.5 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-slate-300 font-semibold text-xs transition-colors flex items-center gap-1.5"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -1396,6 +1565,17 @@ export const FixVerify: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          setShowLoginModal(false);
+          loadAll();
+        }}
+        initialMode={loginModalMode}
+      />
     </div>
   );
 };
