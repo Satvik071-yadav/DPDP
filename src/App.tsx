@@ -17,11 +17,11 @@ export function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Toaster 
-        theme="dark" 
+        theme="light" 
         position="top-right" 
         richColors 
         toastOptions={{
-          className: 'bg-obsidian-900 border border-white/10 text-slate-100 shadow-2xl rounded-xl text-xs',
+          className: 'bg-[#FFFFFF] border border-[#E4E4E7] text-[#18181B] shadow-lg rounded-xl text-xs',
         }}
       />
       <Routes>

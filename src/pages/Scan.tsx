@@ -293,24 +293,23 @@ export const Scan: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       {/* Editorial Header Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-obsidian-900/90 via-obsidian-850/80 to-obsidian-900/90 border border-white/[0.08] p-6 shadow-obsidian-card backdrop-blur-md">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-6 shadow-subtle">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div className="space-y-1.5">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 shadow-cyan-glow">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F]">
                 <Radar className="w-5 h-5 animate-spin-slow" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18181B] font-sans">
                     Target Website Scanner
                   </h2>
-                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#52796F] border border-[#E4E4E7]">
                     DEMO SCANNER
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                <p className="text-xs sm:text-sm text-[#71717A] mt-0.5">
                   Launch deterministic privacy investigations to detect personal data exposures, tracker fires, and consent notice validity under India's DPDP Act 2023.
                 </p>
               </div>
@@ -319,13 +318,13 @@ export const Scan: React.FC = () => {
 
           <div className="flex items-center gap-3 self-start lg:self-auto">
             {isScanning ? (
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono shadow-cyan-glow">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] text-xs font-mono shadow-subtle">
+                <span className="w-2 h-2 rounded-full bg-[#14B8A6] animate-ping" />
                 <span>Scanning Active Sandbox Target...</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-obsidian-950/60 border border-white/[0.08] text-slate-400 text-xs font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#71717A] text-xs font-mono">
+                <span className="w-2 h-2 rounded-full bg-[#15803D]" />
                 <span>Sandbox Ready</span>
               </div>
             )}
@@ -337,28 +336,28 @@ export const Scan: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Probe Configuration Form */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-2xl bg-obsidian-900/85 border border-white/[0.08] p-6 shadow-obsidian-card backdrop-blur-md space-y-5">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3.5">
+          <div className="rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-6 shadow-subtle space-y-5">
+            <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3.5">
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-sm font-bold text-white tracking-wide">
+                <Sliders className="w-4 h-4 text-[#52796F]" />
+                <h3 className="text-sm font-bold text-[#18181B] tracking-wide">
                   Scan Parameters
                 </h3>
               </div>
-              <span className="text-[10px] font-mono text-cyan-400/80 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+              <span className="text-[10px] font-mono text-[#52796F] bg-[#F1F5F9] px-2 py-0.5 rounded border border-[#E4E4E7]">
                 PROBE_SPEC
               </span>
             </div>
 
             {/* Target URL */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-300 tracking-wide">
+              <label className="block text-xs font-semibold text-[#18181B] tracking-wide">
                 Target Website URL
               </label>
               <div className="relative">
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-slate-500 pointer-events-none">
-                  <Globe className="w-4 h-4 text-cyan-400/70" />
-                  <span className="text-[10px] font-mono text-slate-600 font-bold border-r border-white/10 pr-1.5">URL</span>
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[#71717A] pointer-events-none">
+                  <Globe className="w-4 h-4 text-[#52796F]" />
+                  <span className="text-[10px] font-mono text-[#71717A] font-bold border-r border-[#E4E4E7] pr-1.5">URL</span>
                 </div>
                 <input
                   type="text"
@@ -369,7 +368,7 @@ export const Scan: React.FC = () => {
                     setValidationError('');
                   }}
                   placeholder="https://paysecure-india.in"
-                  className="w-full bg-obsidian-950/80 border border-white/[0.08] rounded-xl pl-16 pr-4 py-2.5 text-xs text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 transition-all font-mono disabled:opacity-50"
+                  className="w-full bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl pl-16 pr-4 py-2.5 text-xs text-[#18181B] placeholder:text-slate-600 focus:outline-none focus:border-[#52796F] focus:ring-1 focus:ring-[#14B8A6]/20 transition-all font-mono disabled:opacity-50"
                 />
               </div>
             </div>
@@ -378,11 +377,11 @@ export const Scan: React.FC = () => {
             {verifiedWebsites.filter((w) => w.verificationStatus === 'verified').length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-semibold text-teal-400 flex items-center gap-1.5">
+                  <label className="block text-xs font-semibold text-[#52796F] flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5" />
                     Your Verified Domains
                   </label>
-                  <Link to="/domains" className="text-[10px] text-slate-400 hover:text-teal-300 underline">
+                  <Link to="/domains" className="text-[10px] text-[#71717A] hover:text-[#52796F] underline">
                     Manage Domains
                   </Link>
                 </div>
@@ -403,16 +402,16 @@ export const Scan: React.FC = () => {
                           }}
                           className={`w-full text-left p-3 rounded-xl border text-xs transition-all ${
                             isSelected
-                              ? 'bg-gradient-to-r from-teal-950/40 to-obsidian-950/60 border-teal-400/50 text-teal-200 shadow-teal-500/10'
-                              : 'bg-obsidian-950/50 border-white/[0.06] text-slate-300 hover:bg-obsidian-850 hover:border-teal-500/30 hover:text-white'
+                              ? 'bg-[#F1F5F9] border-[#52796F] text-[#18181B] shadow-subtle'
+                              : 'bg-[#F8FAFC] border-[#E4E4E7] text-[#71717A] hover:bg-[#F1F5F9] hover:border-[#52796F]/20 hover:text-[#18181B]'
                           }`}
                         >
                           <div className="font-bold flex items-center justify-between">
                             <span className="font-mono text-xs tracking-wide flex items-center gap-1.5">
-                              <Globe className="w-3.5 h-3.5 text-teal-400" />
+                              <Globe className="w-3.5 h-3.5 text-[#52796F]" />
                               {w.hostname}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-500/10 text-teal-300 border border-teal-500/20">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-[#15803D] border border-green-200">
                               Verified
                             </span>
                           </div>
@@ -426,10 +425,10 @@ export const Scan: React.FC = () => {
             {/* Authorized Demo Targets */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-semibold text-slate-400">
+                <label className="block text-xs font-semibold text-[#71717A]">
                   Authorized Demo Sandboxes
                 </label>
-                <span className="text-[10px] text-slate-500 font-mono">3 Presets</span>
+                <span className="text-[10px] text-[#71717A] font-mono">3 Presets</span>
               </div>
               <div className="space-y-2">
                 {DEMO_PRESET_TARGETS.map((p) => {
@@ -446,22 +445,22 @@ export const Scan: React.FC = () => {
                       }}
                       className={`w-full text-left p-3.5 rounded-xl border text-xs transition-all ${
                         isSelected
-                          ? 'bg-gradient-to-r from-cyan-950/30 to-obsidian-950/60 border-cyan-400/50 text-cyan-200 shadow-cyan-glow'
-                          : 'bg-obsidian-950/50 border-white/[0.06] text-slate-300 hover:bg-obsidian-850 hover:border-white/[0.12] hover:text-white'
+                          ? 'bg-[#F1F5F9] border-[#52796F] text-[#18181B] shadow-subtle'
+                          : 'bg-[#F8FAFC] border-[#E4E4E7] text-[#71717A] hover:bg-[#F1F5F9] hover:text-[#18181B]'
                       }`}
                     >
                       <div className="font-bold flex items-center justify-between">
                         <span className="font-sans text-xs tracking-wide">{p.label}</span>
                         {isSelected ? (
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-mono text-cyan-400 uppercase">Selected</span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(0,242,254,0.8)]" />
+                            <span className="text-[10px] font-mono text-[#52796F] uppercase">Selected</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6]" />
                           </div>
                         ) : (
-                          <span className="text-[10px] font-mono text-slate-600">ID: {p.profile}</span>
+                          <span className="text-[10px] font-mono text-[#71717A]">ID: {p.profile}</span>
                         )}
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                      <div className="text-[11px] text-[#71717A] mt-1 leading-relaxed">
                         {p.description}
                       </div>
                     </button>
@@ -472,20 +471,20 @@ export const Scan: React.FC = () => {
 
             {/* Scan Profile Selector */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-300">
+              <label className="block text-xs font-semibold text-[#18181B]">
                 Scan Profile
               </label>
               <select
                 disabled={isScanning}
                 value={profile}
                 onChange={(e) => setProfile(e.target.value as ScanProfile)}
-                className="w-full bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-200 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 disabled:opacity-50 cursor-pointer transition-all"
+                className="w-full bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[#18181B] focus:outline-none focus:border-[#52796F] focus:ring-1 focus:ring-[#14B8A6]/20 disabled:opacity-50 cursor-pointer transition-all"
               >
                 <option value="quick_scan">Quick Scan (Rapid Third-Party Pixel & Cookie Check)</option>
                 <option value="privacy_audit">Privacy Audit (Full DPDP Act PII & Data Flow Inspection)</option>
                 <option value="auth_tests">Authorization Tests (Unauthenticated & Consent Bypass Tests)</option>
               </select>
-              <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+              <p className="text-[11px] text-[#71717A] mt-1 leading-relaxed">
                 {profile === 'quick_scan' && 'Runs lightweight check on public landing pages and third-party trackers.'}
                 {profile === 'privacy_audit' && 'Deep audit of form telemetry, national ID parameters, and storage caches.'}
                 {profile === 'auth_tests' && 'Tests unauthenticated access, pre-consent cookies, and opt-out compliance.'}
@@ -493,20 +492,20 @@ export const Scan: React.FC = () => {
             </div>
 
             {/* Optional Consent Behavior Comparison Toggle */}
-            <div className="pt-2 border-t border-white/[0.06]">
+            <div className="pt-2 border-t border-[#E4E4E7]">
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
                   disabled={isScanning}
                   checked={consentTesting}
                   onChange={(e) => setConsentTesting(e.target.checked)}
-                  className="mt-0.5 rounded bg-obsidian-950 border-white/[0.15] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                  className="mt-0.5 rounded bg-[#F8FAFC] border-[#E4E4E7] text-[#52796F] focus:ring-0 focus:ring-offset-0 cursor-pointer"
                 />
                 <div className="text-xs">
-                  <span className="font-semibold text-slate-200 block group-hover:text-cyan-300 transition-colors">
+                  <span className="font-semibold text-[#18181B] block group-hover:text-[#52796F] transition-colors">
                     Optional Consent-Behavior Comparison Toggle
                   </span>
-                  <span className="text-[11px] text-slate-400 leading-relaxed block mt-0.5">
+                  <span className="text-[11px] text-[#71717A] leading-relaxed block mt-0.5">
                     Compares observed browser beacon firings Before Consent vs After Consent Rejection under DPDP Section 6.
                   </span>
                 </div>
@@ -514,33 +513,33 @@ export const Scan: React.FC = () => {
             </div>
 
             {/* Clear Authorization Reminder */}
-            <div className="p-3.5 rounded-xl bg-obsidian-950/70 border border-white/[0.08] space-y-2">
+            <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-2">
               <label className="flex items-start gap-2.5 cursor-pointer">
                 <input
                   type="checkbox"
                   disabled={isScanning}
                   checked={authorizedConsent}
                   onChange={(e) => setAuthorizedConsent(e.target.checked)}
-                  className="mt-0.5 rounded bg-obsidian-950 border-white/[0.15] text-cyan-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                  className="mt-0.5 rounded bg-[#F8FAFC] border-[#E4E4E7] text-[#52796F] focus:ring-0 focus:ring-offset-0 cursor-pointer"
                 />
-                <span className="text-[11px] text-slate-300 leading-relaxed">
-                  <strong className="text-white">Authorization Reminder:</strong> I certify that I am authorized to test this target domain or am evaluating a controlled demonstration sandbox.
+                <span className="text-[11px] text-[#71717A] leading-relaxed">
+                  <strong className="text-[#18181B]">Authorization Reminder:</strong> I certify that I am authorized to test this target domain or am evaluating a controlled demonstration sandbox.
                 </span>
               </label>
             </div>
 
             {/* Error Message Display */}
             {validationError && (
-              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs space-y-2">
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-[#B91C1C] text-xs space-y-2">
                 <div className="flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400 mt-0.5" />
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 text-[#B91C1C] mt-0.5" />
                   <span className="leading-relaxed">{validationError}</span>
                 </div>
                 {validationError.includes('Domain Management') && (
                   <div className="pl-6.5 pt-1">
                     <Link
                       to="/domains"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-400 hover:text-teal-300 underline"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#52796F] hover:text-[#405F57] underline"
                     >
                       <Globe className="w-3.5 h-3.5" />
                       Go to Domain Management to Verify Ownership
@@ -558,7 +557,7 @@ export const Scan: React.FC = () => {
                   type="button"
                   onClick={handleStartScan}
                   disabled={isScanning}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-cyan-glow transition-all active:scale-[0.99] disabled:opacity-50"
+                  className="w-full py-3 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-subtle transition-all active:scale-[0.99] disabled:opacity-50"
                 >
                   <Radar className="w-4 h-4 stroke-[2.5]" />
                   <span>Start Scan</span>
@@ -567,7 +566,7 @@ export const Scan: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleCancelScan}
-                  className="w-full py-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(244,63,94,0.2)]"
+                  className="w-full py-3 rounded-xl bg-red-50 hover:bg-[#B91C1C]/30 border border-red-200 text-[#B91C1C] font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-subtle"
                 >
                   <RotateCcw className="w-3.5 h-3.5 animate-spin" />
                   <span>Scanning in progress... (Click to Cancel)</span>
@@ -577,7 +576,7 @@ export const Scan: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="flex-1 py-2.5 rounded-xl bg-obsidian-950 hover:bg-obsidian-800 border border-white/[0.08] text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#18181B] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Scan Another Target</span>
@@ -585,7 +584,7 @@ export const Scan: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => navigate('/findings')}
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-cyan-glow transition-all"
+                    className="flex-1 py-2.5 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-subtle transition-all"
                   >
                     <span>Inspect Findings ({findingsDiscovered.length})</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -599,14 +598,14 @@ export const Scan: React.FC = () => {
         {/* Right Panel: Progress & Live Scanner Telemetry */}
         <div className="lg:col-span-7 space-y-4">
           {/* Progress Card */}
-          <div className="rounded-2xl bg-obsidian-900/85 border border-white/[0.08] p-6 shadow-obsidian-card backdrop-blur-md space-y-5">
+          <div className="rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-6 shadow-subtle space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-[#52796F]" />
                   <span>Scan Execution Lifecycle</span>
                 </h3>
-                <span className="text-xs text-slate-400 mt-0.5 block">
+                <span className="text-xs text-[#71717A] mt-0.5 block">
                   {isScanning 
                     ? 'Scanner actively inspecting target sandbox telemetry...' 
                     : scanComplete 
@@ -615,16 +614,16 @@ export const Scan: React.FC = () => {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/30 shadow-cyan-glow">
+                <span className="text-xs font-mono font-bold text-[#52796F] bg-[#F1F5F9] px-2.5 py-1 rounded-lg border border-[#E4E4E7]">
                   {progress}%
                 </span>
               </div>
             </div>
 
-            {/* Glowing Progress Bar */}
-            <div className="w-full bg-obsidian-950 rounded-full h-2 overflow-hidden border border-white/[0.08]">
+            {/* Progress Bar */}
+            <div className="w-full bg-[#F8FAFC] rounded-full h-2 overflow-hidden border border-[#E4E4E7]">
               <div
-                className="bg-gradient-to-r from-cyan-400 via-teal-400 to-cyan-300 h-full transition-all duration-500 ease-out rounded-full shadow-[0_0_12px_rgba(0,242,254,0.6)]"
+                className="bg-[#14B8A6] h-full transition-all duration-500 ease-out rounded-full"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -640,37 +639,37 @@ export const Scan: React.FC = () => {
                     key={s.stage}
                     className={`p-3.5 rounded-xl border text-xs flex items-center justify-between transition-all ${
                       isCurrent
-                        ? 'bg-gradient-to-r from-cyan-950/40 to-obsidian-950/60 border-cyan-400/50 text-cyan-200 shadow-cyan-glow'
+                        ? 'bg-[#F1F5F9] border-[#52796F] text-[#18181B] shadow-subtle'
                         : isPassed
-                        ? 'bg-obsidian-950/40 border-white/[0.06] text-slate-300'
-                        : 'bg-obsidian-950/20 border-white/[0.03] text-slate-600'
+                        ? 'bg-[#F8FAFC] border-[#E4E4E7] text-slate-300'
+                        : 'bg-[#F8FAFC]/50 border-[#E4E4E7]/40 text-[#71717A]/60'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {isPassed ? (
-                        <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0">
-                          <Check className="w-3 h-3 text-emerald-400" />
+                        <div className="w-5 h-5 rounded-full bg-green-50 border border-green-200 flex items-center justify-center flex-shrink-0">
+                          <Check className="w-3 h-3 text-[#15803D]" />
                         </div>
                       ) : isCurrent ? (
-                        <div className="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center flex-shrink-0">
-                          <Cpu className="w-3 h-3 text-cyan-400 animate-spin" />
+                        <div className="w-5 h-5 rounded-full bg-[#52796F]/20 border border-[#52796F]/50 flex items-center justify-center flex-shrink-0">
+                          <Cpu className="w-3 h-3 text-[#52796F] animate-spin" />
                         </div>
                       ) : (
-                        <div className="w-5 h-5 rounded-full border border-slate-700/60 flex items-center justify-center flex-shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                        <div className="w-5 h-5 rounded-full border border-[#E4E4E7] flex items-center justify-center flex-shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#273449]" />
                         </div>
                       )}
                       <div className="min-w-0">
-                        <div className={`font-bold ${isCurrent ? 'text-white' : isPassed ? 'text-slate-200' : 'text-slate-500'}`}>
+                        <div className={`font-bold ${isCurrent ? 'text-white' : isPassed ? 'text-slate-200' : 'text-[#71717A]'}`}>
                           {s.label}
                         </div>
-                        <div className="text-[11px] text-slate-400 leading-relaxed truncate">
+                        <div className="text-[11px] text-[#71717A] leading-relaxed truncate">
                           {s.description}
                         </div>
                       </div>
                     </div>
                     {isCurrent && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 animate-pulse flex-shrink-0 ml-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#F1F5F9] text-[#52796F] border border-[#52796F] animate-pulse flex-shrink-0 ml-2">
                         RUNNING
                       </span>
                     )}
@@ -682,70 +681,70 @@ export const Scan: React.FC = () => {
 
           {/* Generated Scan Report Card (Shown on completion) */}
           {scanComplete && completedReport && (
-            <div className="rounded-2xl bg-gradient-to-b from-obsidian-900 via-obsidian-850 to-obsidian-900 border border-emerald-500/40 p-6 shadow-obsidian-card space-y-4 animate-in fade-in duration-300">
-              <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
+            <div className="rounded-2xl bg-[#FFFFFF] border border-green-200 p-6 shadow-subtle space-y-4 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3.5">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.3)]">
+                  <div className="w-9 h-9 rounded-xl bg-green-50 border border-green-200 flex items-center justify-center text-[#15803D]">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white tracking-wide">
+                    <h4 className="text-sm font-bold text-[#18181B] tracking-wide">
                       Scan Completed: Report Generated
                     </h4>
-                    <span className="text-[10px] text-slate-400 font-mono">
+                    <span className="text-[10px] text-[#71717A] font-mono">
                       Report ID: {completedReport.id}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30 shadow-[0_0_10px_rgba(52,211,153,0.2)]">
+                  <span className="text-xs font-mono font-bold text-[#15803D] bg-green-50 px-3 py-1 rounded-full border border-green-200">
                     COMPLETED
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-obsidian-950/70 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Target</span>
-                  <span className="font-semibold text-slate-200 truncate block mt-0.5 font-mono text-[11px]" title={completedReport.targetUrl}>
+                <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7]">
+                  <span className="text-[10px] text-[#71717A] uppercase font-mono block">Target</span>
+                  <span className="font-semibold text-[#18181B] truncate block mt-0.5 font-mono text-[11px]" title={completedReport.targetUrl}>
                     {completedReport.targetUrl}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-obsidian-950/70 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Profile</span>
-                  <span className="font-semibold text-cyan-300 capitalize block mt-0.5 font-mono text-[11px]">
+                <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7]">
+                  <span className="text-[10px] text-[#71717A] uppercase font-mono block">Profile</span>
+                  <span className="font-semibold text-[#52796F] capitalize block mt-0.5 font-mono text-[11px]">
                     {completedReport.profile.replace('_', ' ')}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-obsidian-950/70 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Duration</span>
-                  <span className="font-semibold text-slate-200 block mt-0.5 font-mono text-[11px]">
+                <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7]">
+                  <span className="text-[10px] text-[#71717A] uppercase font-mono block">Duration</span>
+                  <span className="font-semibold text-[#18181B] block mt-0.5 font-mono text-[11px]">
                     {completedReport.durationSeconds} seconds
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-obsidian-950/70 border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono block">Findings</span>
-                  <span className="font-semibold text-rose-400 block mt-0.5 font-mono text-[11px]">
+                <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7]">
+                  <span className="text-[10px] text-[#71717A] uppercase font-mono block">Findings</span>
+                  <span className="font-semibold text-[#B91C1C] block mt-0.5 font-mono text-[11px]">
                     {completedReport.findingsCount.total} Flagged
                   </span>
                 </div>
               </div>
 
               <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-[#71717A]">
                   Findings have been registered and are ready for investigation in the Findings Explorer.
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => navigate(`/privacy-flow?scanId=${completedReport.id}`)}
-                    className="px-3.5 py-2 rounded-xl bg-obsidian-950 hover:bg-obsidian-800 border border-white/[0.08] text-cyan-300 font-semibold text-xs transition-colors"
+                    className="px-3.5 py-2 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#52796F] font-semibold text-xs transition-colors"
                   >
                     View Privacy Flow
                   </button>
                   <button
                     onClick={() => navigate(`/findings?scanId=${completedReport.id}`)}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-cyan-glow transition-all"
+                    className="px-4 py-2 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-xs flex items-center gap-1.5 shadow-subtle transition-all"
                   >
                     <span>Open Findings Explorer</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -756,16 +755,16 @@ export const Scan: React.FC = () => {
           )}
 
           {/* Live Discovered Findings & Console Logs */}
-          <div className="rounded-2xl bg-obsidian-900/85 border border-white/[0.08] p-6 shadow-obsidian-card backdrop-blur-md space-y-4">
+          <div className="rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-6 shadow-subtle space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-cyan-400" />
-                <h4 className="text-xs font-bold text-slate-200 font-mono tracking-wider">
+                <Terminal className="w-4 h-4 text-[#52796F]" />
+                <h4 className="text-xs font-bold text-[#18181B] font-mono tracking-wider">
                   SCANNER CONSOLE TELEMETRY
                 </h4>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-400 font-mono">
+                <span className="text-[10px] text-[#71717A] font-mono">
                   {findingsDiscovered.length > 0
                     ? `${findingsDiscovered.length} potential compliance risk indicators identified`
                     : 'No potential risk indicators detected'}
@@ -774,10 +773,10 @@ export const Scan: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleCopyLogs}
-                    className="p-1 rounded bg-obsidian-950 border border-white/[0.06] text-slate-400 hover:text-white transition-colors"
+                    className="p-1 rounded bg-[#F8FAFC] border border-[#E4E4E7] text-[#71717A] hover:text-[#18181B] transition-colors"
                     title="Copy Logs"
                   >
-                    {copiedLog ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    {copiedLog ? <Check className="w-3 h-3 text-[#15803D]" /> : <Copy className="w-3 h-3" />}
                   </button>
                 )}
               </div>
@@ -785,18 +784,18 @@ export const Scan: React.FC = () => {
 
             {/* Findings detected pills */}
             {findingsDiscovered.length > 0 && (
-              <div className="space-y-2 p-3.5 rounded-xl bg-obsidian-950/80 border border-white/[0.08]">
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block font-mono">
+              <div className="space-y-2 p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7]">
+                <span className="text-[10px] text-[#71717A] uppercase font-bold tracking-wider block font-mono">
                   Identified Exposures (Real-Time Discovery):
                 </span>
                 <div className="space-y-1.5">
                   {findingsDiscovered.map((item, i) => (
-                    <div key={i} className="flex items-center justify-between gap-2 text-xs font-semibold p-2 rounded-lg bg-obsidian-900/60 border border-white/[0.04]">
-                      <div className="flex items-center gap-2 text-rose-400 truncate">
+                    <div key={i} className="flex items-center justify-between gap-2 text-xs font-semibold p-2 rounded-lg bg-[#FFFFFF] border border-[#E4E4E7]">
+                      <div className="flex items-center gap-2 text-[#B91C1C] truncate">
                         <ShieldAlert className="w-4 h-4 flex-shrink-0" />
                         <span className="truncate">{item.title}</span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400 flex-shrink-0 px-2 py-0.5 rounded bg-obsidian-950 border border-white/[0.06]">
+                      <span className="text-[10px] font-mono text-[#71717A] flex-shrink-0 px-2 py-0.5 rounded bg-[#F8FAFC] border border-[#E4E4E7]">
                         {item.dpdpSection.split('-')[0].trim()}
                       </span>
                     </div>
@@ -806,22 +805,22 @@ export const Scan: React.FC = () => {
             )}
 
             {/* Terminal log box */}
-            <div className="h-48 overflow-y-auto bg-obsidian-950/95 rounded-xl p-4 font-mono text-[11px] text-slate-300 space-y-1.5 border border-white/[0.08] shadow-inner relative">
+            <div className="h-48 overflow-y-auto bg-[#F8FAFC] rounded-xl p-4 font-mono text-[11px] text-[#18181B] space-y-1.5 border border-[#E4E4E7] shadow-inner relative">
               <div className="sticky top-0 right-0 flex justify-end pointer-events-none mb-1">
-                <span className="text-[9px] font-mono text-slate-600 bg-obsidian-900/90 px-2 py-0.5 rounded border border-white/[0.04]">
+                <span className="text-[9px] font-mono text-[#71717A] bg-[#FFFFFF] px-2 py-0.5 rounded border border-[#E4E4E7]">
                   LIVE_LOG_BUFFER
                 </span>
               </div>
               {consoleLogs.length === 0 ? (
-                <div className="text-slate-600 italic py-8 text-center flex flex-col items-center justify-center gap-1">
-                  <Terminal className="w-5 h-5 text-slate-700 mb-1" />
+                <div className="text-[#71717A] italic py-8 text-center flex flex-col items-center justify-center gap-1">
+                  <Terminal className="w-5 h-5 text-slate-600 mb-1" />
                   <span>No active audit session. Launch investigation to stream output.</span>
                 </div>
               ) : (
                 consoleLogs.map((log, index) => (
                   <div key={index} className="leading-relaxed flex items-start gap-2">
-                    <span className="text-cyan-400 font-bold select-none">{'>'}</span>
-                    <span className={log.includes('[ERROR]') ? 'text-rose-400' : log.includes('[WARN]') ? 'text-amber-300' : log.includes('[COMPLETED]') ? 'text-emerald-300' : 'text-slate-300'}>
+                    <span className="text-[#52796F] font-bold select-none">{'>'}</span>
+                    <span className={log.includes('[ERROR]') ? 'text-[#B91C1C]' : log.includes('[WARN]') ? 'text-[#B45309]' : log.includes('[COMPLETED]') ? 'text-[#15803D]' : 'text-slate-300'}>
                       {log}
                     </span>
                   </div>

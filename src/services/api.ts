@@ -625,7 +625,7 @@ export const api = {
         const data = await response.json();
         return { 
           ok: true, 
-          message: `Connected to DPDP-Guard Backend (${data.service || 'v1.0.0'}, DB: ${data.database || 'healthy'})`, 
+          message: `Connected to PrivaCraft (DPDP-Guard Backend) (${data.service || 'v1.0.0'}, DB: ${data.database || 'healthy'})`, 
           latencyMs: Math.round(end - start),
           normalizedUrl: baseUrl,
         };

@@ -11,48 +11,48 @@ export function formatSeverity(severity: Severity) {
     case 'critical':
       return {
         label: 'Critical',
-        bg: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-        badge: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
-        dot: 'bg-rose-500 shadow-rose-500/50',
-        text: 'text-rose-400',
-        ring: 'ring-rose-500/30',
+        bg: 'bg-red-50 text-[#B91C1C] border-red-200',
+        badge: 'bg-red-50 text-[#B91C1C] border-red-200',
+        dot: 'bg-[#B91C1C]',
+        text: 'text-[#B91C1C]',
+        ring: 'ring-red-200',
       };
     case 'high':
       return {
         label: 'High',
-        bg: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-        badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-        dot: 'bg-amber-400 shadow-amber-400/50',
-        text: 'text-amber-400',
-        ring: 'ring-amber-500/30',
+        bg: 'bg-amber-50 text-[#B45309] border-amber-200',
+        badge: 'bg-amber-50 text-[#B45309] border-amber-200',
+        dot: 'bg-[#B45309]',
+        text: 'text-[#B45309]',
+        ring: 'ring-amber-200',
       };
     case 'medium':
       return {
         label: 'Medium',
-        bg: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/30',
-        badge: 'bg-yellow-500/20 text-yellow-200 border-yellow-500/40',
-        dot: 'bg-yellow-400 shadow-yellow-400/50',
-        text: 'text-yellow-400',
-        ring: 'ring-yellow-500/30',
+        bg: 'bg-amber-50 text-[#B45309] border-amber-200',
+        badge: 'bg-amber-50 text-[#B45309] border-amber-200',
+        dot: 'bg-[#B45309]',
+        text: 'text-[#B45309]',
+        ring: 'ring-amber-200',
       };
     case 'low':
       return {
         label: 'Low',
-        bg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-        badge: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
-        dot: 'bg-cyan-400 shadow-cyan-400/50',
-        text: 'text-cyan-400',
-        ring: 'ring-cyan-500/30',
+        bg: 'bg-blue-50 text-[#2563EB] border-blue-200',
+        badge: 'bg-blue-50 text-[#2563EB] border-blue-200',
+        dot: 'bg-[#2563EB]',
+        text: 'text-[#2563EB]',
+        ring: 'ring-blue-200',
       };
     case 'info':
     default:
       return {
         label: 'Informational',
-        bg: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
-        badge: 'bg-slate-500/20 text-slate-300 border-slate-500/40',
-        dot: 'bg-slate-400 shadow-slate-400/50',
-        text: 'text-slate-400',
-        ring: 'ring-slate-500/30',
+        bg: 'bg-blue-50 text-[#2563EB] border-blue-200',
+        badge: 'bg-blue-50 text-[#2563EB] border-blue-200',
+        dot: 'bg-[#2563EB]',
+        text: 'text-[#2563EB]',
+        ring: 'ring-blue-200',
       };
   }
 }

@@ -113,17 +113,16 @@ export const Settings: React.FC = () => {
   return (
     <div className="space-y-6 max-w-4xl pb-12">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-obsidian-900/90 via-obsidian-850/80 to-obsidian-900/90 border border-white/[0.08] p-6 shadow-obsidian-card backdrop-blur-md">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-6 shadow-subtle">
         <div className="flex items-center gap-3 relative z-10">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 shadow-cyan-glow">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F]">
             <SettingsIcon className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18181B] font-sans">
               Platform Settings & Connectivity
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-[#71717A] mt-0.5">
               Configure Data Protection Officer (DPO) records, statutory audit rulesets, and FastAPI backend integration.
             </p>
           </div>
@@ -132,70 +131,70 @@ export const Settings: React.FC = () => {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Section 1: DPO & Fiduciary Profile */}
-        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/[0.06] pb-3 font-sans">
-            <Lock className="w-4 h-4 text-cyan-400" />
+        <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
+          <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2 border-b border-[#E4E4E7] pb-3 font-sans">
+            <Lock className="w-4 h-4 text-[#52796F]" />
             <span>Data Fiduciary & DPO Designation (DPDP Act §8)</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
             <div>
-              <label className="block text-slate-300 mb-1.5 font-semibold">Organization / Legal Entity</label>
+              <label className="block text-[#71717A] mb-1.5 font-semibold">Organization / Legal Entity</label>
               <input
                 type="text"
                 value={settings.organizationName}
                 onChange={(e) => setSettings({ ...settings, organizationName: e.target.value })}
-                className="w-full bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400 font-medium"
+                className="w-full bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3.5 py-2.5 text-[#18181B] focus:outline-none focus:border-[#52796F] font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 mb-1.5 font-semibold">Statutory Jurisdiction</label>
+              <label className="block text-[#71717A] mb-1.5 font-semibold">Statutory Jurisdiction</label>
               <input
                 type="text"
                 disabled
                 value={settings.jurisdiction}
-                className="w-full bg-obsidian-950/50 border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-slate-500 cursor-not-allowed opacity-80 font-mono"
+                className="w-full bg-[#F8FAFC]/50 border border-[#E4E4E7] rounded-xl px-3.5 py-2.5 text-[#71717A] cursor-not-allowed opacity-80 font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 mb-1.5 font-semibold">Designated DPO Name</label>
+              <label className="block text-[#71717A] mb-1.5 font-semibold">Designated DPO Name</label>
               <input
                 type="text"
                 value={settings.dpoName}
                 onChange={(e) => setSettings({ ...settings, dpoName: e.target.value })}
-                className="w-full bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400 font-medium"
+                className="w-full bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3.5 py-2.5 text-[#18181B] focus:outline-none focus:border-[#52796F] font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 mb-1.5 font-semibold">DPO Official Redressal Email</label>
+              <label className="block text-[#71717A] mb-1.5 font-semibold">DPO Official Redressal Email</label>
               <input
                 type="email"
                 value={settings.dpoEmail}
                 onChange={(e) => setSettings({ ...settings, dpoEmail: e.target.value })}
-                className="w-full bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400 font-mono"
+                className="w-full bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3.5 py-2.5 text-[#18181B] focus:outline-none focus:border-[#52796F] font-mono"
               />
             </div>
           </div>
         </div>
 
         {/* Section 2: Backend Connectivity & Demo Mode */}
-        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-4">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2 font-sans">
-              <Server className="w-4 h-4 text-cyan-400" />
+        <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E4E4E7] pb-3">
+            <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2 font-sans">
+              <Server className="w-4 h-4 text-[#52796F]" />
               <span>FastAPI Backend Engine Connection</span>
             </h3>
 
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-400 font-medium font-mono">Demo Mode:</span>
+              <span className="text-[#71717A] font-medium font-mono">Demo Mode:</span>
               <button
                 type="button"
                 onClick={() => setSettings({ ...settings, demoMode: !settings.demoMode })}
                 className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${
-                  settings.demoMode ? 'bg-cyan-500 shadow-cyan-glow' : 'bg-obsidian-800'
+                  settings.demoMode ? 'bg-[#14B8A6]' : 'bg-[#F1F5F9]'
                 }`}
               >
                 <span
@@ -207,22 +206,22 @@ export const Settings: React.FC = () => {
             </div>
           </div>
 
-          <p className="text-xs text-slate-400 leading-relaxed font-sans">
-            DPDP-Guard includes an isolated typed API layer connecting to the FastAPI service. Configured settings immediately override the default Vite environment URL without requiring an application rebuild or reload.
+          <p className="text-xs text-[#71717A] leading-relaxed font-sans">
+            PrivaCraft includes an isolated typed API layer connecting to the FastAPI service. Configured settings immediately override the default Vite environment URL without requiring an application rebuild or reload.
           </p>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-obsidian-950/70 border border-white/[0.06] text-[11px] font-mono">
-            <span className="text-slate-400">
-              Default Fallback: <strong className="text-slate-200">{getDefaultApiUrl()}</strong>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] text-[11px] font-mono">
+            <span className="text-[#71717A]">
+              Default Fallback: <strong className="text-[#18181B]">{getDefaultApiUrl()}</strong>
             </span>
-            <span className="text-slate-400">
-              Active Resolved URL: <strong className="text-cyan-300">{getApiBaseUrl()}</strong>
+            <span className="text-[#71717A]">
+              Active Resolved URL: <strong className="text-[#52796F]">{getApiBaseUrl()}</strong>
             </span>
           </div>
 
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 font-sans">
+              <label className="block text-xs font-semibold text-[#18181B] mb-1.5 font-sans">
                 API Base URL Endpoint
               </label>
               <div className="flex gap-2.5">
@@ -234,22 +233,22 @@ export const Settings: React.FC = () => {
                     if (urlError) setUrlError(null);
                   }}
                   placeholder="http://127.0.0.1:8000"
-                  className={`flex-1 bg-obsidian-950/80 border rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-100 focus:outline-none ${
-                    urlError ? 'border-rose-500/60 focus:border-rose-500' : 'border-white/[0.08] focus:border-cyan-400'
+                  className={`flex-1 bg-[#F8FAFC] border rounded-xl px-3.5 py-2.5 text-xs font-mono text-[#18181B] focus:outline-none ${
+                    urlError ? 'border-[#EF4444]/60 focus:border-[#EF4444]' : 'border-[#E4E4E7] focus:border-[#52796F]'
                   }`}
                 />
                 <button
                   type="button"
                   onClick={handleTestBackend}
                   disabled={isTestingBackend}
-                  className="px-4 py-2.5 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  className="px-4 py-2.5 rounded-xl bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-[#18181B] text-xs font-semibold flex items-center gap-1.5 transition-colors"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isTestingBackend ? 'animate-spin' : ''}`} />
                   <span>{isTestingBackend ? 'Pinging...' : 'Test Connection'}</span>
                 </button>
               </div>
               {urlError && (
-                <p className="text-xs text-rose-400 flex items-center gap-1.5 font-medium mt-1.5">
+                <p className="text-xs text-[#B91C1C] flex items-center gap-1.5 font-medium mt-1.5">
                   <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>{urlError}</span>
                 </p>
@@ -260,19 +259,19 @@ export const Settings: React.FC = () => {
               <div
                 className={`p-3.5 rounded-xl border text-xs flex items-center gap-2.5 ${
                   backendStatus.ok
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                    : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                    ? 'bg-green-50 border-green-200 text-[#15803D]'
+                    : 'bg-amber-50 border-amber-200 text-[#B45309]'
                 }`}
               >
                 {backendStatus.ok ? (
-                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <Check className="w-4 h-4 text-[#15803D] flex-shrink-0" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-[#B45309] flex-shrink-0" />
                 )}
                 <div className="flex-1">
                   <span className="font-medium">{backendStatus.message}</span>
                   {backendStatus.latencyMs ? (
-                    <span className="font-mono ml-2 text-[11px] font-bold text-cyan-300">({backendStatus.latencyMs}ms latency)</span>
+                    <span className="font-mono ml-2 text-[11px] font-bold text-[#52796F]">({backendStatus.latencyMs}ms latency)</span>
                   ) : null}
                 </div>
               </div>
@@ -281,29 +280,29 @@ export const Settings: React.FC = () => {
         </div>
 
         {/* Section 3: Scan Engine Preferences */}
-        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/[0.06] pb-3 font-sans">
-            <Cpu className="w-4 h-4 text-cyan-400" />
+        <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
+          <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2 border-b border-[#E4E4E7] pb-3 font-sans">
+            <Cpu className="w-4 h-4 text-[#52796F]" />
             <span>Audit Engine & Regulatory Ruleset</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
             <div>
-              <label className="block text-slate-300 mb-1.5 font-semibold">Compliance Ruleset Version</label>
+              <label className="block text-[#71717A] mb-1.5 font-semibold">Compliance Ruleset Version</label>
               <input
                 type="text"
                 disabled
                 value={settings.rulesetVersion}
-                className="w-full bg-obsidian-950/50 border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-slate-400 font-mono opacity-80"
+                className="w-full bg-[#F8FAFC]/50 border border-[#E4E4E7] rounded-xl px-3.5 py-2.5 text-[#71717A] font-mono opacity-80"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 mb-1.5 font-semibold">Scan Rate Limiting Mode</label>
+              <label className="block text-[#71717A] mb-1.5 font-semibold">Scan Rate Limiting Mode</label>
               <select
                 value={settings.scanRateLimit}
                 onChange={(e) => setSettings({ ...settings, scanRateLimit: e.target.value as any })}
-                className="w-full bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-200 focus:outline-none focus:border-cyan-400 cursor-pointer"
+                className="w-full bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[#18181B] focus:outline-none focus:border-[#52796F] cursor-pointer"
               >
                 <option value="conservative">Conservative (Low footprint - 2 req/s)</option>
                 <option value="standard">Standard (Safe crawling - 5 req/s)</option>
@@ -314,9 +313,9 @@ export const Settings: React.FC = () => {
         </div>
 
         {/* Section 4: Notification Alerts */}
-        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-4">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-white/[0.06] pb-3 font-sans">
-            <Bell className="w-4 h-4 text-cyan-400" />
+        <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
+          <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2 border-b border-[#E4E4E7] pb-3 font-sans">
+            <Bell className="w-4 h-4 text-[#52796F]" />
             <span>Incident & Breach Alert Channels</span>
           </h3>
 
@@ -331,15 +330,15 @@ export const Settings: React.FC = () => {
                     notifications: { ...settings.notifications, notifyOnCritical: e.target.checked },
                   })
                 }
-                className="rounded bg-obsidian-950 border-white/[0.15] text-cyan-500 focus:ring-0"
+                className="rounded bg-[#F8FAFC] border-[#E4E4E7] text-[#52796F] focus:ring-0"
               />
-              <span className="text-slate-200 font-semibold">
+              <span className="text-[#18181B] font-semibold">
                 Immediately notify on Section 8 Critical Exposures (Aadhaar / PII leakage)
               </span>
             </label>
 
             <div>
-              <label className="block text-slate-300 mb-1.5 font-semibold">Slack / Discord Webhook URL</label>
+              <label className="block text-[#71717A] mb-1.5 font-semibold">Slack / Discord Webhook URL</label>
               <input
                 type="text"
                 value={settings.notifications.webhookUrl}
@@ -350,7 +349,7 @@ export const Settings: React.FC = () => {
                   })
                 }
                 placeholder="https://hooks.slack.com/services/..."
-                className="w-full bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-slate-100 font-mono focus:outline-none focus:border-cyan-400"
+                className="w-full bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3.5 py-2.5 text-[#18181B] font-mono focus:outline-none focus:border-[#52796F]"
               />
             </div>
           </div>
@@ -359,7 +358,7 @@ export const Settings: React.FC = () => {
         {/* Save button & Reset */}
         <div className="flex items-center justify-end gap-3 pt-2">
           {isSaved && (
-            <span className="text-xs text-emerald-400 flex items-center gap-1.5 font-semibold animate-in fade-in">
+            <span className="text-xs text-[#15803D] flex items-center gap-1.5 font-semibold animate-in fade-in">
               <Check className="w-4 h-4" />
               <span>Settings synchronized successfully</span>
             </span>
@@ -368,15 +367,15 @@ export const Settings: React.FC = () => {
           <button
             type="button"
             onClick={handleResetDefaults}
-            className="flex items-center gap-2 px-4 py-3 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 font-semibold text-xs transition-colors"
+            className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-[#71717A] font-semibold text-xs transition-colors"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
+            <RotateCcw className="w-3.5 h-3.5 text-[#52796F]" />
             <span>Reset Defaults</span>
           </button>
 
           <button
             type="submit"
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-cyan-glow transition-all active:scale-95"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs shadow-subtle transition-all active:scale-95"
           >
             <Save className="w-4 h-4" />
             <span>Save Preferences</span>

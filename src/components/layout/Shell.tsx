@@ -21,10 +21,7 @@ export const Shell: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative flex h-screen w-screen overflow-hidden bg-background text-slate-100 obsidian-grid select-none">
-      {/* Ambient Atmospheric Top Glow */}
-      <div className="obsidian-glow-top" />
-
+    <div className="relative flex h-screen w-screen overflow-hidden bg-[#F8FAFC] text-[#18181B] obsidian-grid select-none">
       {/* Desktop Collapsible Sidebar */}
       <div className="hidden lg:block h-full relative z-30 flex-shrink-0">
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
@@ -34,10 +31,10 @@ export const Shell: React.FC = () => {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div 
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative z-10 w-72 h-full bg-obsidian-900 border-r border-white/10 shadow-2xl">
+          <div className="relative z-10 w-72 h-full bg-[#FFFFFF] border-r border-[#E4E4E7] shadow-2xl">
             <Sidebar collapsed={false} onToggle={() => setMobileMenuOpen(false)} />
           </div>
         </div>
@@ -50,7 +47,7 @@ export const Shell: React.FC = () => {
           onOpenCommandPalette={() => setCommandPaletteOpen(true)}
         />
 
-        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 obsidian-radial">
+        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 bg-[#F8FAFC]">
           <div className="max-w-7xl mx-auto space-y-6 pb-12">
             <Outlet />
           </div>

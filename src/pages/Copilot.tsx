@@ -220,24 +220,21 @@ export const Copilot: React.FC = () => {
   if (!currentUser) {
     return (
       <div className="space-y-6 max-w-4xl mx-auto py-12 px-4">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-obsidian-850 via-obsidian-900 to-obsidian-950 border border-white/10 p-8 sm:p-12 shadow-2xl text-center">
-          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-violet-600/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-1/4 -mb-24 w-80 h-80 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
-
+        <div className="relative overflow-hidden rounded-3xl bg-[#FFFFFF] border border-[#E4E4E7] p-8 sm:p-12 shadow-subtle text-center">
           <div className="relative z-10 max-w-xl mx-auto space-y-6">
-            <div className="w-14 h-14 rounded-2xl bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center mx-auto shadow-violet-glow">
+            <div className="w-14 h-14 rounded-2xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] flex items-center justify-center mx-auto shadow-subtle">
               <Lock className="w-7 h-7" />
             </div>
 
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-mono font-semibold">
-                <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] text-xs font-mono font-semibold">
+                <Sparkles className="w-3.5 h-3.5 text-[#52796F]" />
                 <span>AI INVESTIGATION COPILOT • TENANT RESTRICTED</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-sans">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#18181B] tracking-tight font-sans">
                 Sign In to Access Copilot Workspace
               </h2>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-sm text-[#71717A] leading-relaxed">
                 Forensic telemetry, code remediation strategies, and AI-assisted investigation contexts are strictly isolated per tenant. Sign in to analyze your organization's security findings.
               </p>
             </div>
@@ -245,16 +242,16 @@ export const Copilot: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => { setLoginModalMode('login'); setShowLoginModal(true); }}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-violet-500 via-indigo-500 to-cyan-500 hover:from-violet-400 hover:to-cyan-400 text-white font-bold text-sm shadow-violet-glow transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-sm shadow-subtle transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Sign In to Compliance Console</span>
               </button>
               <button
                 onClick={() => { setLoginModalMode('register'); setShowLoginModal(true); }}
-                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-obsidian-800 hover:bg-obsidian-750 border border-white/10 text-slate-200 font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#18181B] font-semibold text-sm transition-all flex items-center justify-center gap-2"
               >
-                <UserPlus className="w-4 h-4 text-violet-400" />
+                <UserPlus className="w-4 h-4 text-[#52796F]" />
                 <span>Register Account</span>
               </button>
             </div>
@@ -279,12 +276,12 @@ export const Copilot: React.FC = () => {
   if (isPageLoading) {
     return (
       <div className="py-24 text-center space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center mx-auto animate-pulse shadow-violet-glow">
+        <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] flex items-center justify-center mx-auto animate-pulse shadow-subtle">
           <Sparkles className="w-6 h-6 animate-spin" style={{ animationDuration: '3s' }} />
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-white font-sans">Loading Copilot Workspace...</p>
-          <p className="text-xs text-slate-500 font-mono">Retrieving security findings and forensic telemetry from DPDP-Guard backend</p>
+          <p className="text-sm font-semibold text-[#18181B] font-sans">Loading Copilot Workspace...</p>
+          <p className="text-xs text-[#71717A] font-mono">Retrieving security findings and forensic telemetry from PrivaCraft backend</p>
         </div>
       </div>
     );
@@ -294,18 +291,18 @@ export const Copilot: React.FC = () => {
   if (pageError) {
     return (
       <div className="max-w-2xl mx-auto py-16 px-4 space-y-4">
-        <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 space-y-4 shadow-obsidian-card">
+        <div className="p-6 rounded-2xl bg-red-50 border border-red-200 text-[#B91C1C] space-y-4 shadow-subtle">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-6 h-6 text-rose-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-6 h-6 text-[#B91C1C] flex-shrink-0 mt-0.5" />
             <div className="space-y-1 flex-1">
-              <h3 className="text-sm font-bold text-white font-sans">Unable to Load Copilot Workspace</h3>
-              <p className="text-xs text-rose-200 leading-relaxed font-mono">{pageError}</p>
+              <h3 className="text-sm font-bold text-[#18181B] font-sans">Unable to Load Copilot Workspace</h3>
+              <p className="text-xs text-[#B91C1C] leading-relaxed font-mono">{pageError}</p>
             </div>
           </div>
           <div className="flex justify-end pt-2">
             <button
               onClick={loadFindings}
-              className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-100 font-semibold text-xs transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-xl bg-red-50 hover:bg-[#B91C1C]/30 border border-red-200 text-[#18181B] font-semibold text-xs transition-colors flex items-center gap-2"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Retry Loading</span>
@@ -320,19 +317,19 @@ export const Copilot: React.FC = () => {
   if (findings.length === 0 || !activeFinding) {
     return (
       <div className="max-w-2xl mx-auto py-16 px-4 text-center space-y-5">
-        <div className="w-14 h-14 rounded-2xl bg-obsidian-850 border border-white/10 text-slate-400 flex items-center justify-center mx-auto shadow-obsidian-card">
-          <ShieldAlert className="w-7 h-7 text-slate-500" />
+        <div className="w-14 h-14 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] text-[#71717A] flex items-center justify-center mx-auto shadow-subtle">
+          <ShieldAlert className="w-7 h-7 text-[#71717A]" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-bold text-white font-sans">No Security Findings Detected</h2>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+          <h2 className="text-xl font-bold text-[#18181B] font-sans">No Security Findings Detected</h2>
+          <p className="text-xs sm:text-sm text-[#71717A] max-w-md mx-auto leading-relaxed">
             Your organization has zero active findings or recorded privacy violations. Run an automated compliance scan to detect issues and unlock evidence-grounded AI investigations.
           </p>
         </div>
         <div className="flex items-center justify-center gap-3 pt-2">
           <Link
             to="/scan"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 text-white font-bold text-xs shadow-violet-glow transition-all flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs shadow-subtle transition-all flex items-center gap-2"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Launch Privacy Audit Scan</span>
@@ -340,7 +337,7 @@ export const Copilot: React.FC = () => {
           </Link>
           <button
             onClick={loadFindings}
-            className="px-4 py-2.5 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-slate-300 font-semibold text-xs transition-colors flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#18181B] font-semibold text-xs transition-colors flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Refresh</span>
@@ -355,31 +352,30 @@ export const Copilot: React.FC = () => {
   return (
     <div className="space-y-4 h-[calc(100vh-8.2rem)] flex flex-col pb-2">
       {/* 1. Page Header & Subtitle */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-obsidian-900/90 via-obsidian-850/80 to-obsidian-900/90 border border-white/[0.08] p-4 shadow-obsidian-card backdrop-blur-md flex-shrink-0">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-violet-600/10 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-4 shadow-subtle flex-shrink-0">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-violet-500/15 text-violet-300 border border-violet-500/30 flex items-center gap-1.5 shadow-violet-glow">
-                <Sparkles className="w-3 h-3 text-violet-400" />
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#F1F5F9] text-[#52796F] border border-[#E4E4E7] flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3 text-[#52796F]" />
                 AI INVESTIGATION COPILOT
               </span>
               {copilotMode === 'demo' ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-green-50 text-[#15803D] border border-green-200 flex items-center gap-1.5">
+                  <ShieldCheck className="w-3 h-3 text-[#15803D]" />
                   DEMO MODE: DETERMINISTIC GROUNDED
                 </span>
               ) : (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-violet-500/20 text-violet-200 border border-violet-500/40 flex items-center gap-1.5 shadow-violet-glow">
-                  <Server className="w-3 h-3 text-violet-300" />
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#52796F]/20 text-[#52796F] border border-[#52796F]/20 flex items-center gap-1.5">
+                  <Server className="w-3 h-3 text-[#52796F]" />
                   REAL AI MODE: FASTAPI BACKEND
                 </span>
               )}
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2 font-sans">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18181B] flex items-center gap-2 font-sans">
               <span>AI Investigation Copilot</span>
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[#71717A]">
               Turn technical evidence into clear, actionable decisions. Evidence-grounded explanations without fabricated findings.
             </p>
           </div>
@@ -387,15 +383,15 @@ export const Copilot: React.FC = () => {
           {/* Toolbar: Finding Selector & Mode Switch */}
           <div className="flex items-center gap-2.5 flex-wrap">
             {/* Finding Selector Dropdown */}
-            <div className="flex items-center gap-1.5 bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs shadow-inner">
-              <span className="text-slate-400 font-medium text-[11px] font-mono">Finding:</span>
+            <div className="flex items-center gap-1.5 bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3 py-1.5 text-xs shadow-inner">
+              <span className="text-[#71717A] font-medium text-[11px] font-mono">Finding:</span>
               <select
                 value={selectedFindingId}
                 onChange={(e) => handleSelectFinding(e.target.value)}
-                className="bg-transparent text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer max-w-[220px] truncate"
+                className="bg-transparent text-[#18181B] text-xs font-semibold focus:outline-none cursor-pointer max-w-[220px] truncate"
               >
                 {findings.map((f) => (
-                  <option key={f.id} value={f.id} className="bg-obsidian-950 text-slate-200">
+                  <option key={f.id} value={f.id} className="bg-[#F8FAFC] text-[#18181B]">
                     [{f.id}] {f.title}
                   </option>
                 ))}
@@ -403,13 +399,13 @@ export const Copilot: React.FC = () => {
             </div>
 
             {/* Mode Switch Toggle */}
-            <div className="flex items-center p-1 rounded-xl bg-obsidian-950/80 border border-white/[0.08] text-xs">
+            <div className="flex items-center p-1 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] text-xs">
               <button
                 onClick={() => setCopilotMode('demo')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
                   copilotMode === 'demo'
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-cyan-glow'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-[#F1F5F9] text-[#52796F] border border-[#52796F]'
+                    : 'text-[#71717A] hover:text-[#18181B]'
                 }`}
               >
                 Demo Fixtures
@@ -418,8 +414,8 @@ export const Copilot: React.FC = () => {
                 onClick={() => setCopilotMode('backend')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
                   copilotMode === 'backend'
-                    ? 'bg-violet-500/25 text-violet-200 border border-violet-500/40 shadow-violet-glow font-bold'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-[#F1F5F9] text-[#52796F] border border-[#52796F]'
+                    : 'text-[#71717A] hover:text-[#18181B]'
                 }`}
               >
                 FastAPI Mode
@@ -429,7 +425,7 @@ export const Copilot: React.FC = () => {
             {/* Reset / Clear Chat */}
             <button
               onClick={handleClearChat}
-              className="p-2 rounded-xl bg-obsidian-950/80 hover:bg-rose-500/10 border border-white/[0.08] hover:border-rose-500/30 text-slate-400 hover:text-rose-300 transition-colors"
+              className="p-2 rounded-xl bg-[#F8FAFC] hover:bg-red-50 border border-[#E4E4E7] hover:border-red-200 text-[#71717A] hover:text-[#B91C1C] transition-colors"
               title="Clear conversation for this finding"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -439,21 +435,21 @@ export const Copilot: React.FC = () => {
       </div>
 
       {/* 2. Active Finding Context Card */}
-      <div className="p-3.5 rounded-xl bg-obsidian-900/80 border border-white/[0.08] text-xs flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-obsidian-card backdrop-blur-md flex-shrink-0">
+      <div className="p-3.5 rounded-xl bg-[#FFFFFF] border border-[#E4E4E7] text-xs flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-subtle flex-shrink-0">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${sev.badge}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
               {sev.label}
             </span>
-            <span className="font-mono text-xs font-bold text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+            <span className="font-mono text-xs font-bold text-[#52796F] bg-[#52796F]/10 px-2 py-0.5 rounded border border-[#52796F]/20">
               {activeFinding.id}
             </span>
-            <span className="text-slate-400 font-mono text-[11px]">
+            <span className="text-[#71717A] font-mono text-[11px]">
               {activeFinding.dpdpSection}
             </span>
           </div>
-          <div className="font-semibold text-white truncate text-xs font-sans">
+          <div className="font-semibold text-[#18181B] truncate text-xs font-sans">
             {activeFinding.title}
           </div>
         </div>
@@ -462,20 +458,20 @@ export const Copilot: React.FC = () => {
         <div className="flex items-center gap-2 flex-shrink-0">
           <Link
             to={`/findings?findingId=${activeFinding.id}`}
-            className="px-2.5 py-1 rounded-lg bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 hover:text-white text-[11px] font-medium transition-colors"
+            className="px-2.5 py-1 rounded-lg bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-[#71717A] hover:text-[#18181B] text-[11px] font-medium transition-colors"
           >
             Inspect Evidence
           </Link>
           <Link
             to={`/privacy-flow?findingId=${activeFinding.id}`}
-            className="px-2.5 py-1 rounded-lg bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-cyan-300 text-[11px] font-medium transition-colors flex items-center gap-1"
+            className="px-2.5 py-1 rounded-lg bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] text-[11px] font-medium transition-colors flex items-center gap-1"
           >
-            <Network className="w-3 h-3 text-cyan-400" />
+            <Network className="w-3 h-3 text-[#52796F]" />
             <span>Privacy Flow</span>
           </Link>
           <Link
             to={`/fix-verify?findingId=${activeFinding.id}`}
-            className="px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-300 hover:bg-cyan-500/25 border border-cyan-500/30 text-[11px] font-bold transition-all flex items-center gap-1 shadow-cyan-glow"
+            className="px-2.5 py-1 rounded-lg bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] text-[11px] font-bold transition-all flex items-center gap-1 shadow-subtle"
           >
             <Wrench className="w-3 h-3" />
             <span>Fix & Verify</span>
@@ -484,7 +480,7 @@ export const Copilot: React.FC = () => {
       </div>
 
       {/* 3. Main Conversation Stream */}
-      <div className="flex-1 bg-obsidian-950/70 border border-white/[0.08] rounded-2xl p-4 overflow-y-auto space-y-4 shadow-inner min-h-0">
+      <div className="flex-1 bg-[#F8FAFC] border border-[#E4E4E7] rounded-2xl p-4 overflow-y-auto space-y-4 shadow-inner min-h-0">
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
 
@@ -499,8 +495,8 @@ export const Copilot: React.FC = () => {
               <div
                 className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ${
                   isUser
-                    ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300'
-                    : 'bg-violet-500/20 border border-violet-500/40 text-violet-300 shadow-violet-glow'
+                    ? 'bg-[#52796F]/20 border border-[#52796F]/20 text-[#52796F]'
+                    : 'bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F]'
                 }`}
               >
                 {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -508,10 +504,10 @@ export const Copilot: React.FC = () => {
 
               {/* Message Bubble Container */}
               <div
-                className={`max-w-[85%] md:max-w-[80%] rounded-2xl p-4 space-y-3.5 shadow-obsidian-card backdrop-blur-md ${
+                className={`max-w-[85%] md:max-w-[80%] rounded-2xl p-4 space-y-3.5 shadow-subtle ${
                   isUser
-                    ? 'bg-cyan-950/30 border border-cyan-400/40 text-white rounded-tr-none'
-                    : 'bg-obsidian-900/95 border border-violet-500/25 text-slate-200 rounded-tl-none shadow-violet-glow'
+                    ? 'bg-[#F1F5F9] border border-[#52796F]/20 text-[#18181B] rounded-tr-none'
+                    : 'bg-[#FFFFFF] border border-[#E4E4E7] text-[#18181B] rounded-tl-none shadow-subtle'
                 }`}
               >
                 {/* User Message Content */}
@@ -523,30 +519,30 @@ export const Copilot: React.FC = () => {
                     {/* 1. Summary paragraph */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-[10px] text-violet-400 uppercase tracking-wider font-bold">
+                        <span className="font-mono text-[10px] text-[#52796F] uppercase tracking-wider font-bold">
                           EXECUTIVE SUMMARY
                         </span>
                         {msg.isDemoResponse && (
-                          <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/20">
+                          <span className="text-[10px] font-mono bg-[#52796F]/10 text-[#52796F] px-2 py-0.5 rounded border border-[#52796F]/20">
                             DEMO FIXTURE
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-white leading-relaxed font-sans font-medium">
+                      <p className="text-xs text-[#18181B] leading-relaxed font-sans font-medium">
                         {msg.structuredResponse.summary}
                       </p>
                     </div>
 
                     {/* 2. What We Observed */}
                     {msg.structuredResponse.whatWeObserved.length > 0 && (
-                      <div className="p-3.5 rounded-xl bg-obsidian-950/80 border border-white/[0.06] space-y-1.5">
-                        <span className="font-bold text-[11px] text-slate-300 uppercase tracking-wider block font-mono">
+                      <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-1.5">
+                        <span className="font-bold text-[11px] text-[#71717A] uppercase tracking-wider block font-mono">
                           1. What We Observed (Technical Evidence)
                         </span>
-                        <ul className="space-y-1 text-slate-300 text-xs">
+                        <ul className="space-y-1 text-[#18181B] text-xs">
                           {msg.structuredResponse.whatWeObserved.map((item, idx) => (
                             <li key={idx} className="flex items-start gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-violet-400 mt-1.5 flex-shrink-0 shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6] mt-1.5 flex-shrink-0" />
                               <span>{item}</span>
                             </li>
                           ))}
@@ -556,11 +552,11 @@ export const Copilot: React.FC = () => {
 
                     {/* 3. Why It Matters */}
                     {msg.structuredResponse.whyItMatters && (
-                      <div className="p-3.5 rounded-xl bg-obsidian-950/80 border border-white/[0.06] space-y-1">
-                        <span className="font-bold text-[11px] text-cyan-300 uppercase tracking-wider block font-mono">
+                      <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-1">
+                        <span className="font-bold text-[11px] text-[#52796F] uppercase tracking-wider block font-mono">
                           2. Why It Matters (Statutory & Security Impact)
                         </span>
-                        <p className="text-slate-300 text-xs leading-relaxed font-sans">
+                        <p className="text-[#71717A] text-xs leading-relaxed font-sans">
                           {msg.structuredResponse.whyItMatters}
                         </p>
                       </div>
@@ -568,12 +564,12 @@ export const Copilot: React.FC = () => {
 
                     {/* 4. What Remains Uncertain */}
                     {msg.structuredResponse.whatRemainsUncertain && (
-                      <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-1">
-                        <span className="font-bold text-[11px] text-amber-300 uppercase tracking-wider block flex items-center gap-1.5 font-mono">
-                          <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
+                      <div className="p-3.5 rounded-xl bg-amber-50 border border-[#F59E0B]/25 space-y-1">
+                        <span className="font-bold text-[11px] text-[#B45309] uppercase tracking-wider block flex items-center gap-1.5 font-mono">
+                          <HelpCircle className="w-3.5 h-3.5 text-[#B45309]" />
                           3. What Remains Uncertain (Evidence Limits)
                         </span>
-                        <p className="text-slate-300 text-xs leading-relaxed font-sans">
+                        <p className="text-[#71717A] text-xs leading-relaxed font-sans">
                           {msg.structuredResponse.whatRemainsUncertain}
                         </p>
                       </div>
@@ -581,14 +577,14 @@ export const Copilot: React.FC = () => {
 
                     {/* 5. Recommended Actions */}
                     {msg.structuredResponse.recommendedActions.length > 0 && (
-                      <div className="p-3.5 rounded-xl bg-obsidian-950/80 border border-white/[0.06] space-y-1.5">
-                        <span className="font-bold text-[11px] text-emerald-400 uppercase tracking-wider block font-mono">
+                      <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-1.5">
+                        <span className="font-bold text-[11px] text-[#15803D] uppercase tracking-wider block font-mono">
                           4. Recommended Actions
                         </span>
-                        <ul className="space-y-1.5 text-slate-300 text-xs">
+                        <ul className="space-y-1.5 text-[#18181B] text-xs">
                           {msg.structuredResponse.recommendedActions.map((step, idx) => (
                             <li key={idx} className="flex items-start gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 flex-shrink-0 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#15803D] mt-1.5 flex-shrink-0" />
                               <span>{step}</span>
                             </li>
                           ))}
@@ -598,14 +594,14 @@ export const Copilot: React.FC = () => {
 
                     {/* 6. How to Verify the Fix */}
                     {msg.structuredResponse.howToVerify.length > 0 && (
-                      <div className="p-3.5 rounded-xl bg-obsidian-950/80 border border-white/[0.06] space-y-1.5">
-                        <span className="font-bold text-[11px] text-cyan-300 uppercase tracking-wider block font-mono">
+                      <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-1.5">
+                        <span className="font-bold text-[11px] text-[#52796F] uppercase tracking-wider block font-mono">
                           5. How to Verify the Fix
                         </span>
-                        <ul className="space-y-1 text-slate-300 text-xs">
+                        <ul className="space-y-1 text-[#18181B] text-xs">
                           {msg.structuredResponse.howToVerify.map((step, idx) => (
                             <li key={idx} className="flex items-start gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0 shadow-[0_0_6px_rgba(0,242,254,0.8)]" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6] mt-1.5 flex-shrink-0" />
                               <span>{step}</span>
                             </li>
                           ))}
@@ -616,16 +612,16 @@ export const Copilot: React.FC = () => {
                     {/* Evidence References */}
                     {msg.structuredResponse.evidenceReferences.length > 0 && (
                       <div className="pt-2 flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider font-mono">
+                        <span className="text-[10px] text-[#71717A] uppercase font-bold tracking-wider font-mono">
                           Evidence References:
                         </span>
                         {msg.structuredResponse.evidenceReferences.map((ref) => (
                           <span
                             key={ref.id}
-                            className="px-2 py-0.5 rounded font-mono text-[10px] bg-obsidian-950 text-violet-300 border border-violet-500/30 flex items-center gap-1 shadow-sm"
+                            className="px-2 py-0.5 rounded font-mono text-[10px] bg-[#F8FAFC] text-[#52796F] border border-[#E4E4E7] flex items-center gap-1 shadow-subtle"
                             title={ref.snippet}
                           >
-                            <FileCode2 className="w-3 h-3 text-violet-400" />
+                            <FileCode2 className="w-3 h-3 text-[#52796F]" />
                             {ref.label}
                           </span>
                         ))}
@@ -633,7 +629,7 @@ export const Copilot: React.FC = () => {
                     )}
 
                     {/* Legal Disclaimer */}
-                    <div className="pt-2 text-[10px] text-slate-500 italic leading-relaxed border-t border-white/[0.04]">
+                    <div className="pt-2 text-[10px] text-[#71717A] italic leading-relaxed border-t border-[#E4E4E7]">
                       {msg.structuredResponse.disclaimer}
                     </div>
                   </div>
@@ -643,8 +639,8 @@ export const Copilot: React.FC = () => {
 
                 {/* Assistant Message Actions */}
                 {!isUser && (
-                  <div className="flex items-center justify-between pt-2 border-t border-white/[0.06] text-[11px]">
-                    <span className="text-slate-500 font-mono text-[10px]">
+                  <div className="flex items-center justify-between pt-2 border-t border-[#E4E4E7] text-[11px]">
+                    <span className="text-[#71717A] font-mono text-[10px]">
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
 
@@ -661,13 +657,13 @@ export const Copilot: React.FC = () => {
                             : msg.content
                         )
                       }
-                      className="px-2.5 py-1 rounded-lg bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-400 hover:text-white flex items-center gap-1 text-[10px] transition-colors"
+                      className="px-2.5 py-1 rounded-lg bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-[#71717A] hover:text-[#18181B] flex items-center gap-1 text-[10px] transition-colors"
                       title="Copy response to clipboard"
                     >
                       {copiedMessageId === msg.id ? (
                         <>
-                          <Check className="w-3 h-3 text-emerald-400" />
-                          <span className="text-emerald-400 font-semibold">Copied</span>
+                          <Check className="w-3 h-3 text-[#15803D]" />
+                          <span className="text-[#15803D] font-semibold">Copied</span>
                         </>
                       ) : (
                         <>
@@ -686,11 +682,11 @@ export const Copilot: React.FC = () => {
         {/* Loading Indicator */}
         {isLoading && (
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-violet-500/20 border border-violet-500/40 text-violet-300 flex items-center justify-center flex-shrink-0 animate-pulse shadow-violet-glow">
+            <div className="w-8 h-8 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] flex items-center justify-center flex-shrink-0 animate-pulse shadow-subtle">
               <Bot className="w-4 h-4" />
             </div>
-            <div className="p-4 rounded-2xl bg-obsidian-900 border border-white/[0.08] text-slate-300 text-xs flex items-center gap-2.5">
-              <RefreshCw className="w-3.5 h-3.5 animate-spin text-violet-400" />
+            <div className="p-4 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] text-[#71717A] text-xs flex items-center gap-2.5">
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#52796F]" />
               <span>Analyzing technical evidence traces and statutory requirements...</span>
             </div>
           </div>
@@ -698,9 +694,9 @@ export const Copilot: React.FC = () => {
 
         {/* Error message */}
         {errorMessage && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start justify-between gap-3">
+          <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-[#B91C1C] text-xs flex items-start justify-between gap-3">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-4 h-4 text-[#B91C1C] flex-shrink-0 mt-0.5" />
               <p>{errorMessage}</p>
             </div>
             {copilotMode === 'backend' && (
@@ -709,7 +705,7 @@ export const Copilot: React.FC = () => {
                   setCopilotMode('demo');
                   setErrorMessage(null);
                 }}
-                className="px-3 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs font-bold border border-rose-500/40 flex-shrink-0"
+                className="px-3 py-1 rounded-lg bg-red-50 hover:bg-[#B91C1C]/30 text-[#18181B] text-xs font-bold border border-red-200 flex-shrink-0"
               >
                 Switch to Demo Mode
               </button>
@@ -721,11 +717,11 @@ export const Copilot: React.FC = () => {
       </div>
 
       {/* 4. Suggested Questions & Chat Input Area */}
-      <div className="p-4 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-3 flex-shrink-0">
+      <div className="p-4 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-3 flex-shrink-0">
         {/* Suggested Question Chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-shrink-0 flex items-center gap-1 font-mono">
-            <HelpCircle className="w-3 h-3 text-violet-400" />
+          <span className="text-[10px] font-bold text-[#71717A] uppercase tracking-wider flex-shrink-0 flex items-center gap-1 font-mono">
+            <HelpCircle className="w-3 h-3 text-[#52796F]" />
             Suggested:
           </span>
           {SUGGESTED_QUESTIONS.map((q, idx) => (
@@ -733,7 +729,7 @@ export const Copilot: React.FC = () => {
               key={idx}
               disabled={isLoading}
               onClick={() => handleSendMessage(q)}
-              className="px-3 py-1.5 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] hover:border-violet-500/40 text-slate-300 hover:text-white text-xs whitespace-nowrap transition-all flex-shrink-0 active:scale-95 disabled:opacity-50"
+              className="px-3 py-1.5 rounded-xl bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] hover:border-[#52796F] text-[#71717A] hover:text-[#18181B] text-xs whitespace-nowrap transition-all flex-shrink-0 active:scale-95 disabled:opacity-50"
             >
               {q}
             </button>
@@ -751,9 +747,9 @@ export const Copilot: React.FC = () => {
               onKeyDown={handleKeyDown}
               placeholder={`Ask a question about [${activeFinding.id}] (e.g. "What should a business owner do next?")...`}
               disabled={isLoading}
-              className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-obsidian-950/80 border border-white/[0.08] text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-violet-400 focus:ring-1 focus:ring-violet-400/20 resize-none max-h-24 disabled:opacity-50 font-sans"
+              className="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] text-xs text-[#18181B] placeholder-[#94A3B8] focus:outline-none focus:border-[#52796F] resize-none max-h-24 disabled:opacity-50 font-sans"
             />
-            <span className="absolute right-3 bottom-2.5 text-[10px] text-slate-500 font-mono select-none hidden sm:inline">
+            <span className="absolute right-3 bottom-2.5 text-[10px] text-[#71717A] font-mono select-none hidden sm:inline">
               ↵ to send
             </span>
           </div>
@@ -761,7 +757,7 @@ export const Copilot: React.FC = () => {
           <button
             onClick={() => handleSendMessage()}
             disabled={!inputValue.trim() || isLoading}
-            className="p-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 text-white font-bold shadow-violet-glow transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+            className="p-2.5 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold shadow-subtle transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
             title="Send message"
           >
             <Send className="w-4 h-4" />

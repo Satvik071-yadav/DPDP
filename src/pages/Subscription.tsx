@@ -177,10 +177,10 @@ export const Subscription: React.FC = () => {
   if (!authService.isAuthenticated()) {
     return (
       <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
-          <CreditCard className="w-12 h-12 text-teal-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Sign In Required</h2>
-          <p className="text-slate-400 max-w-md mx-auto mb-6">
+        <div className="bg-[#FFFFFF] border border-[#E4E4E7] rounded-2xl p-8 text-center">
+          <CreditCard className="w-12 h-12 text-[#52796F] mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-[#18181B] mb-2">Sign In Required</h2>
+          <p className="text-[#71717A] max-w-md mx-auto mb-6">
             Subscription and plan management are accessible for registered organizations. Please sign in to manage your tier.
           </p>
         </div>
@@ -194,14 +194,14 @@ export const Subscription: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Subscription & Quota Management</h1>
+            <h1 className="text-2xl font-bold text-[#18181B] tracking-tight">Subscription & Quota Management</h1>
             {currentOrg && (
-              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-[#F1F5F9] text-[#18181B] border border-[#E4E4E7]">
                 {currentOrg.name}
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-[#71717A] mt-1">
             Manage your organization's DPDP audit entitlements, website allowances, and subscription tier.
           </p>
         </div>
@@ -213,7 +213,7 @@ export const Subscription: React.FC = () => {
             setRecommendation(null);
             setQuizAnswers({});
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-semibold rounded-xl text-xs transition-all shadow-lg shadow-teal-500/10"
+          className="flex items-center gap-2 px-4 py-2 bg-[#18181B] hover:bg-[#27272A] text-white font-semibold rounded-xl text-xs transition-colors shadow-sm"
         >
           <Sparkles className="w-4 h-4" />
           Help Me Choose a Plan
@@ -222,12 +222,12 @@ export const Subscription: React.FC = () => {
 
       {/* Notifications */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-[#B91C1C] text-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
-          <button onClick={() => setError(null)} className="text-xs text-slate-400 hover:text-white">✕</button>
+          <button onClick={() => setError(null)} className="text-xs text-[#71717A] hover:text-white">✕</button>
         </div>
       )}
 
@@ -237,36 +237,36 @@ export const Subscription: React.FC = () => {
             <Check className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
-          <button onClick={() => setSuccessMsg(null)} className="text-xs text-slate-400 hover:text-white">✕</button>
+          <button onClick={() => setSuccessMsg(null)} className="text-xs text-[#71717A] hover:text-white">✕</button>
         </div>
       )}
 
       {/* Active Subscription Overview Card */}
       {subscription && (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+        <div className="bg-[#FFFFFF] border border-[#E4E4E7] rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-[#E4E4E7]">
             <div>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold uppercase tracking-wider text-teal-400">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#52796F]">
                   Active Plan
                 </span>
                 <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${
-                  subscription.status === 'active' ? 'bg-teal-500/10 text-teal-300' : 'bg-amber-500/10 text-amber-300'
+                  subscription.status === 'active' ? 'bg-teal-500/10 text-teal-300' : 'bg-amber-50 text-amber-300'
                 }`}>
                   {subscription.status.toUpperCase()}
                 </span>
               </div>
-              <h2 className="text-3xl font-extrabold text-white mt-1">
+              <h2 className="text-3xl font-extrabold text-[#18181B] mt-1">
                 {subscription.plan.name} Plan
               </h2>
-              <p className="text-sm text-slate-400 mt-1 max-w-lg">
+              <p className="text-sm text-[#71717A] mt-1 max-w-lg">
                 {subscription.plan.tagline}
               </p>
             </div>
 
-            <div className="flex items-center gap-6 text-xs text-slate-400">
-              <div className="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 min-w-[160px]">
-                <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+            <div className="flex items-center gap-6 text-xs text-[#71717A]">
+              <div className="bg-[#FFFFFF]/60 border border-[#E4E4E7] rounded-2xl p-4 min-w-[160px]">
+                <div className="flex items-center gap-1.5 text-[#71717A] mb-1">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>Current Billing Period</span>
                 </div>
@@ -280,17 +280,17 @@ export const Subscription: React.FC = () => {
           {/* Usage Meters */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
             {/* Scans Quota */}
-            <div className="bg-slate-950/50 border border-slate-800/60 rounded-2xl p-5">
+            <div className="bg-[#FFFFFF]/50 border border-[#E4E4E7]/60 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-                  <BarChart3 className="w-4 h-4 text-teal-400" />
+                <span className="text-xs font-medium text-[#71717A] flex items-center gap-1.5">
+                  <BarChart3 className="w-4 h-4 text-[#52796F]" />
                   Monthly Scans
                 </span>
                 <span className="text-xs font-bold text-white">
                   {subscription.scansUsed} / {subscription.scansLimit}
                 </span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-[#F1F5F9] rounded-full h-2 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     (subscription.scansUsed / subscription.scansLimit) >= 0.9
@@ -302,51 +302,51 @@ export const Subscription: React.FC = () => {
                   style={{ width: `${Math.min(100, Math.round((subscription.scansUsed / subscription.scansLimit) * 100))}%` }}
                 />
               </div>
-              <span className="text-[11px] text-slate-500 mt-2 block">
+              <span className="text-[11px] text-[#71717A] mt-2 block">
                 {subscription.scansRemaining} scans remaining this cycle
               </span>
             </div>
 
             {/* Websites Quota */}
-            <div className="bg-slate-950/50 border border-slate-800/60 rounded-2xl p-5">
+            <div className="bg-[#FFFFFF]/50 border border-[#E4E4E7]/60 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-                  <Globe className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-medium text-[#71717A] flex items-center gap-1.5">
+                  <Globe className="w-4 h-4 text-[#15803D]" />
                   Verified Domains
                 </span>
                 <span className="text-xs font-bold text-white">
                   {subscription.websitesCount} / {subscription.websitesLimit}
                 </span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-[#F1F5F9] rounded-full h-2 overflow-hidden">
                 <div
                   className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                   style={{ width: `${Math.min(100, Math.round((subscription.websitesCount / subscription.websitesLimit) * 100))}%` }}
                 />
               </div>
-              <span className="text-[11px] text-slate-500 mt-2 block">
+              <span className="text-[11px] text-[#71717A] mt-2 block">
                 {Math.max(0, subscription.websitesLimit - subscription.websitesCount)} domain slots available
               </span>
             </div>
 
             {/* Members Quota */}
-            <div className="bg-slate-950/50 border border-slate-800/60 rounded-2xl p-5">
+            <div className="bg-[#FFFFFF]/50 border border-[#E4E4E7]/60 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-medium text-[#71717A] flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-[#2563EB]" />
                   Team Seats
                 </span>
                 <span className="text-xs font-bold text-white">
                   {subscription.membersCount} / {subscription.membersLimit}
                 </span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-[#F1F5F9] rounded-full h-2 overflow-hidden">
                 <div
                   className="h-full bg-blue-500 rounded-full transition-all duration-500"
                   style={{ width: `${Math.min(100, Math.round((subscription.membersCount / subscription.membersLimit) * 100))}%` }}
                 />
               </div>
-              <span className="text-[11px] text-slate-500 mt-2 block">
+              <span className="text-[11px] text-[#71717A] mt-2 block">
                 {subscription.dataRetentionDays} days statutory audit log retention
               </span>
             </div>
@@ -359,17 +359,17 @@ export const Subscription: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-white">Available Plans</h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-[#71717A] mt-0.5">
               Transparent SaaS pricing in Indian Rupees (INR) designed for DPDP Act 2023 compliance.
             </p>
           </div>
 
           {/* Billing Cycle Toggle */}
-          <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 self-start">
+          <div className="flex items-center bg-[#FFFFFF] border border-[#E4E4E7] rounded-xl p-1 self-start">
             <button
               onClick={() => setBillingCycle('monthly')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                billingCycle === 'monthly' ? 'bg-slate-800 text-white shadow' : 'text-slate-400 hover:text-white'
+                billingCycle === 'monthly' ? 'bg-[#F1F5F9] text-white shadow' : 'text-[#71717A] hover:text-white'
               }`}
             >
               Monthly
@@ -377,11 +377,11 @@ export const Subscription: React.FC = () => {
             <button
               onClick={() => setBillingCycle('annual')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                billingCycle === 'annual' ? 'bg-slate-800 text-white shadow' : 'text-slate-400 hover:text-white'
+                billingCycle === 'annual' ? 'bg-[#F1F5F9] text-white shadow' : 'text-[#71717A] hover:text-white'
               }`}
             >
               Annual
-              <span className="px-1.5 py-0.2 bg-teal-500/20 text-teal-400 text-[10px] font-bold rounded-full">
+              <span className="px-1.5 py-0.2 bg-teal-500/20 text-[#52796F] text-[10px] font-bold rounded-full">
                 Save 20%
               </span>
             </button>
@@ -402,56 +402,56 @@ export const Subscription: React.FC = () => {
                 key={plan.id}
                 className={`rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all relative ${
                   plan.isPopular
-                    ? 'bg-slate-900 border-2 border-teal-500/80 shadow-xl shadow-teal-500/5'
-                    : 'bg-slate-900 border border-slate-800'
+                    ? 'bg-[#FFFFFF] border-2 border-teal-500/80 shadow-xl shadow-teal-500/5'
+                    : 'bg-[#FFFFFF] border border-[#E4E4E7]'
                 }`}
               >
                 {plan.isPopular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 text-[11px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider shadow">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#18181B] text-white text-[11px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
                     Most Popular
                   </div>
                 )}
 
                 <div>
                   <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                  <p className="text-xs text-slate-400 mt-1 min-h-[32px]">{plan.tagline}</p>
+                  <p className="text-xs text-[#71717A] mt-1 min-h-[32px]">{plan.tagline}</p>
 
                   <div className="mt-5 mb-6">
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl font-extrabold text-white">
                         ₹{price.toLocaleString('en-IN')}
                       </span>
-                      <span className="text-xs text-slate-400 font-medium">/ month</span>
+                      <span className="text-xs text-[#71717A] font-medium">/ month</span>
                     </div>
                     {billingCycle === 'annual' && (
-                      <span className="text-[11px] text-teal-400 block mt-0.5 font-medium">
+                      <span className="text-[11px] text-[#52796F] block mt-0.5 font-medium">
                         Billed annually (₹{annualTotal.toLocaleString('en-IN')}/yr)
                       </span>
                     )}
                   </div>
 
-                  <div className="space-y-3 border-t border-slate-800/80 pt-6 mb-8 text-xs text-slate-300">
+                  <div className="space-y-3 border-t border-[#E4E4E7] pt-6 mb-8 text-xs text-slate-300">
                     <div className="flex items-center gap-2.5 font-medium">
-                      <Globe className="w-4 h-4 text-teal-400 shrink-0" />
+                      <Globe className="w-4 h-4 text-[#52796F] shrink-0" />
                       <span><strong>{plan.maxWebsites}</strong> Verified Domain{plan.maxWebsites > 1 ? 's' : ''}</span>
                     </div>
                     <div className="flex items-center gap-2.5 font-medium">
-                      <BarChart3 className="w-4 h-4 text-teal-400 shrink-0" />
+                      <BarChart3 className="w-4 h-4 text-[#52796F] shrink-0" />
                       <span><strong>{plan.scansPerMonth}</strong> Audits / Month</span>
                     </div>
                     <div className="flex items-center gap-2.5 font-medium">
-                      <Users className="w-4 h-4 text-teal-400 shrink-0" />
+                      <Users className="w-4 h-4 text-[#52796F] shrink-0" />
                       <span><strong>{plan.maxMembers}</strong> Team Member{plan.maxMembers > 1 ? 's' : ''}</span>
                     </div>
                     <div className="flex items-center gap-2.5 font-medium">
-                      <Clock className="w-4 h-4 text-teal-400 shrink-0" />
+                      <Clock className="w-4 h-4 text-[#52796F] shrink-0" />
                       <span><strong>{plan.dataRetentionDays || 30} Days</strong> Audit Retention</span>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-800/40 space-y-2 text-slate-400 text-[11px]">
+                    <div className="pt-2 border-t border-[#E4E4E7]/40 space-y-2 text-[#71717A] text-[11px]">
                       {plan.features.map((feat, idx) => (
                         <div key={idx} className="flex items-center gap-2">
-                          <Check className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                          <Check className="w-3.5 h-3.5 text-[#52796F] shrink-0" />
                           <span>{feat}</span>
                         </div>
                       ))}
@@ -463,9 +463,9 @@ export const Subscription: React.FC = () => {
                   {isCurrent ? (
                     <button
                       disabled
-                      className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700 cursor-default flex items-center justify-center gap-2"
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold bg-[#F1F5F9] text-[#71717A] border border-[#E4E4E7] cursor-default flex items-center justify-center gap-2"
                     >
-                      <Check className="w-4 h-4 text-teal-400" />
+                      <Check className="w-4 h-4 text-[#52796F]" />
                       Current Plan
                     </button>
                   ) : (
@@ -474,8 +474,8 @@ export const Subscription: React.FC = () => {
                       disabled={actionLoading === plan.id}
                       className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                         plan.isPopular
-                          ? 'bg-teal-500 hover:bg-teal-400 text-slate-950 shadow-lg shadow-teal-500/10'
-                          : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
+                          ? 'bg-[#18181B] hover:bg-[#27272A] text-white shadow-sm'
+                          : 'bg-[#F1F5F9] hover:bg-slate-700 text-white border border-[#E4E4E7]'
                       }`}
                     >
                       {actionLoading === plan.id && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
@@ -491,56 +491,56 @@ export const Subscription: React.FC = () => {
 
       {/* Questionnaire Modal */}
       {showQuiz && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl p-6 sm:p-8 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#FFFFFF] border border-[#E4E4E7] rounded-3xl w-full max-w-xl p-6 sm:p-8 shadow-2xl relative">
+            <div className="flex items-center justify-between pb-4 border-b border-[#E4E4E7] mb-6">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-teal-400" />
+                <Sparkles className="w-5 h-5 text-[#52796F]" />
                 <h3 className="text-lg font-bold text-white">Plan Recommendation Engine</h3>
               </div>
-              <button onClick={resetQuiz} className="text-slate-400 hover:text-white text-sm">✕</button>
+              <button onClick={resetQuiz} className="text-[#71717A] hover:text-white text-sm">✕</button>
             </div>
 
             {recommendation ? (
               <div className="space-y-6">
                 <div className="bg-teal-500/10 border border-teal-500/30 rounded-2xl p-5 text-center">
-                  <span className="text-xs font-semibold text-teal-400 uppercase tracking-wider block mb-1">
+                  <span className="text-xs font-semibold text-[#52796F] uppercase tracking-wider block mb-1">
                     Recommended Tier For Your Workload
                   </span>
                   <h4 className="text-2xl font-black text-white">
                     {recommendation.recommendedPlanName} Plan
                   </h4>
-                  <p className="text-xs text-slate-300 mt-2 max-w-md mx-auto">
+                  <p className="text-xs text-[#18181B] mt-2 max-w-md mx-auto">
                     {recommendation.summary}
                   </p>
                 </div>
 
-                <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-2">
-                  <span className="text-xs font-semibold text-slate-400 block mb-2">
+                <div className="bg-[#FFFFFF]/60 border border-[#E4E4E7] rounded-2xl p-4 space-y-2">
+                  <span className="text-xs font-semibold text-[#71717A] block mb-2">
                     Transparent Reasoning:
                   </span>
                   {recommendation.reasoning.map((item, idx) => (
                     <div key={idx} className="flex items-start gap-2 text-xs text-slate-300">
-                      <Check className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-[#52796F] shrink-0 mt-0.5" />
                       <span>{item}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E4E4E7]">
                   <button
                     onClick={() => {
                       setRecommendation(null);
                       setQuizStep(0);
                     }}
-                    className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                    className="px-4 py-2 text-xs font-semibold text-[#71717A] hover:text-white"
                   >
                     Retake Quiz
                   </button>
                   <button
                     onClick={() => handlePlanChange(recommendation.recommendedPlan)}
                     disabled={actionLoading === recommendation.recommendedPlan}
-                    className="px-5 py-2.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-xs transition-colors flex items-center gap-2 shadow-lg shadow-teal-500/10"
+                    className="px-5 py-2.5 bg-[#18181B] hover:bg-[#27272A] text-white font-bold rounded-xl text-xs transition-colors flex items-center gap-2 shadow-sm"
                   >
                     {actionLoading === recommendation.recommendedPlan && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                     Select {recommendation.recommendedPlanName} Plan
@@ -548,18 +548,18 @@ export const Subscription: React.FC = () => {
                 </div>
               </div>
             ) : quizLoading ? (
-              <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center">
-                <RefreshCw className="w-8 h-8 animate-spin text-teal-400 mb-3" />
+              <div className="p-12 text-center text-[#71717A] flex flex-col items-center justify-center">
+                <RefreshCw className="w-8 h-8 animate-spin text-[#52796F] mb-3" />
                 <span className="text-sm">Calculating deterministic recommendation based on DPDP compliance requirements...</span>
               </div>
             ) : (
               <div className="space-y-6">
                 <div>
-                  <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+                  <div className="flex items-center justify-between text-xs text-[#71717A] mb-2">
                     <span>Question {quizStep + 1} of {quizQuestions.length}</span>
                     <span>{Math.round(((quizStep) / quizQuestions.length) * 100)}% Complete</span>
                   </div>
-                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden mb-6">
+                  <div className="w-full bg-[#F1F5F9] rounded-full h-1.5 overflow-hidden mb-6">
                     <div
                       className="h-full bg-teal-500 rounded-full transition-all duration-300"
                       style={{ width: `${Math.round(((quizStep + 1) / quizQuestions.length) * 100)}%` }}
@@ -575,26 +575,26 @@ export const Subscription: React.FC = () => {
                     <button
                       key={idx}
                       onClick={() => handleAnswerQuestion(opt.value)}
-                      className="w-full p-4 rounded-2xl bg-slate-800/40 border border-slate-800 hover:border-teal-500/60 hover:bg-slate-800/80 text-left transition-all flex items-center justify-between group"
+                      className="w-full p-4 rounded-2xl bg-[#F1F5F9]/40 border border-[#E4E4E7] hover:border-teal-500/60 hover:bg-[#F1F5F9] text-left transition-all flex items-center justify-between group"
                     >
-                      <span className="text-sm text-slate-200 group-hover:text-white font-medium">
+                      <span className="text-sm text-[#18181B] group-hover:text-white font-medium">
                         {opt.label}
                       </span>
-                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-teal-400 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-[#71717A] group-hover:text-[#52796F] transition-colors" />
                     </button>
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-800 text-xs">
+                <div className="flex items-center justify-between pt-4 border-t border-[#E4E4E7] text-xs">
                   {quizStep > 0 ? (
                     <button
                       onClick={() => setQuizStep(prev => prev - 1)}
-                      className="text-slate-400 hover:text-white"
+                      className="text-[#71717A] hover:text-white"
                     >
                       ← Back
                     </button>
                   ) : <div />}
-                  <button onClick={resetQuiz} className="text-slate-500 hover:text-slate-400">
+                  <button onClick={resetQuiz} className="text-[#71717A] hover:text-[#71717A]">
                     Cancel
                   </button>
                 </div>

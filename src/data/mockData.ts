@@ -77,7 +77,7 @@ export function trackKycProgress(step: string, formData: Record<string, any>) {
         id: 'VER-001',
         timestamp: '2026-10-14T09:30:00Z',
         status: 'pending',
-        verifiedBy: 'DPDP-Guard Automated Sandbox',
+        verifiedBy: 'PrivaCraft Automated Sandbox',
         notes: 'Initial finding recorded. Awaiting code patch approval.'
       }
     ]
@@ -397,7 +397,7 @@ export async function getCustomerKycRecord(req: Request, res: Response) {
         id: 'VER-007',
         timestamp: '2026-10-14T09:35:00Z',
         status: 'pending',
-        verifiedBy: 'DPDP-Guard Automated Sandbox',
+        verifiedBy: 'PrivaCraft Automated Sandbox',
         notes: 'BOLA/IDOR vulnerability registered. Pending sandbox authorization verification.'
       }
     ]

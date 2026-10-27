@@ -119,35 +119,35 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
       aria-modal="true"
       aria-label="Command Palette"
       data-testid="command-palette"
-      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-150"
     >
       <div 
         className="fixed inset-0" 
         onClick={onClose} 
       />
-      <div className="relative z-10 w-full max-w-2xl bg-obsidian-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="relative z-10 w-full max-w-2xl bg-[#FFFFFF] border border-[#E4E4E7] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         {/* Input box */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.08] bg-obsidian-950/70">
-          <Search className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#E4E4E7] bg-[#FFFFFF]">
+          <Search className="w-4 h-4 text-[#52796F] flex-shrink-0" />
           <input
             type="text"
             autoFocus
             placeholder="Search pages, DPDP findings, statutory sections, or actions..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+            className="w-full bg-transparent text-sm text-[#18181B] placeholder:text-[#71717A] focus:outline-none"
           />
           {query && (
             <button 
               onClick={() => setQuery('')}
-              className="text-xs text-slate-500 hover:text-slate-300 font-mono"
+              className="text-xs text-[#71717A] hover:text-[#18181B] font-mono"
             >
               Clear
             </button>
           )}
           <button 
             onClick={onClose} 
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-obsidian-800 transition-colors"
+            className="text-[#71717A] hover:text-[#18181B] p-1 rounded-lg hover:bg-[#F1F5F9] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -158,7 +158,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
           {/* Navigation group */}
           {filteredPages.length > 0 && (
             <div>
-              <div className="px-3 py-1 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
+              <div className="px-3 py-1 text-[10px] font-mono font-bold text-[#71717A] uppercase tracking-wider">
                 Workflows & Console Views
               </div>
               <div className="mt-1 space-y-0.5">
@@ -169,16 +169,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
                       key={page.path}
                       onClick={() => handleSelect(page.path)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors text-left group ${
-                        isCurrent 
-                          ? 'bg-obsidian-800 text-white border border-cyan-500/30' 
-                          : 'text-slate-300 hover:text-white hover:bg-obsidian-850 border border-transparent'
+                        isCurrent
+                          ? 'bg-[#F1F5F9] text-[#18181B] border border-[#52796F]/30'
+                          : 'text-[#71717A] hover:text-[#18181B] hover:bg-[#F1F5F9] border border-transparent'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <page.icon className={`w-4 h-4 ${isCurrent ? 'text-cyan-400' : 'text-slate-400 group-hover:text-cyan-400'}`} />
+                        <page.icon className={`w-4 h-4 ${isCurrent ? 'text-[#52796F]' : 'text-[#71717A] group-hover:text-[#52796F]'}`} />
                         <span className="font-medium">{page.title}</span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-500 group-hover:text-slate-400">{page.hint}</span>
+                      <span className="text-[10px] font-mono text-[#71717A] group-hover:text-[#18181B]">{page.hint}</span>
                     </button>
                   );
                 })}
@@ -189,7 +189,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
           {/* Findings group */}
           {filteredFindings.length > 0 && (
             <div>
-              <div className="px-3 py-1 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
+              <div className="px-3 py-1 text-[10px] font-mono font-bold text-[#71717A] uppercase tracking-wider">
                 DPDP Findings & Forensic Evidence
               </div>
               <div className="mt-1 space-y-0.5">
@@ -201,23 +201,23 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
                       key={finding.id}
                       onClick={() => handleSelect(`/findings?id=${finding.id}`)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-colors text-left group ${
-                        isCurrent 
-                          ? 'bg-obsidian-800 text-white border border-cyan-500/30' 
-                          : 'text-slate-300 hover:text-white hover:bg-obsidian-850 border border-transparent'
+                        isCurrent
+                          ? 'bg-[#F1F5F9] text-[#18181B] border border-[#52796F]/30'
+                          : 'text-[#71717A] hover:text-[#18181B] hover:bg-[#F1F5F9] border border-transparent'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
-                        <span className="font-mono text-[10px] text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20 font-bold">
+                        <span className="font-mono text-[10px] text-[#52796F] bg-[#52796F]/10 px-1.5 py-0.5 rounded border border-[#52796F]/20 font-bold">
                           {finding.id}
                         </span>
                         <span className="truncate font-medium">{finding.title}</span>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                        <span className="text-[10px] font-mono text-slate-400">{finding.dpdpSection}</span>
-                        <span className={`text-[10px] font-mono font-bold uppercase px-1.5 py-0.2 rounded ${
-                          finding.severity === 'critical' ? 'bg-rose-500/20 text-rose-300' :
-                          finding.severity === 'high' ? 'bg-amber-500/20 text-amber-300' :
-                          'bg-cyan-500/20 text-cyan-300'
+                        <span className="text-[10px] font-mono text-[#71717A]">{finding.dpdpSection}</span>
+                        <span className={`text-[10px] font-mono font-bold uppercase px-1.5 py-0.2 rounded border ${
+                          finding.severity === 'critical' ? 'bg-red-50 text-[#B91C1C] border-[#B91C1C]/20' :
+                          finding.severity === 'high' ? 'bg-amber-50 text-[#B45309] border-[#B45309]/20' :
+                          'bg-blue-50 text-[#2563EB] border-[#2563EB]/20'
                         }`}>
                           {finding.severity}
                         </span>
@@ -230,19 +230,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
           )}
 
           {allItems.length === 0 && (
-            <div className="py-12 text-center text-xs text-slate-500">
+            <div className="py-12 text-center text-xs text-[#71717A]">
               No matching pages, findings, or sections found for "{query}".
             </div>
           )}
         </div>
 
         {/* Footer shortcuts */}
-        <div className="px-4 py-2.5 bg-obsidian-950/80 border-t border-white/[0.08] text-[11px] text-slate-400 flex items-center justify-between">
+        <div className="px-4 py-2.5 bg-[#F1F5F9] border-t border-[#E4E4E7] text-[11px] text-[#71717A] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span>Navigate: <kbd className="font-mono bg-obsidian-850 px-1.5 py-0.5 rounded border border-white/10 text-slate-300">↑</kbd> <kbd className="font-mono bg-obsidian-850 px-1.5 py-0.5 rounded border border-white/10 text-slate-300">↓</kbd></span>
-            <span>Select: <kbd className="font-mono bg-obsidian-850 px-1.5 py-0.5 rounded border border-white/10 text-slate-300">↵</kbd></span>
+            <span>Navigate: <kbd className="font-mono bg-[#FFFFFF] px-1.5 py-0.5 rounded border border-[#E4E4E7] text-[#71717A]">↑</kbd> <kbd className="font-mono bg-[#FFFFFF] px-1.5 py-0.5 rounded border border-[#E4E4E7] text-[#71717A]">↓</kbd></span>
+            <span>Select: <kbd className="font-mono bg-[#FFFFFF] px-1.5 py-0.5 rounded border border-[#E4E4E7] text-[#71717A]">↵</kbd></span>
           </div>
-          <span>Close: <kbd className="font-mono bg-obsidian-850 px-1.5 py-0.5 rounded border border-white/10 text-slate-300">ESC</kbd></span>
+          <span>Close: <kbd className="font-mono bg-[#FFFFFF] px-1.5 py-0.5 rounded border border-[#E4E4E7] text-[#71717A]">ESC</kbd></span>
         </div>
       </div>
     </div>

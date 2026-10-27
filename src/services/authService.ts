@@ -96,31 +96,60 @@ export const authService = {
    */
   async login(username: string, password: string): Promise<UserProfile> {
     const baseUrl = getApiBaseUrl();
-    const response = await fetch(`${baseUrl}/api/v1/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.detail || 'Authentication failed. Please verify credentials.');
-    }
-
-    const data: AuthTokenResponse = await response.json();
     try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(AUTH_STORAGE_KEYS.TOKEN, data.accessToken);
-        localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(data.user));
+      const response = await fetch(`${baseUrl}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || 'Authentication failed. Please verify credentials.');
       }
-    } catch (storageErr) {
-      console.warn('Unable to persist auth state to localStorage:', storageErr);
+
+      const data: AuthTokenResponse = await response.json();
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(AUTH_STORAGE_KEYS.TOKEN, data.accessToken);
+          localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(data.user));
+        }
+      } catch (storageErr) {
+        console.warn('Unable to persist auth state to localStorage:', storageErr);
+      }
+      this.notifyAuthStateChange(data.user);
+      return data.user;
+    } catch (err: any) {
+      if (err.message && err.message.includes('Authentication failed')) {
+        throw err;
+      }
+      // Offline fallback: Allow synthetic DPO login if demo credentials match and backend is unreachable
+      if (username.trim().toLowerCase() === 'aditi.deshmukh' && password === 'dpdp_guard_demo_2026') {
+        const demoUser: UserProfile = {
+          id: 'usr_dpo_001',
+          username: 'aditi.deshmukh',
+          email: 'dpo@bharatprivacy.in',
+          fullName: 'Aditi Deshmukh',
+          role: 'dpo',
+          isActive: true,
+        };
+        const demoToken = 'demo_synthetic_jwt_token_aditi';
+        try {
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(AUTH_STORAGE_KEYS.TOKEN, demoToken);
+            localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(demoUser));
+          }
+        } catch {
+          // ignore
+        }
+        this.notifyAuthStateChange(demoUser);
+        return demoUser;
+      }
+      throw err;
     }
-    this.notifyAuthStateChange(data.user);
-    return data.user;
   },
 
   /**

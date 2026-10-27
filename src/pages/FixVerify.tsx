@@ -94,7 +94,7 @@ export const FixVerify: React.FC = () => {
       const records = await remediationService.getAuditHistory();
       setAuditHistory(records);
     } catch (err: any) {
-      setHistoryError(err?.message || 'Failed to connect to DPDP-Guard backend audit history service.');
+      setHistoryError(err?.message || 'Failed to connect to PrivaCraft backend audit history service.');
     } finally {
       setIsLoadingHistory(false);
     }
@@ -236,7 +236,7 @@ export const FixVerify: React.FC = () => {
       : (activeFinding.endpoint || activeFinding.affectedUrl);
 
     setVerificationLogs([
-      `[INIT] Dispatching verification probe to DPDP-Guard backend...`,
+      `[INIT] Dispatching verification probe to PrivaCraft backend...`,
       `[TARGET] ${targetUrl}`,
       `[MODE] ${testState ? 'REMEDIATED (Patched Guard Active)' : 'UNPATCHED / VULNERABLE (Simulate Exposure)'}`,
       `[CALLER] Account A (${SYNTHETIC_ACCOUNT_A.id} / ${SYNTHETIC_ACCOUNT_A.name})`,
@@ -325,24 +325,21 @@ export const FixVerify: React.FC = () => {
   if (!currentUser) {
     return (
       <div className="space-y-6 max-w-4xl mx-auto py-12 px-4">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-obsidian-850 via-obsidian-900 to-obsidian-950 border border-white/10 p-8 sm:p-12 shadow-2xl text-center">
-          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-1/4 -mb-24 w-80 h-80 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
-
+        <div className="relative overflow-hidden rounded-3xl bg-[#FFFFFF] border border-[#E4E4E7] p-8 sm:p-12 shadow-subtle text-center">
           <div className="relative z-10 max-w-xl mx-auto space-y-6">
-            <div className="w-14 h-14 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto shadow-cyan-glow">
+            <div className="w-14 h-14 rounded-2xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] flex items-center justify-center mx-auto shadow-subtle">
               <Lock className="w-7 h-7" />
             </div>
 
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono font-semibold">
-                <Wrench className="w-3.5 h-3.5 text-cyan-400" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] text-xs font-mono font-semibold">
+                <Wrench className="w-3.5 h-3.5 text-[#52796F]" />
                 <span>FIX & VERIFY WORKSPACE • TENANT RESTRICTED</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-sans">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#18181B] tracking-tight font-sans">
                 Sign In to Access Fix & Verify Workspace
               </h2>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-sm text-[#71717A] leading-relaxed">
                 Remediation code patches, sandbox probe verification, and audit trail records are strictly isolated per tenant. Sign in to inspect vulnerability remediation steps and execute live verification probes.
               </p>
             </div>
@@ -350,16 +347,16 @@ export const FixVerify: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => { setLoginModalMode('login'); setShowLoginModal(true); }}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-bold text-sm shadow-cyan-md transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-sm shadow-subtle transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Sign In to Compliance Console</span>
               </button>
               <button
                 onClick={() => { setLoginModalMode('register'); setShowLoginModal(true); }}
-                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-obsidian-800 hover:bg-obsidian-750 border border-white/10 text-slate-200 font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#18181B] font-semibold text-sm transition-all flex items-center justify-center gap-2"
               >
-                <UserPlus className="w-4 h-4 text-cyan-400" />
+                <UserPlus className="w-4 h-4 text-[#52796F]" />
                 <span>Register Account</span>
               </button>
             </div>
@@ -384,12 +381,12 @@ export const FixVerify: React.FC = () => {
   if (isPageLoading) {
     return (
       <div className="py-24 text-center space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto animate-pulse shadow-cyan-glow">
+        <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] flex items-center justify-center mx-auto animate-pulse shadow-subtle">
           <Wrench className="w-6 h-6 animate-spin" style={{ animationDuration: '3s' }} />
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-white font-sans">Loading Fix & Verify Workspace...</p>
-          <p className="text-xs text-slate-500 font-mono">Retrieving security findings, remediation patches, and audit verification history</p>
+          <p className="text-sm font-semibold text-[#18181B] font-sans">Loading Fix & Verify Workspace...</p>
+          <p className="text-xs text-[#71717A] font-mono">Retrieving security findings, remediation patches, and audit verification history</p>
         </div>
       </div>
     );
@@ -399,18 +396,18 @@ export const FixVerify: React.FC = () => {
   if (pageError) {
     return (
       <div className="max-w-2xl mx-auto py-16 px-4 space-y-4">
-        <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 space-y-4 shadow-obsidian-card">
+        <div className="p-6 rounded-2xl bg-red-50 border border-red-200 text-[#B91C1C] space-y-4 shadow-subtle">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-6 h-6 text-rose-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-6 h-6 text-[#B91C1C] flex-shrink-0 mt-0.5" />
             <div className="space-y-1 flex-1">
-              <h3 className="text-sm font-bold text-white font-sans">Unable to Load Fix & Verify Workspace</h3>
-              <p className="text-xs text-rose-200 leading-relaxed font-mono">{pageError}</p>
+              <h3 className="text-sm font-bold text-[#18181B] font-sans">Unable to Load Fix & Verify Workspace</h3>
+              <p className="text-xs text-[#B91C1C] leading-relaxed font-mono">{pageError}</p>
             </div>
           </div>
           <div className="flex justify-end pt-2">
             <button
               onClick={loadAll}
-              className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-100 font-semibold text-xs transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-xl bg-red-50 hover:bg-[#B91C1C]/30 border border-red-200 text-[#18181B] font-semibold text-xs transition-colors flex items-center gap-2"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Retry Loading</span>
@@ -425,19 +422,19 @@ export const FixVerify: React.FC = () => {
   if (findings.length === 0 || !activeFinding) {
     return (
       <div className="max-w-2xl mx-auto py-16 px-4 text-center space-y-5">
-        <div className="w-14 h-14 rounded-2xl bg-obsidian-850 border border-white/10 text-slate-400 flex items-center justify-center mx-auto shadow-obsidian-card">
-          <ShieldAlert className="w-7 h-7 text-slate-500" />
+        <div className="w-14 h-14 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] text-[#71717A] flex items-center justify-center mx-auto shadow-subtle">
+          <ShieldAlert className="w-7 h-7 text-[#71717A]" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-bold text-white font-sans">No Findings to Remediate</h2>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+          <h2 className="text-xl font-bold text-[#18181B] font-sans">No Findings to Remediate</h2>
+          <p className="text-xs sm:text-sm text-[#71717A] max-w-md mx-auto leading-relaxed">
             Your organization has zero active security findings or compliance issues requiring remediation. Run a privacy audit scan to identify exposure risks and generate automated code patches.
           </p>
         </div>
         <div className="flex items-center justify-center gap-3 pt-2">
           <Link
             to="/scan"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-cyan-glow transition-all flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs shadow-subtle transition-all flex items-center gap-2"
           >
             <Wrench className="w-3.5 h-3.5" />
             <span>Launch Privacy Audit Scan</span>
@@ -445,7 +442,7 @@ export const FixVerify: React.FC = () => {
           </Link>
           <button
             onClick={loadAll}
-            className="px-4 py-2.5 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-slate-300 font-semibold text-xs transition-colors flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#18181B] font-semibold text-xs transition-colors flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Refresh</span>
@@ -481,8 +478,8 @@ export const FixVerify: React.FC = () => {
           className={`flex items-start text-xs font-mono leading-relaxed py-0.5 px-2.5 ${
             isHighlight
               ? isVulnerable
-                ? 'bg-rose-500/20 text-rose-200 border-l-2 border-rose-500 shadow-inner'
-                : 'bg-emerald-500/20 text-emerald-200 border-l-2 border-emerald-400 shadow-inner'
+                ? 'bg-red-50 text-rose-200 border-l-2 border-rose-500 shadow-inner'
+                : 'bg-green-50 text-emerald-200 border-l-2 border-emerald-400 shadow-inner'
               : 'text-slate-300 border-l-2 border-transparent'
           }`}
         >
@@ -500,36 +497,35 @@ export const FixVerify: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       {/* 1. Header & Subtitle */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-obsidian-900/90 via-obsidian-850/80 to-obsidian-900/90 border border-white/[0.08] p-6 shadow-obsidian-card backdrop-blur-md">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-6 shadow-subtle">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5 shadow-cyan-glow">
-                <Wrench className="w-3 h-3 text-cyan-400" />
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#F1F5F9] text-[#52796F] border border-[#E4E4E7] flex items-center gap-1.5">
+                <Wrench className="w-3 h-3 text-[#52796F]" />
                 REMEDIATION & VERIFICATION ENGINE
               </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1.5">
-                <Lock className="w-3 h-3 text-amber-400" />
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#F1F5F9] text-[#71717A] border border-[#E4E4E7] flex items-center gap-1.5">
+                <Lock className="w-3 h-3 text-[#71717A]" />
                 CONTROLLED LOCAL SANDBOX
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5 font-sans">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#18181B] flex items-center gap-2.5 font-sans">
               <span>Fix & Verify</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-[#71717A] mt-0.5">
               Turn security findings into verified fixes. Run deterministic synthetic security probes in a safe, controlled local environment.
             </p>
           </div>
 
           {/* Local Demo Environment Notice Badge */}
-          <div className="p-3.5 rounded-xl bg-obsidian-950/80 border border-white/[0.08] text-xs max-w-md shadow-inner">
-            <div className="flex items-center gap-2 text-cyan-300 font-bold mb-1 font-mono text-[11px]">
-              <ShieldCheck className="w-4 h-4 text-cyan-400" />
+          <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] text-xs max-w-md shadow-inner">
+            <div className="flex items-center gap-2 text-[#52796F] font-bold mb-1 font-mono text-[11px]">
+              <ShieldCheck className="w-4 h-4 text-[#52796F]" />
               <span>Controlled Synthetic Testbed Only</span>
             </div>
-            <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-              Probing strictly targets <code className="text-cyan-300 font-mono">/testbed/api/v1/customers/...</code> with synthetic identities (Account A: <code className="text-cyan-300 font-mono">usr_demo_custA</code>, Account B: <code className="text-cyan-300 font-mono">usr_demo_custB</code>). Zero real customer data or external network egress.
+            <p className="text-[11px] text-[#71717A] leading-relaxed font-sans">
+              Probing strictly targets <code className="text-[#52796F] font-mono">/testbed/api/v1/customers/...</code> with synthetic identities (Account A: <code className="text-[#52796F] font-mono">usr_demo_custA</code>, Account B: <code className="text-[#52796F] font-mono">usr_demo_custB</code>). Zero real customer data or external network egress.
             </p>
           </div>
         </div>
@@ -538,71 +534,71 @@ export const FixVerify: React.FC = () => {
       {/* 2. Top Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Open Issues */}
-        <div className="p-5 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block font-mono">
+            <span className="text-xs font-semibold text-[#71717A] uppercase tracking-wider block font-mono">
               Open Issues
             </span>
-            <div className="text-3xl font-black font-mono text-white">
+            <div className="text-3xl font-black font-mono text-[#18181B]">
               {summaryCounts.openCount}
             </div>
-            <span className="text-[11px] text-rose-400 flex items-center gap-1 font-sans">
+            <span className="text-[11px] text-[#B91C1C] flex items-center gap-1 font-sans">
               <AlertTriangle className="w-3 h-3" />
               Requires technical remediation
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.2)]">
+          <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-[#B91C1C]">
             <ShieldAlert className="w-6 h-6" />
           </div>
         </div>
 
         {/* Fixes in Progress */}
-        <div className="p-5 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block font-mono">
+            <span className="text-xs font-semibold text-[#71717A] uppercase tracking-wider block font-mono">
               Fixes In Progress
             </span>
-            <div className="text-3xl font-black font-mono text-cyan-300">
+            <div className="text-3xl font-black font-mono text-[#52796F]">
               {summaryCounts.inProgressCount + (isPatched && activeFinding.status !== 'verified_fix' ? 1 : 0)}
             </div>
-            <span className="text-[11px] text-cyan-400 flex items-center gap-1 font-sans">
-              <RefreshCw className="w-3 h-3" />
+            <span className="text-[11px] text-[#71717A] flex items-center gap-1 font-sans">
+              <RefreshCw className="w-3 h-3 text-[#52796F]" />
               Code patch staged in sandbox
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shadow-cyan-glow">
+          <div className="w-12 h-12 rounded-2xl bg-[#F1F5F9] border border-[#E4E4E7] flex items-center justify-center text-[#52796F]">
             <Wrench className="w-6 h-6" />
           </div>
         </div>
 
         {/* Verified Fixes */}
-        <div className="p-5 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block font-mono">
+            <span className="text-xs font-semibold text-[#71717A] uppercase tracking-wider block font-mono">
               Verified Fixes
             </span>
-            <div className="text-3xl font-black font-mono text-emerald-400">
+            <div className="text-3xl font-black font-mono text-[#15803D]">
               {summaryCounts.verifiedCount}
             </div>
-            <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-sans">
+            <span className="text-[11px] text-[#15803D] flex items-center gap-1 font-sans">
               <CheckCircle2 className="w-3 h-3" />
               Deterministic probe certified
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.2)]">
+          <div className="w-12 h-12 rounded-2xl bg-green-50 border border-green-200 flex items-center justify-center text-[#15803D]">
             <ShieldCheck className="w-6 h-6" />
           </div>
         </div>
       </div>
 
       {/* 3. Findings Selection & Filter Bar */}
-      <div className="p-4 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-3">
+      <div className="p-4 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">
+            <span className="text-xs font-bold text-[#18181B] uppercase tracking-wider font-mono">
               Select Finding to Remediate:
             </span>
-            <span className="text-xs font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">
+            <span className="text-xs font-mono text-[#52796F] bg-[#52796F]/10 px-2 py-0.5 rounded border border-[#52796F]/20 font-bold">
               {filteredFindings.length} Available
             </span>
           </div>
@@ -610,29 +606,29 @@ export const FixVerify: React.FC = () => {
           <div className="flex items-center gap-2 flex-wrap">
             {/* Search Input */}
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A]" />
               <input
                 type="text"
                 placeholder="Search findings or endpoints..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-xl bg-obsidian-950/80 border border-white/[0.08] text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-400 w-52 font-mono"
+                className="pl-8 pr-3 py-1.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] text-xs text-[#18181B] placeholder-[#94A3B8] focus:outline-none focus:border-[#52796F] w-52 font-mono"
               />
             </div>
 
             {/* Severity Filter */}
-            <div className="flex items-center gap-1.5 bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-2.5 py-1 text-xs">
-              <Filter className="w-3.5 h-3.5 text-slate-400" />
+            <div className="flex items-center gap-1.5 bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-2.5 py-1 text-xs">
+              <Filter className="w-3.5 h-3.5 text-[#71717A]" />
               <select
                 value={severityFilter}
                 onChange={(e) => setSeverityFilter(e.target.value as any)}
-                className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer"
+                className="bg-transparent text-[#18181B] text-xs focus:outline-none cursor-pointer"
               >
-                <option value="all">All Severities</option>
-                <option value="critical">Critical</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
+                <option value="all" className="bg-[#F8FAFC] text-[#18181B]">All Severities</option>
+                <option value="critical" className="bg-[#F8FAFC] text-[#18181B]">Critical</option>
+                <option value="high" className="bg-[#F8FAFC] text-[#18181B]">High</option>
+                <option value="medium" className="bg-[#F8FAFC] text-[#18181B]">Medium</option>
+                <option value="low" className="bg-[#F8FAFC] text-[#18181B]">Low</option>
               </select>
             </div>
           </div>
@@ -651,21 +647,21 @@ export const FixVerify: React.FC = () => {
                 onClick={() => handleSelectFinding(f.id)}
                 className={`px-3.5 py-2.5 rounded-xl border text-left flex-shrink-0 transition-all flex items-center gap-2.5 ${
                   isSelected
-                    ? 'bg-gradient-to-r from-cyan-950/40 via-obsidian-900 to-obsidian-950 border-cyan-400/50 text-white shadow-cyan-glow'
-                    : 'bg-obsidian-950/60 hover:bg-obsidian-850 border-white/[0.06] text-slate-300'
+                    ? 'bg-[#F1F5F9] border-[#52796F] text-[#18181B] shadow-subtle'
+                    : 'bg-[#F8FAFC] hover:bg-[#F1F5F9] border-[#E4E4E7] text-[#71717A]'
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${fSev.dot}`} />
                 <div className="text-left">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono text-xs font-bold text-white">{f.id}</span>
+                    <span className="font-mono text-xs font-bold text-[#18181B]">{f.id}</span>
                     {isVerified && (
-                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded border border-emerald-500/30 font-bold">
+                      <span className="text-[10px] bg-green-50 text-[#15803D] px-1.5 py-0.2 rounded border border-green-200 font-bold">
                         VERIFIED
                       </span>
                     )}
                   </div>
-                  <div className="text-[11px] text-slate-400 max-w-[200px] truncate font-sans">
+                  <div className="text-[11px] text-[#71717A] max-w-[200px] truncate font-sans">
                     {f.title}
                   </div>
                 </div>
@@ -693,21 +689,21 @@ export const FixVerify: React.FC = () => {
               onClick={() => setCurrentStage(s.stage as any)}
               className={`p-3.5 rounded-2xl border text-left transition-all ${
                 isActive
-                  ? 'bg-gradient-to-r from-cyan-950/40 to-obsidian-900 border-cyan-400 text-white shadow-cyan-glow font-semibold'
+                  ? 'bg-[#F1F5F9] border-[#52796F] text-[#18181B] shadow-subtle font-semibold'
                   : isCompleted
-                  ? 'bg-obsidian-900/80 border-white/[0.08] text-slate-300 hover:border-white/[0.15]'
-                  : 'bg-obsidian-950/40 border-white/[0.04] text-slate-500 hover:text-slate-300'
+                  ? 'bg-[#FFFFFF] border-[#E4E4E7] text-[#18181B] hover:border-[#52796F]/20'
+                  : 'bg-[#F8FAFC] border-[#E4E4E7] text-[#71717A] hover:text-[#18181B]'
               }`}
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="font-bold text-xs font-sans">{s.title}</span>
                 {isCompleted ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D] flex-shrink-0" />
                 ) : (
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+                  <ChevronRight className="w-3.5 h-3.5 text-[#71717A]" />
                 )}
               </div>
-              <div className="text-[11px] text-slate-400 truncate font-sans">{s.desc}</div>
+              <div className="text-[11px] text-[#71717A] truncate font-sans">{s.desc}</div>
             </button>
           );
         })}
@@ -715,7 +711,7 @@ export const FixVerify: React.FC = () => {
 
       {/* STAGE 1: Review Finding */}
       {currentStage === 1 && (
-        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-6 animate-in fade-in duration-200">
+        <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-6 animate-in fade-in duration-200">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2 flex-wrap">
@@ -723,27 +719,27 @@ export const FixVerify: React.FC = () => {
                   <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
                   {sev.label}
                 </span>
-                <span className="font-mono text-xs text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">
+                <span className="font-mono text-xs text-[#52796F] bg-[#52796F]/10 px-2 py-0.5 rounded border border-[#52796F]/20 font-bold">
                   {activeFinding.id}
                 </span>
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-[#71717A] font-mono">
                   Confidence: {activeFinding.confidence}%
                 </span>
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-[#71717A] font-mono">
                   Status:{' '}
-                  <span className={activeFinding.status === 'verified_fix' ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                  <span className={activeFinding.status === 'verified_fix' ? 'text-[#15803D] font-bold' : 'text-[#B91C1C] font-bold'}>
                     {activeFinding.status.toUpperCase()}
                   </span>
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white mt-1 font-sans">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#18181B] mt-1 font-sans">
                 {activeFinding.title}
               </h2>
             </div>
 
             <button
               onClick={() => setCurrentStage(2)}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-cyan-glow transition-all active:scale-95"
+              className="px-5 py-2.5 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs flex items-center gap-2 shadow-subtle transition-all active:scale-95"
             >
               <span>Next: Inspect Evidence</span>
               <ArrowRight className="w-4 h-4" />
@@ -751,41 +747,41 @@ export const FixVerify: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-2">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-mono">
+            <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-2">
+              <span className="text-xs font-bold text-[#18181B] uppercase tracking-wider block font-mono">
                 Technical Vulnerability Summary
               </span>
-              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              <p className="text-xs text-[#71717A] leading-relaxed font-sans">
                 {activeFinding.summary}
               </p>
-              <div className="pt-2 text-[11px] text-slate-400 font-mono break-all">
-                <span className="text-slate-500">Affected Target:</span> {activeFinding.affectedUrl}
+              <div className="pt-2 text-[11px] text-[#71717A] font-mono break-all">
+                <span className="text-[#71717A]">Affected Target:</span> {activeFinding.affectedUrl}
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-2">
-              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block font-mono">
+            <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-2">
+              <span className="text-xs font-bold text-[#52796F] uppercase tracking-wider block font-mono">
                 Statutory Ground: DPDP Act 2023
               </span>
-              <div className="font-mono text-xs text-slate-200 font-semibold">
+              <div className="font-mono text-xs text-[#18181B] font-semibold">
                 {activeFinding.dpdpSection}
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed font-sans">
+              <p className="text-xs text-[#71717A] leading-relaxed font-sans">
                 {activeFinding.impactExplanation}
               </p>
             </div>
           </div>
 
           {activeFinding.id === 'DPDP-HIGH-007' && (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2">
-              <div className="flex items-center gap-2 text-amber-300 font-bold text-xs font-mono">
+            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
+              <div className="flex items-center gap-2 text-[#B45309] font-bold text-xs font-mono">
                 <KeyRound className="w-4 h-4" />
                 <span>Synthetic BOLA/IDOR Cross-Account Test Scenario</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              <p className="text-xs text-[#71717A] leading-relaxed font-sans">
                 In this test case, <strong>Account A (Rajesh Kumar Sharma)</strong> holds a valid session token. 
                 Account A queries the confidential KYC endpoint targeting <strong>Account B (Priya Patel)</strong> at 
-                <code className="text-amber-200 bg-amber-950/40 px-1.5 py-0.5 rounded font-mono ml-1">
+                <code className="text-[#B45309] bg-[#F8FAFC] px-1.5 py-0.5 rounded font-mono ml-1">
                   /api/v1/customers/usr_demo_custB/kyc-record
                 </code>.
                 Without authorization check, Account B's PAN, Aadhaar ref, mobile, and residential address leak to Account A.
@@ -793,14 +789,14 @@ export const FixVerify: React.FC = () => {
             </div>
           )}
 
-          <div className="p-4 rounded-xl bg-obsidian-950/80 border border-white/[0.06] space-y-2">
-            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block font-mono">
+          <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-2">
+            <span className="text-xs font-bold text-[#18181B] uppercase tracking-wider block font-mono">
               Remediation Action Plan
             </span>
-            <ul className="space-y-2 text-xs text-slate-300 font-sans">
+            <ul className="space-y-2 text-xs text-[#71717A] font-sans">
               {activeFinding.remediationSteps.map((step, idx) => (
                 <li key={idx} className="flex items-start gap-2.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0 shadow-[0_0_6px_rgba(0,242,254,0.8)]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6] mt-1.5 flex-shrink-0" />
                   <span>{step}</span>
                 </li>
               ))}
@@ -811,16 +807,16 @@ export const FixVerify: React.FC = () => {
 
       {/* STAGE 2: Inspect Evidence */}
       {currentStage === 2 && (
-        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-6 animate-in fade-in duration-200">
+        <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-6 animate-in fade-in duration-200">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <FileSearch className="w-5 h-5 text-cyan-400" />
-                <h3 className="text-lg font-bold text-white font-sans">
+                <FileSearch className="w-5 h-5 text-[#52796F]" />
+                <h3 className="text-lg font-bold text-[#18181B] font-sans">
                   Observed Technical Evidence & Network Telemetry
                 </h3>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-[#71717A] mt-0.5">
                 Exact intercepted request, headers, and captured personal data markers from scan probe.
               </p>
             </div>
@@ -828,13 +824,13 @@ export const FixVerify: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentStage(1)}
-                className="px-4 py-2 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 text-xs font-semibold transition-colors"
+                className="px-4 py-2 rounded-xl bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-[#18181B] text-xs font-semibold transition-colors"
               >
                 Back
               </button>
               <button
                 onClick={() => setCurrentStage(3)}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-cyan-glow transition-all active:scale-95"
+                className="px-5 py-2.5 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs flex items-center gap-2 shadow-subtle transition-all active:scale-95"
               >
                 <span>Next: Review Suggested Fix</span>
                 <ArrowRight className="w-4 h-4" />
@@ -844,28 +840,28 @@ export const FixVerify: React.FC = () => {
 
           {/* Evidence Details */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
-            <div className="p-3.5 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1">
-              <span className="text-slate-500 block text-[11px] uppercase">HTTP METHOD</span>
-              <span className="font-bold text-cyan-300">{activeFinding.observedEvidence.method}</span>
+            <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-1">
+              <span className="text-[#71717A] block text-[11px] uppercase">HTTP METHOD</span>
+              <span className="font-bold text-[#52796F]">{activeFinding.observedEvidence.method}</span>
             </div>
-            <div className="p-3.5 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1 md:col-span-2">
-              <span className="text-slate-500 block text-[11px] uppercase">TARGET URL</span>
-              <span className="text-slate-200 break-all">{activeFinding.observedEvidence.url}</span>
+            <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-1 md:col-span-2">
+              <span className="text-[#71717A] block text-[11px] uppercase">TARGET URL</span>
+              <span className="text-[#18181B] break-all">{activeFinding.observedEvidence.url}</span>
             </div>
           </div>
 
           {/* Detected PII Tags */}
           <div className="space-y-1.5">
-            <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider font-mono">
+            <span className="text-xs font-semibold text-[#71717A] block uppercase tracking-wider font-mono">
               Identified Personal Data Fields in Payload:
             </span>
             <div className="flex flex-wrap gap-2">
               {activeFinding.observedEvidence.detectedFields.map((field, idx) => (
                 <span
                   key={idx}
-                  className="px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-mono font-semibold flex items-center gap-1.5"
+                  className="px-2.5 py-1 rounded-lg bg-red-50 text-[#B91C1C] border border-red-200 text-xs font-mono font-semibold flex items-center gap-1.5"
                 >
-                  <AlertTriangle className="w-3 h-3 text-rose-400" />
+                  <AlertTriangle className="w-3 h-3 text-[#B91C1C]" />
                   {field}
                 </span>
               ))}
@@ -875,14 +871,14 @@ export const FixVerify: React.FC = () => {
           {/* Payload Display */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-300 font-sans">
+              <span className="font-semibold text-[#18181B] font-sans">
                 Intercepted Response Body / Evidence Payload:
               </span>
-              <span className="text-[11px] font-mono text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 font-bold">
+              <span className="text-[11px] font-mono text-[#B91C1C] bg-red-50 px-2 py-0.5 rounded border border-red-200 font-bold">
                 CONFIDENTIAL DATA EXPOSURE
               </span>
             </div>
-            <pre className="p-4 rounded-xl bg-obsidian-950 border border-rose-500/30 text-rose-200 font-mono text-xs overflow-x-auto shadow-inner leading-relaxed">
+            <pre className="p-4 rounded-xl bg-[#F8FAFC] border border-red-200 text-[#B91C1C] font-mono text-xs overflow-x-auto shadow-inner leading-relaxed">
               {activeFinding.observedEvidence.sanitizedPayload}
             </pre>
           </div>
@@ -891,16 +887,16 @@ export const FixVerify: React.FC = () => {
 
       {/* STAGE 3: Suggested Fix (Code Diff) */}
       {currentStage === 3 && (
-        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-6 animate-in fade-in duration-200">
+        <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-6 animate-in fade-in duration-200">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <FileCode2 className="w-5 h-5 text-cyan-400" />
-                <h3 className="text-lg font-bold text-white font-sans">
+                <FileCode2 className="w-5 h-5 text-[#52796F]" />
+                <h3 className="text-lg font-bold text-[#18181B] font-sans">
                   Engineered Code Fix ({activeFinding.codeDiff?.filePath || 'Source Code'})
                 </h3>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-[#71717A] mt-0.5">
                 {activeFinding.codeDiff?.description || 'Review the recommended patch to remediate the identified technical risk.'}
               </p>
             </div>
@@ -908,15 +904,15 @@ export const FixVerify: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleCopyCode}
-                className="px-3.5 py-2 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                className="px-3.5 py-2 rounded-xl bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-[#18181B] text-xs font-semibold flex items-center gap-1.5 transition-colors"
               >
-                {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedCode ? <Check className="w-3.5 h-3.5 text-[#15803D]" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedCode ? 'Copied to Clipboard' : 'Copy Remediation Code'}</span>
               </button>
 
               <button
                 onClick={() => setCurrentStage(4)}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-cyan-glow transition-all active:scale-95"
+                className="px-5 py-2.5 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs flex items-center gap-2 shadow-subtle transition-all active:scale-95"
               >
                 <span>Next: Apply Fix to Sandbox</span>
                 <ArrowRight className="w-4 h-4" />
@@ -925,11 +921,11 @@ export const FixVerify: React.FC = () => {
           </div>
 
           {/* Controlled demo code diff banner */}
-          <div className="px-4 py-2 rounded-xl bg-cyan-950/30 border border-cyan-500/20 text-cyan-300 text-xs flex items-center justify-between">
+          <div className="px-4 py-2 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] text-[#52796F] text-xs flex items-center justify-between">
             <span className="font-mono text-[11px] font-bold">
               CONTROLLED CODE DIFF — FOR SANCTIONED LOCAL SIMULATION ONLY
             </span>
-            <span className="text-[11px] text-slate-400 font-mono">
+            <span className="text-[11px] text-[#71717A] font-mono">
               Language: {activeFinding.codeDiff?.language || 'TypeScript'}
             </span>
           </div>
@@ -937,37 +933,37 @@ export const FixVerify: React.FC = () => {
           {/* Side by side code diff */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Before (Vulnerable) */}
-            <div className="rounded-2xl border border-rose-500/30 bg-obsidian-950 overflow-hidden flex flex-col shadow-inner">
-              <div className="px-4 py-2.5 bg-rose-950/40 border-b border-rose-500/20 flex items-center justify-between text-xs">
+            <div className="rounded-2xl border border-red-200 bg-[#F8FAFC] overflow-hidden flex flex-col shadow-inner">
+              <div className="px-4 py-2.5 bg-red-50 border-b border-red-200 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
-                  <span className="font-mono text-rose-300 font-bold">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#B91C1C]" />
+                  <span className="font-mono text-[#B91C1C] font-bold">
                     BEFORE: Vulnerable Authorization / Logic
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 uppercase font-bold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-50 text-[#B91C1C] uppercase font-bold">
                   DPDP Breach Risk
                 </span>
               </div>
-              <div className="py-3 overflow-x-auto flex-1 bg-obsidian-950/90">
+              <div className="py-3 overflow-x-auto flex-1 bg-[#F8FAFC]">
                 {renderCodeLines(activeFinding.codeDiff?.beforeCode || '// No code fixture available', true)}
               </div>
             </div>
 
             {/* After (Remediated) */}
-            <div className="rounded-2xl border border-emerald-500/30 bg-obsidian-950 overflow-hidden flex flex-col shadow-inner">
-              <div className="px-4 py-2.5 bg-emerald-950/40 border-b border-emerald-500/20 flex items-center justify-between text-xs">
+            <div className="rounded-2xl border border-green-200 bg-[#F8FAFC] overflow-hidden flex flex-col shadow-inner">
+              <div className="px-4 py-2.5 bg-green-50 border-b border-green-200 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-                  <span className="font-mono text-emerald-300 font-bold">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#15803D]" />
+                  <span className="font-mono text-[#15803D] font-bold">
                     AFTER: Remediated & Section 8 Compliant
                   </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 uppercase font-bold">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-green-50 text-[#15803D] uppercase font-bold">
                   Approved Patch
                 </span>
               </div>
-              <div className="py-3 overflow-x-auto flex-1 bg-obsidian-950/90">
+              <div className="py-3 overflow-x-auto flex-1 bg-[#F8FAFC]">
                 {renderCodeLines(activeFinding.codeDiff?.afterCode || '// Remediated patch available in sandbox', false)}
               </div>
             </div>
@@ -977,23 +973,23 @@ export const FixVerify: React.FC = () => {
 
       {/* STAGE 4: Apply Fix */}
       {currentStage === 4 && (
-        <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-6 animate-in fade-in duration-200">
+        <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-6 animate-in fade-in duration-200">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <Wrench className="w-5 h-5 text-cyan-400" />
-                <h3 className="text-lg font-bold text-white font-sans">
+                <Wrench className="w-5 h-5 text-[#52796F]" />
+                <h3 className="text-lg font-bold text-[#18181B] font-sans">
                   Sandbox Patch Deployment Workbench
                 </h3>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-[#71717A] mt-0.5">
                 Stage or revert the code patch in the isolated local sandbox to test both pass and fail paths.
               </p>
             </div>
 
             <button
               onClick={() => setCurrentStage(5)}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-cyan-glow transition-all active:scale-95"
+              className="px-5 py-2.5 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs flex items-center gap-2 shadow-subtle transition-all active:scale-95"
             >
               <span>Next: Run Verification Probe</span>
               <ArrowRight className="w-4 h-4" />
@@ -1001,24 +997,24 @@ export const FixVerify: React.FC = () => {
           </div>
 
           {/* Interactive Patch Control Card */}
-          <div className="p-6 rounded-2xl bg-obsidian-950/80 border border-white/[0.08] space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-obsidian-900/80 border border-white/[0.06]">
+          <div className="p-6 rounded-2xl bg-[#F8FAFC] border border-[#E4E4E7] space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7]">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-300 font-mono">Sandbox Runtime State:</span>
+                  <span className="text-xs font-bold text-[#18181B] font-mono">Sandbox Runtime State:</span>
                   {isPatched ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5 shadow-[0_0_8px_rgba(52,211,153,0.3)]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-green-50 text-[#15803D] border border-green-200 flex items-center gap-1.5 shadow-subtle">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
                       PATCHED (Secured)
                     </span>
                   ) : (
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1.5 shadow-[0_0_8px_rgba(244,63,94,0.3)]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-red-50 text-[#B91C1C] border border-red-200 flex items-center gap-1.5 shadow-subtle">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#B91C1C] animate-pulse" />
                       UNPATCHED (Vulnerable)
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-400 font-sans">
+                <p className="text-xs text-[#71717A] font-sans">
                   {isPatched
                     ? 'The approved remediation diff is active in the test environment. Probing will test for zero personal data exposure.'
                     : 'The target endpoint is currently running unpatched. Probing will reproduce the security vulnerability and trigger failure.'}
@@ -1031,12 +1027,12 @@ export const FixVerify: React.FC = () => {
                   <button
                     disabled={isDeployingPatch}
                     onClick={() => handleTogglePatch(true)}
-                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-[0_0_12px_rgba(52,211,153,0.4)] transition-all active:scale-95 disabled:opacity-50"
+                    className="px-4 py-2.5 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs flex items-center gap-2 shadow-subtle transition-all active:scale-95 disabled:opacity-50"
                   >
                     {isDeployingPatch ? (
-                      <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                      <RefreshCw className="w-4 h-4 animate-spin text-[#0B0F19]" />
                     ) : (
-                      <Check className="w-4 h-4 text-slate-950 stroke-[3]" />
+                      <Check className="w-4 h-4 text-[#0B0F19] stroke-[3]" />
                     )}
                     <span>{isDeployingPatch ? 'Applying Patch...' : 'Apply Remediation Patch'}</span>
                   </button>
@@ -1044,12 +1040,12 @@ export const FixVerify: React.FC = () => {
                   <button
                     disabled={isDeployingPatch}
                     onClick={() => handleTogglePatch(false)}
-                    className="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-semibold text-xs flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                    className="px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-50 border border-red-200 text-[#B91C1C] font-semibold text-xs flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {isDeployingPatch ? (
-                      <RefreshCw className="w-4 h-4 animate-spin text-rose-300" />
+                      <RefreshCw className="w-4 h-4 animate-spin text-[#B91C1C]" />
                     ) : (
-                      <RotateCcw className="w-4 h-4 text-rose-400" />
+                      <RotateCcw className="w-4 h-4 text-[#B91C1C]" />
                     )}
                     <span>Simulate Unpatched State (Test Failure Path)</span>
                   </button>
@@ -1059,41 +1055,41 @@ export const FixVerify: React.FC = () => {
 
             {/* Explanatory summary of changes applied */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
-              <div className="p-4 rounded-xl bg-obsidian-900/60 border border-white/[0.06] space-y-2">
-                <span className="font-bold text-slate-300 uppercase tracking-wider block text-[11px] font-mono">
+              <div className="p-4 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] space-y-2">
+                <span className="font-bold text-[#18181B] uppercase tracking-wider block text-[11px] font-mono">
                   What happens when Patched:
                 </span>
-                <ul className="space-y-1.5 text-slate-400">
+                <ul className="space-y-1.5 text-[#71717A]">
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D] flex-shrink-0" />
                     <span>Object authorization guard intercepts cross-account tenant queries.</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D] flex-shrink-0" />
                     <span>HTTP 403 Forbidden emitted with zero PII leakage.</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D] flex-shrink-0" />
                     <span>Security probe status updates to VERIFIED FIXED.</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="p-4 rounded-xl bg-obsidian-900/60 border border-white/[0.06] space-y-2">
-                <span className="font-bold text-slate-300 uppercase tracking-wider block text-[11px] font-mono">
+              <div className="p-4 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] space-y-2">
+                <span className="font-bold text-[#18181B] uppercase tracking-wider block text-[11px] font-mono">
                   What happens when Unpatched:
                 </span>
-                <ul className="space-y-1.5 text-slate-400">
+                <ul className="space-y-1.5 text-[#71717A]">
                   <li className="flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#B91C1C] flex-shrink-0" />
                     <span>Cross-account request succeeds without authorization validation.</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#B91C1C] flex-shrink-0" />
                     <span>Account B's confidential PII leaked in response body.</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#B91C1C] flex-shrink-0" />
                     <span>Probe status evaluates to FAIL (reproducing vulnerability).</span>
                   </li>
                 </ul>
@@ -1107,15 +1103,15 @@ export const FixVerify: React.FC = () => {
       {currentStage === 5 && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* Probe Execution Console */}
-          <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-5">
+          <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-5">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2 font-sans">
-                  <Cpu className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-lg font-bold text-[#18181B] flex items-center gap-2 font-sans">
+                  <Cpu className="w-5 h-5 text-[#52796F]" />
                   <span>Sandbox Test Verification Engine</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Executes a genuine HTTP probe against the controlled local testbed (<code className="text-cyan-300 font-mono">/testbed/api/v1/customers/...</code>) to verify zero personal data egress.
+                <p className="text-xs text-[#71717A] mt-0.5">
+                  Executes a genuine HTTP probe against the controlled local testbed (<code className="text-[#52796F] font-mono">/testbed/api/v1/customers/...</code>) to verify zero personal data egress.
                 </p>
               </div>
 
@@ -1124,10 +1120,10 @@ export const FixVerify: React.FC = () => {
                 <button
                   disabled={isVerifying}
                   onClick={() => handleRunVerification(false)}
-                  className="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 font-semibold text-xs flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
+                  className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-50 border border-red-200 text-[#B91C1C] font-semibold text-xs flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
                   title="Simulate unpatched state to observe test FAIL"
                 >
-                  <Bug className="w-3.5 h-3.5 text-rose-400" />
+                  <Bug className="w-3.5 h-3.5 text-[#B91C1C]" />
                   <span>Test Failure Path (Unpatched)</span>
                 </button>
 
@@ -1135,12 +1131,12 @@ export const FixVerify: React.FC = () => {
                 <button
                   disabled={isVerifying}
                   onClick={() => handleRunVerification(true)}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-[0_0_15px_rgba(52,211,153,0.4)] transition-all active:scale-95 disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs flex items-center gap-2 shadow-subtle transition-all active:scale-95 disabled:opacity-50"
                 >
                   {isVerifying ? (
-                    <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                    <RefreshCw className="w-4 h-4 animate-spin text-[#0B0F19]" />
                   ) : (
-                    <Play className="w-4 h-4 fill-slate-950" />
+                    <Play className="w-4 h-4 fill-[#0B0F19]" />
                   )}
                   <span>{isVerifying ? 'Running Test Probe...' : 'Run Verification Probe (Patched)'}</span>
                 </button>
@@ -1149,20 +1145,20 @@ export const FixVerify: React.FC = () => {
 
             {/* Error Notification if Verification Probe fails */}
             {verificationError && (
-              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start justify-between gap-3 text-rose-300 text-xs">
+              <div className="p-4 rounded-xl bg-red-50 border border-red-200 flex items-start justify-between gap-3 text-[#B91C1C] text-xs">
                 <div className="flex items-start gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-4 h-4 text-[#B91C1C] flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold block text-rose-200 font-sans">Verification Engine Error</span>
-                    <p className="text-slate-300 mt-0.5 font-sans leading-relaxed">{verificationError}</p>
-                    <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                    <span className="font-bold block text-[#B91C1C] font-sans">Verification Engine Error</span>
+                    <p className="text-[#71717A] mt-0.5 font-sans leading-relaxed">{verificationError}</p>
+                    <p className="text-[11px] text-[#71717A] mt-1 font-mono">
                       No synthetic pass fixture was substituted. Verify backend is active on http://127.0.0.1:8000.
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => handleRunVerification(isPatched)}
-                  className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-semibold text-xs border border-rose-500/40 flex items-center gap-1.5 transition-colors flex-shrink-0"
+                  className="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-[#B91C1C]/30 text-[#B91C1C] font-semibold text-xs border border-red-200 flex items-center gap-1.5 transition-colors flex-shrink-0"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Retry Probe</span>
@@ -1173,18 +1169,18 @@ export const FixVerify: React.FC = () => {
             {/* Progress bar */}
             {(isVerifying || lastProbeResult) && (
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+                <div className="flex items-center justify-between text-xs text-[#71717A] font-mono">
                   <span>TEST EXECUTION PROGRESS</span>
-                  <span className="text-cyan-400 font-bold">{verificationProgress}%</span>
+                  <span className="text-[#52796F] font-bold">{verificationProgress}%</span>
                 </div>
-                <div className="w-full bg-obsidian-950 rounded-full h-2 overflow-hidden border border-white/[0.08]">
+                <div className="w-full bg-[#F8FAFC] rounded-full h-2 overflow-hidden border border-[#E4E4E7]">
                   <div
                     className={`h-full transition-all duration-300 ease-out rounded-full ${
-                      lastProbeResult?.outcome === 'PASS' 
-                        ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' 
+                      lastProbeResult?.outcome === 'PASS'
+                        ? 'bg-[#15803D]'
                         : lastProbeResult?.outcome === 'FAIL'
-                        ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.8)]'
-                        : 'bg-gradient-to-r from-cyan-400 to-indigo-500'
+                        ? 'bg-[#B91C1C]'
+                        : 'bg-[#14B8A6]'
                     }`}
                     style={{ width: `${verificationProgress}%` }}
                   />
@@ -1193,7 +1189,7 @@ export const FixVerify: React.FC = () => {
             )}
 
             {/* Real-time terminal log viewer */}
-            <div className="h-52 overflow-y-auto bg-obsidian-950/95 rounded-xl p-4 font-mono text-xs text-slate-300 space-y-1.5 border border-white/[0.08] shadow-inner">
+            <div className="h-52 overflow-y-auto bg-[#F8FAFC] rounded-xl p-4 font-mono text-xs text-[#71717A] space-y-1.5 border border-[#E4E4E7] shadow-inner">
               {verificationLogs.length === 0 ? (
                 <div className="text-slate-600 italic py-12 text-center flex flex-col items-center justify-center gap-2">
                   <Terminal className="w-6 h-6 text-slate-700" />
@@ -1202,13 +1198,13 @@ export const FixVerify: React.FC = () => {
               ) : (
                 verificationLogs.map((log, i) => (
                   <div key={i} className="leading-relaxed flex items-start gap-2">
-                    <span className="text-cyan-400 font-bold select-none">{'>'}</span>
+                    <span className="text-[#52796F] font-bold select-none">{'>'}</span>
                     <span
                       className={
                         log.includes('[TEST PASSED]') || log.includes('[CERTIFIED]') || log.includes('[SAFE]')
-                          ? 'text-emerald-300 font-semibold'
+                          ? 'text-[#15803D] font-semibold'
                           : log.includes('[TEST FAILED]') || log.includes('[ALERT]') || log.includes('[DPDP BREACH]')
-                          ? 'text-rose-400 font-semibold'
+                          ? 'text-[#B91C1C] font-semibold'
                           : ''
                       }
                     >
@@ -1223,20 +1219,20 @@ export const FixVerify: React.FC = () => {
           {/* Side-by-Side Before/After Comparison Panel */}
           {lastProbeResult && (
             <div
-              className={`p-6 rounded-2xl border space-y-6 shadow-2xl transition-all ${
+              className={`p-6 rounded-2xl border space-y-6 shadow-subtle transition-all ${
                 lastProbeResult.outcome === 'PASS'
-                  ? 'bg-gradient-to-b from-obsidian-900 via-obsidian-850 to-obsidian-900 border-emerald-500/40'
-                  : 'bg-gradient-to-b from-obsidian-900 via-obsidian-850 to-obsidian-900 border-rose-500/40'
+                  ? 'bg-[#FFFFFF] border-green-200'
+                  : 'bg-[#FFFFFF] border-red-200'
               }`}
             >
               {/* Header result badge */}
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3.5">
                   <div
-                    className={`w-12 h-12 rounded-2xl border flex items-center justify-center shadow-lg ${
+                    className={`w-12 h-12 rounded-2xl border flex items-center justify-center shadow-subtle ${
                       lastProbeResult.outcome === 'PASS'
-                        ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.3)]'
-                        : 'bg-rose-500/20 border-rose-500/40 text-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.3)]'
+                        ? 'bg-green-50 border-green-200 text-[#15803D]'
+                        : 'bg-red-50 border-red-200 text-[#B91C1C]'
                     }`}
                   >
                     {lastProbeResult.outcome === 'PASS' ? (
@@ -1247,7 +1243,7 @@ export const FixVerify: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-lg font-bold text-white font-sans">
+                      <h4 className="text-lg font-bold text-[#18181B] font-sans">
                         {lastProbeResult.outcome === 'PASS'
                           ? 'Verification Successfully Confirmed: PASS'
                           : 'Probe Reproduction Confirmed: FAIL'}
@@ -1255,14 +1251,14 @@ export const FixVerify: React.FC = () => {
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
                           lastProbeResult.outcome === 'PASS'
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_8px_rgba(52,211,153,0.3)]'
-                            : 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.3)]'
+                            ? 'bg-green-50 text-[#15803D] border-green-200 shadow-subtle'
+                            : 'bg-red-50 text-[#B91C1C] border-red-200 shadow-subtle'
                         }`}
                       >
                         {lastProbeResult.outcome === 'PASS' ? 'VERIFIED FIXED' : 'VULNERABILITY DETECTED'}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                    <p className="text-xs text-[#71717A] mt-0.5 font-sans">
                       {lastProbeResult.summary}
                     </p>
                   </div>
@@ -1271,14 +1267,14 @@ export const FixVerify: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleRunVerification(isPatched)}
-                    className="px-3.5 py-2 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                    className="px-3.5 py-2 rounded-xl bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-[#71717A] text-xs font-semibold flex items-center gap-1.5 transition-colors"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Re-run Probe</span>
                   </button>
                   <Link
                     to="/findings"
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-cyan-glow transition-all"
+                    className="px-4 py-2 rounded-xl bg-[#14B8A6] hover:bg-[#405F57] text-[#0B0F19] font-bold text-xs shadow-subtle transition-all"
                   >
                     Inspect in Findings
                   </Link>
@@ -1288,61 +1284,61 @@ export const FixVerify: React.FC = () => {
               {/* Before vs After Telemetry Comparison Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                 {/* Metric 1 */}
-                <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1">
-                  <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-semibold font-mono">
+                <div className="p-4 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] space-y-1">
+                  <span className="text-[11px] text-[#71717A] uppercase tracking-wider block font-semibold font-mono">
                     HTTP Response Status
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-mono line-through text-rose-400 font-bold">200 OK</span>
+                    <span className="text-lg font-mono line-through text-[#B91C1C] font-bold">200 OK</span>
                     <span
                       className={`text-2xl font-black font-mono ${
                         lastProbeResult.response.statusCode === 403 || lastProbeResult.response.statusCode === 204
-                          ? 'text-emerald-400'
-                          : 'text-rose-400'
+                          ? 'text-[#15803D]'
+                          : 'text-[#B91C1C]'
                       }`}
                     >
                       {lastProbeResult.response.statusCode} {lastProbeResult.response.statusText}
                     </span>
                   </div>
-                  <span className="text-[11px] text-slate-400 block font-mono">
+                  <span className="text-[11px] text-[#71717A] block font-mono">
                     {lastProbeResult.outcome === 'PASS' ? 'Access rejected by auth guard' : 'Unauthorized data emitted'}
                   </span>
                 </div>
 
                 {/* Metric 2 */}
-                <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1">
-                  <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-semibold font-mono">
+                <div className="p-4 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] space-y-1">
+                  <span className="text-[11px] text-[#71717A] uppercase tracking-wider block font-semibold font-mono">
                     Exposed Personal Data Fields
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-mono line-through text-rose-400 font-bold">
+                    <span className="text-lg font-mono line-through text-[#B91C1C] font-bold">
                       {activeFinding.id === 'DPDP-HIGH-007' ? '5 leaked' : '2 leaked'}
                     </span>
                     <span
                       className={`text-2xl font-black font-mono ${
-                        lastProbeResult.response.leakedPiiFields.length === 0 ? 'text-emerald-400' : 'text-rose-400'
+                        lastProbeResult.response.leakedPiiFields.length === 0 ? 'text-[#15803D]' : 'text-[#B91C1C]'
                       }`}
                     >
                       {lastProbeResult.response.leakedPiiFields.length} leaked
                     </span>
                   </div>
-                  <span className="text-[11px] text-slate-400 block font-mono">
+                  <span className="text-[11px] text-[#71717A] block font-mono">
                     {lastProbeResult.outcome === 'PASS' ? 'Zero sensitive fields exposed' : 'Confidential PII exposed'}
                   </span>
                 </div>
 
                 {/* Metric 3 */}
-                <div className="p-4 rounded-xl bg-obsidian-950/70 border border-white/[0.06] space-y-1">
-                  <span className="text-[11px] text-slate-400 uppercase tracking-wider block font-semibold font-mono">
+                <div className="p-4 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] space-y-1">
+                  <span className="text-[11px] text-[#71717A] uppercase tracking-wider block font-semibold font-mono">
                     Statutory Compliance Score
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-mono line-through text-amber-400 font-bold">42%</span>
-                    <span className="text-2xl font-black font-mono text-cyan-300">
+                    <span className="text-lg font-mono line-through text-[#B45309] font-bold">42%</span>
+                    <span className="text-2xl font-black font-mono text-[#52796F]">
                       {lastProbeResult.complianceDelta.newComplianceScore}%
                     </span>
                   </div>
-                  <span className="text-[11px] text-emerald-400 block font-semibold font-sans">
+                  <span className="text-[11px] text-[#15803D] block font-semibold font-sans">
                     +{lastProbeResult.complianceDelta.statutoryRiskReductionPercent}% technical risk reduction
                   </span>
                 </div>
@@ -1351,47 +1347,47 @@ export const FixVerify: React.FC = () => {
               {/* Response Inspector Comparison */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Vulnerable (Before) */}
-                <div className="p-4 rounded-xl bg-obsidian-950 border border-rose-500/30 space-y-2">
+                <div className="p-4 rounded-xl bg-[#F8FAFC] border border-red-200 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-rose-300 flex items-center gap-1.5 font-mono">
-                      <span className="w-2 h-2 rounded-full bg-rose-500" />
+                    <span className="font-bold text-[#B91C1C] flex items-center gap-1.5 font-mono">
+                      <span className="w-2 h-2 rounded-full bg-[#B91C1C]" />
                       UNAUTHORIZED RESPONSE (Vulnerable)
                     </span>
-                    <span className="font-mono text-[10px] text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded border border-rose-500/30">
+                    <span className="font-mono text-[10px] text-[#B91C1C] bg-red-50 px-2 py-0.5 rounded border border-red-200">
                       HTTP 200 OK
                     </span>
                   </div>
-                  <pre className="p-3.5 rounded-lg bg-black/60 text-rose-200 font-mono text-xs overflow-x-auto max-h-48 leading-relaxed border border-white/[0.04]">
+                  <pre className="p-3.5 rounded-lg bg-[#F8FAFC] text-[#B91C1C] font-mono text-xs overflow-x-auto max-h-48 leading-relaxed border border-[#E4E4E7]">
                     {activeFinding.observedEvidence.sanitizedPayload}
                   </pre>
-                  <p className="text-[11px] text-rose-300 font-sans">
+                  <p className="text-[11px] text-[#B91C1C] font-sans">
                     Leaks personal identifiers without tenant ownership verification.
                   </p>
                 </div>
 
                 {/* Remediated (After) */}
-                <div className="p-4 rounded-xl bg-obsidian-950 border border-emerald-500/30 space-y-2">
+                <div className="p-4 rounded-xl bg-[#F8FAFC] border border-green-200 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-emerald-300 flex items-center gap-1.5 font-mono">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span className="font-bold text-[#15803D] flex items-center gap-1.5 font-mono">
+                      <span className="w-2 h-2 rounded-full bg-[#15803D]" />
                       REMEDIATED RESPONSE (Current Probe)
                     </span>
                     <span
                       className={`font-mono text-[10px] px-2 py-0.5 rounded border ${
                         lastProbeResult.response.statusCode === 403 || lastProbeResult.response.statusCode === 204
-                          ? 'text-emerald-300 bg-emerald-500/20 border-emerald-500/30'
-                          : 'text-rose-300 bg-rose-500/20 border-rose-500/30'
+                          ? 'text-[#15803D] bg-green-50 border-green-200'
+                          : 'text-[#B91C1C] bg-red-50 border-red-200'
                       }`}
                     >
                       HTTP {lastProbeResult.response.statusCode} {lastProbeResult.response.statusText}
                     </span>
                   </div>
-                  <pre className="p-3.5 rounded-lg bg-black/60 text-slate-200 font-mono text-xs overflow-x-auto max-h-48 leading-relaxed border border-white/[0.04]">
+                  <pre className="p-3.5 rounded-lg bg-[#F8FAFC] text-[#18181B] font-mono text-xs overflow-x-auto max-h-48 leading-relaxed border border-[#E4E4E7]">
                     {typeof lastProbeResult.response.body === 'object'
                       ? JSON.stringify(lastProbeResult.response.body, null, 2)
                       : String(lastProbeResult.response.body)}
                   </pre>
-                  <p className="text-[11px] text-emerald-300 font-sans">
+                  <p className="text-[11px] text-[#15803D] font-sans">
                     {lastProbeResult.explanation}
                   </p>
                 </div>
@@ -1402,15 +1398,15 @@ export const FixVerify: React.FC = () => {
       )}
 
       {/* 5. Persistent Audit History */}
-      <div className="p-6 rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md space-y-4">
+      <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="space-y-1">
-            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2 font-sans">
-              <Clock className="w-4 h-4 text-cyan-400" />
+            <h3 className="text-base sm:text-lg font-bold text-[#18181B] flex items-center gap-2 font-sans">
+              <Clock className="w-4 h-4 text-[#52796F]" />
               <span>Compliance Verification Audit Trail</span>
             </h3>
-            <p className="text-xs text-slate-400">
-              Immutable trial records persisted in backend database (<code className="text-cyan-300 font-mono text-[11px]">audit_records</code> table).
+            <p className="text-xs text-[#71717A]">
+              Immutable trial records persisted in backend database (<code className="text-[#52796F] font-mono text-[11px]">audit_records</code> table).
             </p>
           </div>
 
@@ -1418,7 +1414,7 @@ export const FixVerify: React.FC = () => {
             <button
               onClick={loadAuditHistory}
               disabled={isLoadingHistory}
-              className="px-3 py-1.5 rounded-xl bg-obsidian-950 hover:bg-obsidian-850 border border-white/[0.08] text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 rounded-xl bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-[#71717A] text-xs font-medium flex items-center gap-1.5 transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoadingHistory ? 'animate-spin' : ''}`} />
               <span>Refresh History</span>
@@ -1426,7 +1422,7 @@ export const FixVerify: React.FC = () => {
             {auditHistory.length > 0 && (
               <button
                 onClick={handleClearHistory}
-                className="px-3 py-1.5 rounded-xl bg-obsidian-950 hover:bg-rose-500/10 border border-white/[0.08] hover:border-rose-500/30 text-slate-400 hover:text-rose-300 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 rounded-xl bg-[#F8FAFC] hover:bg-red-50 border border-[#E4E4E7] hover:border-red-200 text-[#71717A] hover:text-[#B91C1C] text-xs font-medium flex items-center gap-1.5 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Clear History</span>
@@ -1437,17 +1433,17 @@ export const FixVerify: React.FC = () => {
 
         {/* Error notification if history fetch fails */}
         {historyError && (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">
+          <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-[#B91C1C] text-xs flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-[#B91C1C] flex-shrink-0" />
               <div>
                 <span className="font-bold block font-sans">Backend Database Unavailable</span>
-                <span className="text-slate-300">{historyError}</span>
+                <span className="text-[#71717A]">{historyError}</span>
               </div>
             </div>
             <button
               onClick={loadAuditHistory}
-              className="px-3 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-semibold text-xs border border-rose-500/40 flex-shrink-0"
+              className="px-3 py-1 rounded-lg bg-red-50 hover:bg-[#B91C1C]/30 text-[#B91C1C] font-semibold text-xs border border-red-200 flex-shrink-0"
             >
               Retry
             </button>
@@ -1455,9 +1451,9 @@ export const FixVerify: React.FC = () => {
         )}
 
         {/* Audit History Table */}
-        <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+        <div className="overflow-x-auto rounded-xl border border-[#E4E4E7]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-obsidian-950 text-slate-400 uppercase tracking-wider text-[11px] border-b border-white/[0.06] font-semibold font-mono">
+            <thead className="bg-[#F8FAFC] text-[#71717A] uppercase tracking-wider text-[11px] border-b border-[#E4E4E7] font-semibold font-mono">
               <tr>
                 <th className="py-3 px-4">Test Case ID</th>
                 <th className="py-3 px-4">Finding ID</th>
@@ -1470,43 +1466,43 @@ export const FixVerify: React.FC = () => {
                 <th className="py-3 px-4">Evidence Summary</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04] font-mono text-slate-300">
+            <tbody className="divide-y divide-[#E4E4E7] font-mono text-[#71717A]">
               {isLoadingHistory ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-slate-400 font-sans">
+                  <td colSpan={9} className="py-8 text-center text-[#71717A] font-sans">
                     <div className="flex items-center justify-center gap-2">
-                      <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
+                      <RefreshCw className="w-4 h-4 animate-spin text-[#52796F]" />
                       <span>Loading verification records from backend database...</span>
                     </div>
                   </td>
                 </tr>
               ) : auditHistory.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-slate-500 italic font-sans">
+                  <td colSpan={9} className="py-8 text-center text-[#71717A] italic font-sans">
                     No verification records in database. Run a verification probe above to persist an audit entry.
                   </td>
                 </tr>
               ) : (
                 auditHistory.map((item) => (
-                  <tr key={item.id} className="hover:bg-obsidian-850/50 transition-colors">
-                    <td className="py-3 px-4 font-bold text-cyan-300 whitespace-nowrap">{item.testCaseId}</td>
-                    <td className="py-3 px-4 text-slate-200 whitespace-nowrap">
-                      <span className="font-semibold text-white">{item.findingId}</span>
+                  <tr key={item.id} className="hover:bg-[#F1F5F9]/50 transition-colors">
+                    <td className="py-3 px-4 font-bold text-[#52796F] whitespace-nowrap">{item.testCaseId}</td>
+                    <td className="py-3 px-4 text-[#18181B] whitespace-nowrap">
+                      <span className="font-semibold text-[#18181B]">{item.findingId}</span>
                       {item.findingTitle && (
-                        <span className="block text-[11px] text-slate-400 font-sans truncate max-w-[200px]">
+                        <span className="block text-[11px] text-[#71717A] font-sans truncate max-w-[200px]">
                           {item.findingTitle}
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-slate-400 text-[11px] font-sans whitespace-nowrap">
+                    <td className="py-3 px-4 text-[#71717A] text-[11px] font-sans whitespace-nowrap">
                       {formatDate(item.timestamp)}
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
                           item.isPatched
-                            ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
-                            : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                            ? 'bg-green-50 text-[#15803D] border-green-200'
+                            : 'bg-amber-50 text-[#B45309] border-amber-200'
                         }`}
                       >
                         {item.isPatched ? 'Patched' : 'Unpatched'}
@@ -1516,14 +1512,14 @@ export const FixVerify: React.FC = () => {
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${
                           item.result === 'PASS'
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                            : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                            ? 'bg-green-50 text-[#15803D] border-green-200'
+                            : 'bg-red-50 text-[#B91C1C] border-red-200'
                         }`}
                       >
                         {item.result === 'PASS' ? (
-                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          <CheckCircle2 className="w-3 h-3 text-[#15803D]" />
                         ) : (
-                          <AlertTriangle className="w-3 h-3 text-rose-400" />
+                          <AlertTriangle className="w-3 h-3 text-[#B91C1C]" />
                         )}
                         {item.result}
                       </span>
@@ -1532,10 +1528,10 @@ export const FixVerify: React.FC = () => {
                       <span
                         className={`font-bold ${
                           item.statusCode === 200 && !item.isPatched
-                            ? 'text-rose-400'
+                            ? 'text-[#B91C1C]'
                             : item.statusCode === 403 || item.statusCode === 204
-                            ? 'text-emerald-400'
-                            : 'text-slate-300'
+                            ? 'text-[#15803D]'
+                            : 'text-[#71717A]'
                         }`}
                       >
                         {item.statusCode}
@@ -1545,17 +1541,17 @@ export const FixVerify: React.FC = () => {
                       <span
                         className={`capitalize text-xs font-semibold ${
                           item.remediationStatus === 'verified_fix'
-                            ? 'text-emerald-400'
-                            : 'text-amber-400'
+                            ? 'text-[#15803D]'
+                            : 'text-[#B45309]'
                         }`}
                       >
                         {item.remediationStatus.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-400 font-mono text-[11px] max-w-[200px] truncate" title={item.targetEndpoint}>
+                    <td className="py-3 px-4 text-[#71717A] font-mono text-[11px] max-w-[200px] truncate" title={item.targetEndpoint}>
                       {item.targetEndpoint}
                     </td>
-                    <td className="py-3 px-4 text-slate-400 font-sans text-xs max-w-xs truncate" title={item.evidenceSummary}>
+                    <td className="py-3 px-4 text-[#71717A] font-sans text-xs max-w-xs truncate" title={item.evidenceSummary}>
                       {item.evidenceSummary}
                     </td>
                   </tr>

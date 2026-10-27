@@ -1,6 +1,6 @@
-# DPDP-Guard: Free Hackathon Deployment Guide ($0/Month)
+# PrivaCraft: Free Hackathon Deployment Guide ($0/Month)
 
-This guide documents how to deploy **DPDP-Guard** as a public cybersecurity and privacy investigation website on **Render's Free Tier** ($0/month) backed by an **external free PostgreSQL database (Neon)** for persistent demo storage.
+This guide documents how to deploy **PrivaCraft** as a public cybersecurity and privacy investigation website on **Render's Free Tier** ($0/month) backed by an **external free PostgreSQL database (Neon)** for persistent demo storage.
 
 > [!IMPORTANT]
 > **Hackathon Demonstration Notice**: Free tier hosting is intended strictly for live judging, demonstrations, and technical verification. It is not suitable for production storage of real-world personal data or sensitive enterprise telemetry.
@@ -58,7 +58,7 @@ This guide documents how to deploy **DPDP-Guard** as a public cybersecurity and 
      ```
      postgresql://dpdp_owner:s3cr3t@ep-cool-flower-12345.us-east-2.aws.neon.tech/neondb?sslmode=require
      ```
-   *(DPDP-Guard automatically translates `sslmode=require` to `ssl=require` for asyncpg compatibility).*
+   *(PrivaCraft automatically translates `sslmode=require` to `ssl=require` for asyncpg compatibility).*
 
 ---
 
@@ -71,7 +71,7 @@ This guide documents how to deploy **DPDP-Guard** as a public cybersecurity and 
 5. Render will automatically read [`render.yaml`](./render.yaml).
 6. When prompted for environment variables:
    - `DATABASE_URL`: Paste your **Neon PostgreSQL connection string**.
-   *(If left empty, DPDP-Guard will fall back to local SQLite, which resets on container restart).*
+   *(If left empty, PrivaCraft will fall back to local SQLite, which resets on container restart).*
 7. Click **Apply**.
 8. Render will:
    - Build the unified Docker image (React frontend + FastAPI backend + Playwright Chromium).

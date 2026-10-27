@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="DPDP-Guard Security & Privacy API",
+    title="PrivaCraft Security & Privacy API",
     description="Backend services for the India DPDP Act 2023 compliance & privacy investigation SaaS.",
     version="1.0.0",
     docs_url="/docs",
@@ -125,7 +125,7 @@ if os.path.isdir(STATIC_DIR):
         if os.path.isfile(index_file):
             return FileResponse(index_file)
         return {
-            "service": "DPDP-Guard Backend API",
+            "service": "PrivaCraft Backend API",
             "status": "online",
             "documentation": "/docs",
             "health": "/api/health"
@@ -155,7 +155,7 @@ else:
     @app.get("/")
     async def root():
         return {
-            "service": "DPDP-Guard Backend API",
+            "service": "PrivaCraft Backend API",
             "status": "online",
             "documentation": "/docs",
             "health": "/api/health"

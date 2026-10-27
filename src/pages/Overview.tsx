@@ -185,10 +185,10 @@ export const Overview: React.FC = () => {
     : (verifiedFindingsCount > 0 ? 100 : 0);
 
   const severityData = [
-    { name: 'Critical', value: criticalCount, color: '#F43F5E' },
-    { name: 'High', value: highCount, color: '#F59E0B' },
-    { name: 'Medium', value: mediumCount, color: '#FACC15' },
-    { name: 'Low', value: lowCount, color: '#22D3EE' },
+    { name: 'Critical', value: criticalCount, color: '#B91C1C' },
+    { name: 'High', value: highCount, color: '#B45309' },
+    { name: 'Medium', value: mediumCount, color: '#B45309' },
+    { name: 'Low', value: lowCount, color: '#2563EB' },
   ];
 
   // 5. Weekly Exposure vs. Verified Remediation Trajectory
@@ -290,17 +290,17 @@ export const Overview: React.FC = () => {
         />
 
         {/* Guest Warning / CTA Banner */}
-        <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-cyan-sm">
+        <div className="p-4 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-subtle">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <div className="w-9 h-9 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] flex items-center justify-center text-[#52796F]">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-white uppercase tracking-wider">Public Security Gateway</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] bg-cyan-500/20 text-cyan-300 font-mono">Unauthenticated</span>
+                <span className="text-xs font-bold text-[#18181B] uppercase tracking-wider">Public Security Gateway</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] bg-[#F1F5F9] text-[#71717A] border border-[#E4E4E7] font-mono">Unauthenticated</span>
               </div>
-              <p className="text-xs text-slate-300 mt-0.5">
+              <p className="text-xs text-[#71717A] mt-0.5">
                 Telemetry and audit records are isolated per tenant. Sign in to launch target audits and review your organization's findings.
               </p>
             </div>
@@ -308,7 +308,7 @@ export const Overview: React.FC = () => {
           <div className="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
             <button
               onClick={() => { setLoginModalMode('register'); setShowLoginModal(true); }}
-              className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+              className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#18181B] font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
             >
               <UserPlus className="w-3.5 h-3.5" />
               <span>Register</span>
@@ -317,29 +317,26 @@ export const Overview: React.FC = () => {
         </div>
 
         {/* Hero Section */}
-        <div className="relative rounded-3xl bg-gradient-to-b from-obsidian-850 via-obsidian-900 to-obsidian-950 border border-white/10 p-8 sm:p-12 overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[28rem] h-[28rem] rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-1/4 -mb-24 w-96 h-96 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
-
+        <div className="relative rounded-3xl bg-[#FFFFFF] border border-[#E4E4E7] p-8 sm:p-12 overflow-hidden shadow-subtle">
           <div className="relative z-10 max-w-3xl space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold tracking-wide">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F] text-xs font-semibold tracking-wide">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>India DPDP Act 2023 Technical Compliance & Verification</span>
+              <span>PrivaCraft — Privacy Intelligence & Compliance Auditing</span>
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-5xl font-black text-[#18181B] tracking-tight leading-tight">
                 Continuous Client-Side Privacy Auditing & Exposure Defense
               </h1>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                DPDP-Guard instruments automated headless Chromium browsers to detect pre-consent tracker egress, unconsented storage writes, statutory notice omissions, and data security vulnerabilities in live web applications.
+              <p className="text-sm sm:text-base text-[#71717A] leading-relaxed">
+                PrivaCraft instruments automated headless Chromium browsers to detect pre-consent tracker egress, unconsented storage writes, statutory notice omissions, and data security vulnerabilities in live web applications under India's DPDP Act, 2023.
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 onClick={() => { setLoginModalMode('login'); setShowLoginModal(true); }}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 text-slate-950 font-bold text-sm shadow-cyan-md hover:shadow-cyan-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2"
+                className="px-6 py-3 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-sm shadow-subtle hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center gap-2"
               >
                 <span>Access Compliance Workspace</span>
                 <ArrowRight className="w-4 h-4" />
@@ -347,15 +344,15 @@ export const Overview: React.FC = () => {
 
               <button
                 onClick={() => { setLoginModalMode('register'); setShowLoginModal(true); }}
-                className="px-5 py-3 rounded-xl bg-obsidian-800 hover:bg-obsidian-750 border border-white/10 text-slate-200 font-semibold text-sm transition-all flex items-center gap-2"
+                className="px-5 py-3 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#18181B] font-semibold text-sm transition-all flex items-center gap-2"
               >
-                <UserPlus className="w-4 h-4 text-cyan-400" />
+                <UserPlus className="w-4 h-4 text-[#52796F]" />
                 <span>Create Multi-Tenant Account</span>
               </button>
 
               <Link
                 to="/scan"
-                className="px-4 py-3 rounded-xl text-slate-400 hover:text-white font-medium text-sm transition-colors flex items-center gap-1.5"
+                className="px-4 py-3 rounded-xl text-[#71717A] hover:text-[#18181B] font-medium text-sm transition-colors flex items-center gap-1.5"
               >
                 <span>Explore Scanner</span>
                 <ChevronRight className="w-4 h-4" />
@@ -366,97 +363,97 @@ export const Overview: React.FC = () => {
 
         {/* 4 Core Pillars Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+          <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] flex items-center justify-center text-[#52796F]">
               <Radar className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-white">Browser Observer</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <h3 className="text-sm font-bold text-[#18181B]">Browser Observer</h3>
+            <p className="text-xs text-[#71717A] leading-relaxed">
               Instruments headless Chromium via Playwright to observe live network requests, cookies, and localStorage writes prior to user consent.
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+          <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] flex items-center justify-center text-[#52796F]">
               <Shield className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-white">Statutory DPDP Rules</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <h3 className="text-sm font-bold text-[#18181B]">Statutory DPDP Rules</h3>
+            <p className="text-xs text-[#71717A] leading-relaxed">
               Automated rule checks against Sections 6(1) Notice, 6(4) Consent Withdrawal, 8(5) Security, 9(1) Children's Data, and 11(1) Rights.
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+          <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] flex items-center justify-center text-[#52796F]">
               <CheckCircle2 className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-white">Cryptographic Verification</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <h3 className="text-sm font-bold text-[#18181B]">Cryptographic Verification</h3>
+            <p className="text-xs text-[#71717A] leading-relaxed">
               Captures SHA-256 evidence logs and runs automated remediation probes to verify that reported privacy gaps have been patched.
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+          <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] flex items-center justify-center text-[#52796F]">
               <Database className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-bold text-white">Multi-Tenant Isolation</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <h3 className="text-sm font-bold text-[#18181B]">Multi-Tenant Isolation</h3>
+            <p className="text-xs text-[#71717A] leading-relaxed">
               Enterprise tenant isolation ensures that your organization's scans, findings, evidence logs, and settings are never exposed across tenants.
             </p>
           </div>
         </div>
 
         {/* DPDP Act 2023 Statutory Breakdown Table */}
-        <div className="p-6 rounded-2xl bg-obsidian-900/90 border border-white/[0.08] shadow-obsidian-card space-y-4">
+        <div className="p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-sm font-bold text-white">DPDP Act, 2023 — Statutory Inspection Modules</h2>
+              <FileText className="w-4 h-4 text-[#52796F]" />
+              <h2 className="text-sm font-bold text-[#18181B]">DPDP Act, 2023 — Statutory Inspection Modules</h2>
             </div>
-            <span className="text-[11px] text-slate-400">Active Rule Engine Coverage</span>
+            <span className="text-[11px] text-[#71717A]">Active Rule Engine Coverage</span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-white/[0.08] text-slate-400 font-mono text-[11px]">
+                <tr className="border-b border-[#E4E4E7] text-[#71717A] font-mono text-[11px]">
                   <th className="py-2.5 px-3">Statutory Provision</th>
                   <th className="py-2.5 px-3">Evaluation Scope</th>
                   <th className="py-2.5 px-3">Severity</th>
                   <th className="py-2.5 px-3">Automated Telemetry Method</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04] text-slate-300">
+              <tbody className="divide-y divide-[#E4E4E7] text-[#18181B]">
                 <tr>
-                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 6(1)</td>
+                  <td className="py-3 px-3 font-mono font-semibold text-[#52796F]">Section 6(1)</td>
                   <td className="py-3 px-3">Notice Requirements & Itemised Purpose Specification</td>
-                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">HIGH</span></td>
-                  <td className="py-3 px-3 text-slate-400">DOM extraction of consent notice and purpose disclosure</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-[#B45309] border border-amber-200">HIGH</span></td>
+                  <td className="py-3 px-3 text-[#71717A]">DOM extraction of consent notice and purpose disclosure</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 6(4)</td>
+                  <td className="py-3 px-3 font-mono font-semibold text-[#52796F]">Section 6(4)</td>
                   <td className="py-3 px-3">Ease of Consent Withdrawal (Equal friction)</td>
-                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">HIGH</span></td>
-                  <td className="py-3 px-3 text-slate-400">Withdrawal link accessibility and friction comparison</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-[#B45309] border border-amber-200">HIGH</span></td>
+                  <td className="py-3 px-3 text-[#71717A]">Withdrawal link accessibility and friction comparison</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 8(5)</td>
+                  <td className="py-3 px-3 font-mono font-semibold text-[#52796F]">Section 8(5)</td>
                   <td className="py-3 px-3">Reasonable Security Safeguards & Egress Protection</td>
-                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">CRITICAL</span></td>
-                  <td className="py-3 px-3 text-slate-400">Network egress capture, tracker detection, cookie auditing</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-[#B91C1C] border border-red-200">CRITICAL</span></td>
+                  <td className="py-3 px-3 text-[#71717A]">Network egress capture, tracker detection, cookie auditing</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 9(1)</td>
+                  <td className="py-3 px-3 font-mono font-semibold text-[#52796F]">Section 9(1)</td>
                   <td className="py-3 px-3">Verifiable Parental Consent for Children's Data</td>
-                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">CRITICAL</span></td>
-                  <td className="py-3 px-3 text-slate-400">Age gating, profiling script checks, parental consent mechanism</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-[#B91C1C] border border-red-200">CRITICAL</span></td>
+                  <td className="py-3 px-3 text-[#71717A]">Age gating, profiling script checks, parental consent mechanism</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-3 font-mono font-semibold text-cyan-300">Section 11(1)</td>
+                  <td className="py-3 px-3 font-mono font-semibold text-[#52796F]">Section 11(1)</td>
                   <td className="py-3 px-3">Data Principal Rights: Access, Correction & Erasure</td>
-                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">MEDIUM</span></td>
-                  <td className="py-3 px-3 text-slate-400">Privacy policy rights clause parsing and DPO contact verification</td>
+                  <td className="py-3 px-3"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-[#B45309] border border-amber-200">MEDIUM</span></td>
+                  <td className="py-3 px-3 text-[#71717A]">Privacy policy rights clause parsing and DPO contact verification</td>
                 </tr>
               </tbody>
             </table>
@@ -464,8 +461,8 @@ export const Overview: React.FC = () => {
         </div>
 
         {/* Disclaimer */}
-        <div className="p-4 rounded-2xl bg-obsidian-900/80 border border-white/[0.07] flex items-start gap-3 text-xs text-slate-400">
-          <AlertCircle className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+        <div className="p-4 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] flex items-start gap-3 text-xs text-[#71717A]">
+          <AlertCircle className="w-4 h-4 text-[#52796F] flex-shrink-0 mt-0.5" />
           <p className="text-[11px] leading-relaxed">
             Technical audit scores, exposure categories, and automated observations represent an advisory security assessment of observed system behaviors under India's Digital Personal Data Protection Act, 2023. They identify potential compliance risk indicators and do not constitute formal legal adjudication.
           </p>
@@ -477,20 +474,16 @@ export const Overview: React.FC = () => {
   return (
     <div className="space-y-6 pb-8">
       {/* 1. Hero Command Center & Target Audit Launchpad */}
-      <div className="relative rounded-2xl bg-gradient-to-b from-obsidian-850 via-obsidian-900 to-obsidian-950 border border-cyan-500/30 p-6 sm:p-8 overflow-hidden shadow-2xl">
-        {/* Subtle Atmospheric Top Glow */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 -mb-20 w-80 h-80 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
-
+      <div className="relative rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-6 sm:p-8 overflow-hidden shadow-subtle">
         <div className="relative z-10 space-y-6">
           {/* Top Status Badges */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 flex items-center gap-1.5 shadow-cyan-sm">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                DPDP ACT 2023 REGULATORY AUDITOR
+              <span className="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-[#F1F5F9] text-[#52796F] border border-[#E4E4E7] flex items-center gap-1.5 shadow-subtle">
+                <span className="w-2 h-2 rounded-full bg-[#52796F] animate-pulse" />
+                PRIVACRAFT REGULATORY AUDITOR
               </span>
-              <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-[10px] font-mono bg-obsidian-950 text-slate-400 border border-white/10">
+              <span className="hidden sm:inline-flex px-2.5 py-1 rounded-full text-[10px] font-mono bg-[#F8FAFC] text-[#71717A] border border-[#E4E4E7]">
                 SANDBOX ENGINE v2.4
               </span>
             </div>
@@ -498,34 +491,34 @@ export const Overview: React.FC = () => {
             <div className="flex items-center gap-2 text-xs">
               <Link
                 to="/fix-verify"
-                className="px-3 py-1.5 rounded-xl bg-obsidian-950/80 hover:bg-obsidian-800 border border-white/10 text-slate-300 hover:text-white font-medium transition-colors flex items-center gap-2 group"
+                className="px-3 py-1.5 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#71717A] hover:text-[#18181B] font-medium transition-colors flex items-center gap-2 group"
               >
                 <span>Verify Pending Patches</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 group-hover:scale-125 transition-transform" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#15803D] group-hover:scale-125 transition-transform" />
               </Link>
             </div>
           </div>
 
           {/* Headline & Mission Context */}
           <div className="max-w-3xl space-y-2">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Discover exposure. Understand risk.{' '}
-              <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-cyan-200 bg-clip-text text-transparent">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#18181B] tracking-tight leading-tight">
+              Crafting trust through privacy.{' '}
+              <span className="text-[#52796F]">
                 Verify every fix.
               </span>
             </h2>
-            <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed font-normal">
-              Continuous technical privacy auditing platform engineered to uncover personal data leakage, unauthorized third-party tracking, and object-level authorization vulnerabilities across modern web architectures.
+            <p className="text-xs sm:text-sm text-[#71717A] leading-relaxed font-normal">
+              PrivaCraft is a continuous technical privacy auditing platform engineered to uncover personal data leakage, unauthorized third-party tracking, and statutory compliance gaps across modern web architectures.
             </p>
           </div>
 
           {/* Prominent Website Scan Input */}
           <div className="pt-2">
             <form onSubmit={handleQuickScan} className="space-y-3">
-              <div className="flex flex-col md:flex-row gap-2.5 p-2 rounded-2xl bg-obsidian-950/90 border border-cyan-500/40 shadow-cyan-glow backdrop-blur-md">
+              <div className="flex flex-col md:flex-row gap-2.5 p-2 rounded-2xl bg-[#F8FAFC] border border-[#E4E4E7] shadow-subtle">
                 {/* URL Input */}
-                <div className="flex-1 flex items-center gap-3 px-3.5 py-2.5 bg-obsidian-900/80 rounded-xl border border-white/10 focus-within:border-cyan-400/80 transition-colors">
-                  <Globe className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                <div className="flex-1 flex items-center gap-3 px-3.5 py-2.5 bg-[#F1F5F9] rounded-xl border border-[#E4E4E7] focus-within:border-[#52796F] transition-colors">
+                  <Globe className="w-4 h-4 text-[#52796F] flex-shrink-0" />
                   <input
                     type="text"
                     placeholder="Enter target website URL (e.g. https://your-business.in)"
@@ -534,13 +527,13 @@ export const Overview: React.FC = () => {
                       setQuickUrl(e.target.value);
                       setUrlError('');
                     }}
-                    className="w-full bg-transparent text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none font-mono"
+                    className="w-full bg-transparent text-xs sm:text-sm text-[#18181B] placeholder:text-[#71717A] focus:outline-none font-mono"
                   />
                   {quickUrl && (
                     <button
                       type="button"
                       onClick={() => setQuickUrl('')}
-                      className="text-slate-500 hover:text-slate-300 text-xs px-1 font-mono"
+                      className="text-[#71717A] hover:text-[#18181B] text-xs px-1 font-mono"
                     >
                       Clear
                     </button>
@@ -552,7 +545,7 @@ export const Overview: React.FC = () => {
                   <select
                     value={quickProfile}
                     onChange={(e) => setQuickProfile(e.target.value as ScanProfile)}
-                    className="w-full h-full min-h-[44px] bg-obsidian-900/90 border border-white/10 rounded-xl px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-cyan-400 transition-colors cursor-pointer"
+                    className="w-full h-full min-h-[44px] bg-[#F1F5F9] border border-[#E4E4E7] rounded-xl px-3 py-2 text-xs font-medium text-[#18181B] focus:outline-none focus:border-[#52796F] transition-colors cursor-pointer"
                   >
                     <option value="privacy_audit">Privacy Audit (Full DPDP Scope)</option>
                     <option value="quick_scan">Quick Scan (Pixels & Trackers)</option>
@@ -564,7 +557,7 @@ export const Overview: React.FC = () => {
                 {/* Scan Button */}
                 <button
                   type="submit"
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-cyan-sm transition-all flex-shrink-0 active:scale-95"
+                  className="px-6 py-3 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-subtle transition-all flex-shrink-0 active:scale-95"
                 >
                   <Radar className="w-4 h-4 stroke-[2.5]" />
                   <span>Run DPDP Audit</span>
@@ -573,7 +566,7 @@ export const Overview: React.FC = () => {
               </div>
 
               {urlError && (
-                <div className="flex items-center gap-2 text-rose-400 text-xs px-2">
+                <div className="flex items-center gap-2 text-[#B91C1C] text-xs px-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   <span>{urlError}</span>
                 </div>
@@ -581,8 +574,8 @@ export const Overview: React.FC = () => {
 
               {/* Quick Target Preset Chips */}
               <div className="flex items-center gap-2 flex-wrap pt-1 text-xs">
-                <span className="text-slate-400 text-[11px] font-medium flex items-center gap-1">
-                  <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="text-[#71717A] text-[11px] font-medium flex items-center gap-1">
+                  <Zap className="w-3.5 h-3.5 text-[#52796F]" />
                   Target presets:
                 </span>
                 {DEMO_PRESET_TARGETS.map((preset) => {
@@ -594,12 +587,12 @@ export const Overview: React.FC = () => {
                       onClick={() => handleApplyPreset(preset.url, preset.profile)}
                       className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                         isSelected
-                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-cyan-sm'
-                          : 'bg-obsidian-950/80 text-slate-300 border border-white/[0.08] hover:bg-obsidian-800 hover:text-white'
+                          ? 'bg-[#F1F5F9] text-[#52796F] border border-[#52796F] shadow-subtle'
+                          : 'bg-[#F8FAFC] text-[#71717A] border border-[#E4E4E7] hover:bg-[#F1F5F9] hover:text-[#18181B]'
                       }`}
                     >
                       <span>{preset.label.split('(')[0].trim()}</span>
-                      <span className="text-[10px] text-slate-500 font-mono">
+                      <span className="text-[10px] text-[#71717A] font-mono">
                         ({preset.label.includes('FinTech') ? 'FinTech' : preset.label.includes('Health') ? 'Health' : 'Retail'})
                       </span>
                     </button>
@@ -608,8 +601,8 @@ export const Overview: React.FC = () => {
               </div>
 
               {/* Authorization Note */}
-              <div className="flex items-center gap-2 text-[11px] text-slate-400 pt-1">
-                <Lock className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+              <div className="flex items-center gap-2 text-[11px] text-[#71717A] pt-1">
+                <Lock className="w-3.5 h-3.5 text-[#52796F] flex-shrink-0" />
                 <span>
                   Authorized security testing mode: Scan only domains you own or have explicit verification authority to inspect under statutory guidelines.
                 </span>
@@ -650,109 +643,109 @@ export const Overview: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
           {/* Card 1: Monitored Websites */}
-          <div className="p-5 rounded-2xl bg-obsidian-900 border border-white/[0.08] hover:border-cyan-500/30 transition-all shadow-obsidian-card group">
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-3">
-              <span className="font-semibold text-slate-200">Websites Monitored</span>
-              <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+          <div className="p-5 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] hover:border-[#52796F]/20 transition-all shadow-subtle group">
+            <div className="flex items-center justify-between text-[#71717A] text-xs mb-3">
+              <span className="font-semibold text-[#18181B]">Websites Monitored</span>
+              <div className="w-8 h-8 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] flex items-center justify-center text-[#52796F]">
                 <Globe className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-white font-mono">{monitoredWebsitesCount}</span>
+              <span className="text-3xl font-black text-[#18181B] font-mono">{monitoredWebsitesCount}</span>
               {monitoredWebsitesCount > 0 ? (
-                <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono">
+                <span className="text-xs font-semibold text-[#15803D] bg-green-50 px-2 py-0.5 rounded-full border border-green-200 font-mono">
                   {monitoredWebsitesCount} Active
                 </span>
               ) : (
-                <span className="text-xs font-semibold text-slate-400 bg-obsidian-850 px-2 py-0.5 rounded-full border border-white/10 font-mono">
+                <span className="text-xs font-semibold text-[#71717A] bg-[#F1F5F9] px-2 py-0.5 rounded-full border border-[#E4E4E7] font-mono">
                   No targets
                 </span>
               )}
             </div>
-            <div className="mt-3 pt-3 border-t border-white/[0.07] flex items-center justify-between text-[11px] text-slate-400">
+            <div className="mt-3 pt-3 border-t border-[#E4E4E7] flex items-center justify-between text-[11px] text-[#71717A]">
               <span>Audit Scope</span>
-              <span className="text-slate-200 font-mono">
+              <span className="text-[#18181B] font-mono">
                 {monitoredWebsitesCount > 0 ? `${scans.length} Total Audits` : 'Pending First Scan'}
               </span>
             </div>
           </div>
 
           {/* Card 2: Open Privacy Findings */}
-          <div className="p-5 rounded-2xl bg-obsidian-900 border border-white/[0.08] hover:border-amber-500/30 transition-all shadow-obsidian-card group">
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-3">
-              <span className="font-semibold text-slate-200">Open Privacy Findings</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+          <div className="p-5 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] hover:border-[#F59E0B]/40 transition-all shadow-subtle group">
+            <div className="flex items-center justify-between text-[#71717A] text-xs mb-3">
+              <span className="font-semibold text-[#18181B]">Open Privacy Findings</span>
+              <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#B45309]">
                 <AlertCircle className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className={`text-3xl font-black font-mono ${openFindings.length > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+              <span className={`text-3xl font-black font-mono ${openFindings.length > 0 ? 'text-[#B45309]' : 'text-[#15803D]'}`}>
                 {openFindings.length}
               </span>
               {openFindings.length > 0 ? (
-                <span className="text-xs font-semibold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 font-mono">
+                <span className="text-xs font-semibold text-[#B45309] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-mono">
                   Action Required
                 </span>
               ) : (
-                <span className="text-xs font-semibold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono">
+                <span className="text-xs font-semibold text-[#15803D] bg-green-50 px-2 py-0.5 rounded-full border border-green-200 font-mono">
                   Baseline Clear
                 </span>
               )}
             </div>
-            <div className="mt-3 pt-3 border-t border-white/[0.07] flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">Severity distribution</span>
-              <span className="text-rose-400 font-mono font-bold">
+            <div className="mt-3 pt-3 border-t border-[#E4E4E7] flex items-center justify-between text-[11px]">
+              <span className="text-[#71717A]">Severity distribution</span>
+              <span className="text-[#B91C1C] font-mono font-bold">
                 {criticalCount} Crit • {highCount} High
               </span>
             </div>
           </div>
 
           {/* Card 3: Technical Risk Exposure Index */}
-          <div className="p-5 rounded-2xl bg-obsidian-900 border border-white/[0.08] hover:border-rose-500/30 transition-all shadow-obsidian-card group">
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-3">
-              <span className="font-semibold text-slate-200">Technical Exposure Index</span>
-              <div className="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+          <div className="p-5 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] hover:border-[#EF4444]/40 transition-all shadow-subtle group">
+            <div className="flex items-center justify-between text-[#71717A] text-xs mb-3">
+              <span className="font-semibold text-[#18181B]">Technical Exposure Index</span>
+              <div className="w-8 h-8 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-[#B91C1C]">
                 <ShieldAlert className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className={`text-xl sm:text-2xl font-black font-mono ${criticalCount > 0 ? 'text-rose-400' : highCount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+              <span className={`text-xl sm:text-2xl font-black font-mono ${criticalCount > 0 ? 'text-[#B91C1C]' : highCount > 0 ? 'text-[#B45309]' : 'text-[#15803D]'}`}>
                 {exposureTierText}
               </span>
               <span className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded border ${
                 criticalCount > 0
-                  ? 'text-rose-300 bg-rose-500/20 border-rose-500/30'
+                  ? 'text-[#B91C1C] bg-red-50 border-red-200'
                   : openFindings.length === 0
-                  ? 'text-emerald-300 bg-emerald-500/20 border-emerald-500/30'
-                  : 'text-amber-300 bg-amber-500/20 border-amber-500/30'
+                  ? 'text-[#15803D] bg-green-50 border-green-200'
+                  : 'text-[#B45309] bg-amber-50 border-amber-200'
               }`}>
                 {exposureBadge}
               </span>
             </div>
-            <div className="mt-3 pt-3 border-t border-white/[0.07] flex items-center justify-between text-[11px] text-slate-400">
+            <div className="mt-3 pt-3 border-t border-[#E4E4E7] flex items-center justify-between text-[11px] text-[#71717A]">
               <span className="font-mono">{exposureTierLevel}</span>
-              <span className="text-slate-300 font-mono truncate max-w-[170px]" title={exposureTierLabel}>{exposureTierLabel}</span>
+              <span className="text-[#18181B] font-mono truncate max-w-[170px]" title={exposureTierLabel}>{exposureTierLabel}</span>
             </div>
           </div>
 
           {/* Card 4: Verified Remediations */}
-          <div className="p-5 rounded-2xl bg-obsidian-900 border border-white/[0.08] hover:border-emerald-500/30 transition-all shadow-obsidian-card group">
-            <div className="flex items-center justify-between text-slate-400 text-xs mb-3">
-              <span className="font-semibold text-slate-200">Verified Remediations</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <div className="p-5 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] hover:border-[#22C55E]/40 transition-all shadow-subtle group">
+            <div className="flex items-center justify-between text-[#71717A] text-xs mb-3">
+              <span className="font-semibold text-[#18181B]">Verified Remediations</span>
+              <div className="w-8 h-8 rounded-xl bg-green-50 border border-green-200 flex items-center justify-center text-[#15803D]">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-emerald-400 font-mono">{verifiedFindingsCount}</span>
-              <span className="text-xs font-semibold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono">
+              <span className="text-3xl font-black text-[#15803D] font-mono">{verifiedFindingsCount}</span>
+              <span className="text-xs font-semibold text-[#15803D] bg-green-50 px-2 py-0.5 rounded-full border border-green-200 font-mono">
                 {totalAuditCount > 0 ? `${passRate}% pass rate` : (verifiedFindingsCount > 0 ? 'Verified' : 'No tests yet')}
               </span>
             </div>
-            <div className="mt-3 pt-3 border-t border-white/[0.07]">
-              <div className="w-full bg-obsidian-950 rounded-full h-1.5 overflow-hidden border border-white/5">
+            <div className="mt-3 pt-3 border-t border-[#E4E4E7]">
+              <div className="w-full bg-[#F8FAFC] rounded-full h-1.5 overflow-hidden border border-[#E4E4E7]">
                 <div
-                  className="bg-emerald-400 h-full rounded-full transition-all duration-500 shadow-emerald-glow"
+                  className="bg-[#15803D] h-full rounded-full transition-all duration-500"
                   style={{ width: `${Math.max(5, passRate)}%` }}
                 />
               </div>
@@ -764,23 +757,23 @@ export const Overview: React.FC = () => {
       {/* 3. Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Weekly Exposure vs Verified Area Chart */}
-        <div className="lg:col-span-8 p-6 rounded-2xl bg-obsidian-900 border border-white/[0.08] shadow-obsidian-card space-y-4">
+        <div className="lg:col-span-8 p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Activity className="w-4 h-4 text-cyan-400" />
+              <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2">
+                <Activity className="w-4 h-4 text-[#52796F]" />
                 <span>Weekly Exposure vs. Verified Remediation Trajectory</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-[#71717A] mt-0.5">
                 Observed potential personal-data exposures vs proven fixes validated in sandbox
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs font-mono">
-              <span className="flex items-center gap-1.5 text-slate-300">
-                <span className="w-2.5 h-2.5 rounded-sm bg-rose-500" /> Detected Exposures
+              <span className="flex items-center gap-1.5 text-[#71717A]">
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#B91C1C]" /> Detected Exposures
               </span>
-              <span className="flex items-center gap-1.5 text-slate-300">
-                <span className="w-2.5 h-2.5 rounded-sm bg-cyan-400" /> Verified Fixes
+              <span className="flex items-center gap-1.5 text-[#71717A]">
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#15803D]" /> Verified Fixes
               </span>
             </div>
           </div>
@@ -794,42 +787,42 @@ export const Overview: React.FC = () => {
                     <stop offset="95%" stopColor="#EF4444" stopOpacity={0.0} />
                   </linearGradient>
                   <linearGradient id="colorVerified" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#22C55E" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#22C55E" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="day" stroke="#64748B" fontSize={11} tickLine={false} />
                 <YAxis stroke="#64748B" fontSize={11} tickLine={false} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0A0F1F',
-                    borderColor: 'rgba(255, 255, 255, 0.12)',
+                    backgroundColor: '#111827',
+                    borderColor: '#273449',
                     borderRadius: '12px',
                     fontSize: '12px',
                     color: '#F8FAFC',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+                    boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.4)',
                   }}
                 />
                 <Area type="monotone" dataKey="exposures" stroke="#EF4444" strokeWidth={2.5} fillOpacity={1} fill="url(#colorExposures)" />
-                <Area type="monotone" dataKey="verified" stroke="#06B6D4" strokeWidth={2.5} fillOpacity={1} fill="url(#colorVerified)" />
+                <Area type="monotone" dataKey="verified" stroke="#22C55E" strokeWidth={2.5} fillOpacity={1} fill="url(#colorVerified)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Severity Donut Distribution */}
-        <div className="lg:col-span-4 p-6 rounded-2xl bg-obsidian-900 border border-white/[0.08] shadow-obsidian-card flex flex-col justify-between">
+        <div className="lg:col-span-4 p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-amber-400" />
+              <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-[#B45309]" />
                 <span>Severity Breakdown</span>
               </h3>
-              <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">
+              <span className="text-[10px] font-mono text-[#52796F] bg-[#F1F5F9] px-2 py-0.5 rounded border border-[#E4E4E7] font-bold">
                 ACTIVE
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-[#71717A] mt-0.5">
               Current active vulnerability severity weights
             </p>
           </div>
@@ -852,8 +845,8 @@ export const Overview: React.FC = () => {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0A0F1F',
-                    borderColor: 'rgba(255, 255, 255, 0.12)',
+                    backgroundColor: '#111827',
+                    borderColor: '#273449',
                     borderRadius: '10px',
                     fontSize: '12px',
                   }}
@@ -861,19 +854,19 @@ export const Overview: React.FC = () => {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute text-center">
-              <span className="text-2xl font-black text-white font-mono">{findings.length}</span>
-              <span className="text-[10px] text-slate-400 block uppercase tracking-wider font-semibold font-mono">Total Items</span>
+              <span className="text-2xl font-black text-[#18181B] font-mono">{findings.length}</span>
+              <span className="text-[10px] text-[#71717A] block uppercase tracking-wider font-semibold font-mono">Total Items</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-xs pt-3 border-t border-white/[0.07]">
+          <div className="grid grid-cols-2 gap-2 text-xs pt-3 border-t border-[#E4E4E7]">
             {severityData.map((item) => (
-              <div key={item.name} className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-obsidian-850 border border-white/[0.06]">
-                <span className="flex items-center gap-1.5 text-slate-300 font-medium text-[11px]">
+              <div key={item.name} className="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7]">
+                <span className="flex items-center gap-1.5 text-[#71717A] font-medium text-[11px]">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                   {item.name}
                 </span>
-                <span className="font-mono text-slate-200 font-bold">{item.value}</span>
+                <span className="font-mono text-[#18181B] font-bold">{item.value}</span>
               </div>
             ))}
           </div>
@@ -883,30 +876,30 @@ export const Overview: React.FC = () => {
       {/* 4. Bottom Grid: Findings Table & Activity Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Findings Table */}
-        <div className="lg:col-span-8 p-6 rounded-2xl bg-obsidian-900 border border-white/[0.08] shadow-obsidian-card space-y-4">
+        <div className="lg:col-span-8 p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2">
                 <span>Priority Privacy & Security Findings</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#F1F5F9] text-[#52796F] border border-[#E4E4E7]">
                   {filteredFindings.length} Items
                 </span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-[#71717A] mt-0.5">
                 Forensic findings mapped directly against DPDP Act obligations
               </p>
             </div>
 
             {/* Quick Filter Tabs */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-obsidian-850 border border-white/[0.08] text-xs">
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] text-xs">
               {(['all', 'critical', 'high', 'verified'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setTableFilter(tab)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all capitalize font-mono ${
                     tableFilter === tab
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#F1F5F9] text-[#52796F] border border-[#52796F] font-bold shadow-subtle'
+                      : 'text-[#71717A] hover:text-[#18181B]'
                   }`}
                 >
                   {tab}
@@ -918,7 +911,7 @@ export const Overview: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-white/[0.08] text-slate-400 font-medium">
+                <tr className="border-b border-[#E4E4E7] text-[#71717A] font-medium">
                   <th className="pb-3 font-semibold">Finding Details</th>
                   <th className="pb-3 font-semibold">Severity</th>
                   <th className="pb-3 font-semibold hidden sm:table-cell">Statutory Section</th>
@@ -926,10 +919,10 @@ export const Overview: React.FC = () => {
                   <th className="pb-3 font-semibold text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.05]">
+              <tbody className="divide-y divide-[#E4E4E7]">
                 {filteredFindings.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-xs text-slate-500 italic">
+                    <td colSpan={5} className="py-12 text-center text-xs text-[#71717A] italic">
                       No security or privacy findings matching the selected filter.
                     </td>
                   </tr>
@@ -938,19 +931,19 @@ export const Overview: React.FC = () => {
                     const sev = formatSeverity(f.severity);
                     const isSynthetic = f.isDemoFixture || f.affectedUrl.includes('paysecure-india.in') || f.affectedUrl.includes('testbed');
                     return (
-                      <tr key={f.id} className="group hover:bg-obsidian-800/50 transition-colors">
+                      <tr key={f.id} className="group hover:bg-[#F1F5F9]/50 transition-colors">
                         <td className="py-3.5 pr-2">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-200 group-hover:text-cyan-300 transition-colors truncate max-w-xs sm:max-w-sm">
+                            <span className="font-semibold text-[#18181B] group-hover:text-[#52796F] transition-colors truncate max-w-xs sm:max-w-sm">
                               {f.title}
                             </span>
                             {isSynthetic && (
-                              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 flex-shrink-0 font-bold">
+                              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#52796F] border border-[#E4E4E7] flex-shrink-0 font-bold">
                                 TESTBED
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-400 truncate max-w-xs font-mono mt-0.5">
+                          <div className="text-[11px] text-[#71717A] truncate max-w-xs font-mono mt-0.5">
                             {truncateUrl(f.affectedUrl, 42)}
                           </div>
                         </td>
@@ -960,18 +953,18 @@ export const Overview: React.FC = () => {
                             {sev.label}
                           </span>
                         </td>
-                        <td className="py-3.5 text-slate-300 hidden sm:table-cell font-mono text-[11px]">
+                        <td className="py-3.5 text-[#18181B] hidden sm:table-cell font-mono text-[11px]">
                           {f.dpdpSection.split('-')[0].trim()}
                         </td>
                         <td className="py-3.5 hidden md:table-cell">
-                          <span className="capitalize text-slate-300 text-[11px] font-medium font-mono">
+                          <span className="capitalize text-[#18181B] text-[11px] font-medium font-mono">
                             {f.status.replace('_', ' ')}
                           </span>
                         </td>
                         <td className="py-3.5 text-right">
                           <Link
                             to={`/fix-verify?findingId=${f.id}`}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-obsidian-850 hover:bg-cyan-500 hover:text-slate-950 border border-white/10 text-cyan-400 transition-all font-semibold text-xs shadow-sm"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#F1F5F9] hover:bg-[#18181B] hover:text-white border border-[#E4E4E7] text-[#52796F] transition-all font-semibold text-xs shadow-subtle"
                           >
                             <span>Remediate</span>
                             <ArrowRight className="w-3 h-3" />
@@ -985,13 +978,13 @@ export const Overview: React.FC = () => {
             </table>
           </div>
 
-          <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between text-xs">
-            <span className="text-slate-400">
+          <div className="pt-2 border-t border-[#E4E4E7] flex items-center justify-between text-xs">
+            <span className="text-[#71717A]">
               Showing {Math.min(filteredFindings.length, 5)} of {findings.length} total findings
             </span>
             <Link
               to="/findings"
-              className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1"
+              className="text-[#52796F] hover:text-[#405F57] font-semibold flex items-center gap-1"
             >
               <span>Explore all findings</span>
               <ChevronRight className="w-4 h-4" />
@@ -1000,41 +993,41 @@ export const Overview: React.FC = () => {
         </div>
 
         {/* Recent Activity Feed */}
-        <div className="lg:col-span-4 p-6 rounded-2xl bg-obsidian-900 border border-white/[0.08] shadow-obsidian-card flex flex-col justify-between">
+        <div className="lg:col-span-4 p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle flex flex-col justify-between">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Activity className="w-4 h-4 text-emerald-400" />
+              <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2">
+                <Activity className="w-4 h-4 text-[#15803D]" />
                 <span>Audit Activity Stream</span>
               </h3>
-              <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] text-[#15803D] flex items-center gap-1 font-mono font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#15803D] animate-pulse" />
                 STREAMING
               </span>
             </div>
 
             <div className="space-y-2.5">
               {activityList.length === 0 ? (
-                <div className="text-center py-10 text-slate-500 text-xs space-y-1">
+                <div className="text-center py-10 text-[#71717A] text-xs space-y-1">
                   <Activity className="w-6 h-6 text-slate-600 mx-auto mb-2 opacity-60" />
-                  <p className="font-semibold text-slate-400">No Audit Activity Recorded</p>
-                  <p className="text-[11px] text-slate-500">Run a website scan or verify a patch to stream real compliance events.</p>
+                  <p className="font-semibold text-[#71717A]">No Audit Activity Recorded</p>
+                  <p className="text-[11px] text-[#71717A]">Run a website scan or verify a patch to stream real compliance events.</p>
                 </div>
               ) : (
                 activityList.slice(0, 5).map((act) => (
-                  <div key={act.id} className="p-3 rounded-xl bg-obsidian-850 border border-white/[0.07] hover:bg-obsidian-800 transition-colors text-xs space-y-1">
+                  <div key={act.id} className="p-3 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] hover:bg-[#F1F5F9]/80 transition-colors text-xs space-y-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 truncate pr-2">
-                        <span className="font-semibold text-slate-200 truncate">{act.title}</span>
+                        <span className="font-semibold text-[#18181B] truncate">{act.title}</span>
                         {act.isSynthetic && (
-                          <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-obsidian-950 text-slate-400 border border-white/10 font-bold">
+                          <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-[#F8FAFC] text-[#71717A] border border-[#E4E4E7] font-bold">
                             TESTBED
                           </span>
                         )}
                       </div>
-                      <span className="text-[10px] text-slate-500 font-mono flex-shrink-0">{act.timestamp}</span>
+                      <span className="text-[10px] text-[#71717A] font-mono flex-shrink-0">{act.timestamp}</span>
                     </div>
-                    <p className="text-slate-400 text-[11px] leading-relaxed">
+                    <p className="text-[#71717A] text-[11px] leading-relaxed">
                       {act.description}
                     </p>
                   </div>
@@ -1043,10 +1036,10 @@ export const Overview: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/[0.08]">
+          <div className="mt-4 pt-3 border-t border-[#E4E4E7]">
             <Link
               to="/history"
-              className="w-full py-2.5 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-center text-xs text-slate-200 font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full py-2.5 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-center text-xs text-[#18181B] font-semibold flex items-center justify-center gap-1.5 transition-colors"
             >
               <span>View Full Compliance Event Log</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -1056,10 +1049,10 @@ export const Overview: React.FC = () => {
       </div>
 
       {/* Advisory Assessment Disclaimer */}
-      <div className="p-4 rounded-2xl bg-obsidian-900/80 border border-white/[0.07] shadow-obsidian-card flex items-start gap-3 text-xs text-slate-400">
-        <AlertCircle className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+      <div className="p-4 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle flex items-start gap-3 text-xs text-[#71717A]">
+        <AlertCircle className="w-4 h-4 text-[#52796F] flex-shrink-0 mt-0.5" />
         <div className="space-y-0.5">
-          <span className="font-semibold text-slate-300">Technical Advisory Notice (DPDP Act 2023 Evaluation):</span>
+          <span className="font-semibold text-[#18181B]">Technical Advisory Notice (DPDP Act 2023 Evaluation):</span>
           <p className="text-[11px] leading-relaxed">
             Technical audit scores, exposure categories, and automated observations represent an advisory security assessment of observed system behaviors. They identify potential compliance risk indicators and do not constitute formal legal adjudication or confirmed statutory penalty determinations under the Digital Personal Data Protection Act, 2023.
           </p>

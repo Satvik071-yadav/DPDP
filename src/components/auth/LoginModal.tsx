@@ -120,44 +120,44 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-label="Security Access"
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/40 backdrop-blur-md animate-in fade-in duration-150"
     >
       <div
         className="fixed inset-0 bg-transparent"
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative z-10 w-full max-w-md my-auto bg-obsidian-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]">
+      <div className="relative z-10 w-full max-w-md my-auto bg-[#FFFFFF] border border-[#E4E4E7] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)]">
         {/* Modal Header */}
-        <div className="p-6 border-b border-white/[0.08] bg-obsidian-950/70 flex items-start justify-between flex-shrink-0">
+        <div className="p-6 border-b border-[#E4E4E7] bg-[#FFFFFF] flex items-start justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-cyan-sm">
+            <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] flex items-center justify-center text-[#52796F]">
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">DPDP-Guard Security Access</h3>
-              <p className="text-xs text-slate-400">
-                {mode === 'login' ? 'Sign in to access your compliance workspace' : 'Create a new tenant account'}
+              <h3 className="text-base font-bold text-[#18181B] tracking-tight">PrivaCraft Security Access</h3>
+              <p className="text-xs text-[#71717A]">
+                {mode === 'login' ? 'Sign in to access your PrivaCraft compliance workspace' : 'Create a new tenant account'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-obsidian-800 transition-colors"
+            className="p-1 rounded-lg text-[#71717A] hover:text-[#18181B] hover:bg-[#F1F5F9] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Selector */}
-        <div className="grid grid-cols-2 border-b border-white/[0.08] bg-obsidian-950/40 flex-shrink-0">
+        <div className="grid grid-cols-2 border-b border-[#E4E4E7] bg-[#FFFFFF] flex-shrink-0">
           <button
             type="button"
             onClick={() => { setMode('login'); setErrorMessage(null); }}
             className={`py-3 text-xs font-semibold flex items-center justify-center gap-2 border-b-2 transition-all ${
               mode === 'login'
-                ? 'border-cyan-400 text-cyan-300 bg-cyan-500/5'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
+                ? 'border-[#52796F] text-[#52796F] bg-[#52796F]/10'
+                : 'border-transparent text-[#71717A] hover:text-[#18181B]'
             }`}
           >
             <LogIn className="w-3.5 h-3.5" />
@@ -168,8 +168,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             onClick={() => { setMode('register'); setErrorMessage(null); }}
             className={`py-3 text-xs font-semibold flex items-center justify-center gap-2 border-b-2 transition-all ${
               mode === 'register'
-                ? 'border-cyan-400 text-cyan-300 bg-cyan-500/5'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
+                ? 'border-[#52796F] text-[#52796F] bg-[#52796F]/10'
+                : 'border-transparent text-[#71717A] hover:text-[#18181B]'
             }`}
           >
             <UserPlus className="w-3.5 h-3.5" />
@@ -180,7 +180,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         {/* Modal Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs overflow-y-auto flex-1">
           {errorMessage && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-[#B91C1C] flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -189,29 +189,29 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           {mode === 'login' ? (
             <>
               <div className="space-y-1.5">
-                <label className="block text-slate-300 font-semibold">Username or Email</label>
+                <label className="block text-[#18181B] font-semibold">Username or Email</label>
                 <div className="relative">
-                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A]" />
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="e.g. priya.sharma or dpo@org.in"
-                    className="w-full bg-obsidian-850 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                    className="w-full bg-[#F1F5F9] border border-[#E4E4E7] rounded-xl pl-9 pr-3 py-2.5 text-[#18181B] placeholder:text-[#71717A] focus:outline-none focus:border-[#52796F] transition-colors"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-slate-300 font-semibold">Password</label>
+                <label className="block text-[#18181B] font-semibold">Password</label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A]" />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full bg-obsidian-850 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                    className="w-full bg-[#F1F5F9] border border-[#E4E4E7] rounded-xl pl-9 pr-3 py-2.5 text-[#18181B] placeholder:text-[#71717A] focus:outline-none focus:border-[#52796F] transition-colors"
                   />
                 </div>
               </div>
@@ -219,57 +219,57 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           ) : (
             <>
               <div className="space-y-1.5">
-                <label className="block text-slate-300 font-semibold">Full Name (Optional)</label>
+                <label className="block text-[#18181B] font-semibold">Full Name (Optional)</label>
                 <div className="relative">
-                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A]" />
                   <input
                     type="text"
                     value={regFullName}
                     onChange={(e) => setRegFullName(e.target.value)}
                     placeholder="e.g. Priya Sharma"
-                    className="w-full bg-obsidian-850 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                    className="w-full bg-[#F1F5F9] border border-[#E4E4E7] rounded-xl pl-9 pr-3 py-2.5 text-[#18181B] placeholder:text-[#71717A] focus:outline-none focus:border-[#52796F] transition-colors"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-slate-300 font-semibold">Email Address</label>
+                <label className="block text-[#18181B] font-semibold">Email Address</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A]" />
                   <input
                     type="email"
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="e.g. priya@acme.org"
-                    className="w-full bg-obsidian-850 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                    className="w-full bg-[#F1F5F9] border border-[#E4E4E7] rounded-xl pl-9 pr-3 py-2.5 text-[#18181B] placeholder:text-[#71717A] focus:outline-none focus:border-[#52796F] transition-colors"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-slate-300 font-semibold">Username</label>
+                <label className="block text-[#18181B] font-semibold">Username</label>
                 <div className="relative">
-                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A]" />
                   <input
                     type="text"
                     value={regUsername}
                     onChange={(e) => setRegUsername(e.target.value)}
                     placeholder="e.g. priya.sharma"
-                    className="w-full bg-obsidian-850 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                    className="w-full bg-[#F1F5F9] border border-[#E4E4E7] rounded-xl pl-9 pr-3 py-2.5 text-[#18181B] placeholder:text-[#71717A] focus:outline-none focus:border-[#52796F] transition-colors"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-slate-300 font-semibold">Password (min 8 characters)</label>
+                <label className="block text-[#18181B] font-semibold">Password (min 8 characters)</label>
                 <div className="relative">
-                  <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A]" />
                   <input
                     type="password"
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full bg-obsidian-850 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                    className="w-full bg-[#F1F5F9] border border-[#E4E4E7] rounded-xl pl-9 pr-3 py-2.5 text-[#18181B] placeholder:text-[#71717A] focus:outline-none focus:border-[#52796F] transition-colors"
                   />
                 </div>
               </div>
@@ -279,7 +279,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-cyan-sm transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+            className="w-full py-2.5 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-xs shadow-sm transition-colors flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
           >
             {isLoading ? (
               <span>{mode === 'login' ? 'Authenticating...' : 'Creating Account...'}</span>

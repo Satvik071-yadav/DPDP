@@ -1,4 +1,4 @@
-﻿SYNTHETIC_ACCOUNT_A = {
+SYNTHETIC_ACCOUNT_A = {
     "id": "usr_demo_custA",
     "name": "Rajesh Kumar Sharma",
     "email": "rajesh.sharma@fictional-mail.in",
@@ -76,7 +76,7 @@ INITIAL_FIXTURE_FINDINGS = [
                 "id": "VER-001",
                 "timestamp": "2026-10-14T09:30:00Z",
                 "status": "pending",
-                "verifiedBy": "DPDP-Guard Automated Sandbox",
+                "verifiedBy": "PrivaCraft Automated Sandbox",
                 "notes": "Initial finding recorded. Awaiting code patch approval."
             }
         ]
@@ -156,7 +156,7 @@ INITIAL_FIXTURE_FINDINGS = [
                 "id": "VER-007",
                 "timestamp": "2026-10-14T09:35:00Z",
                 "status": "pending",
-                "verifiedBy": "DPDP-Guard Automated Sandbox",
+                "verifiedBy": "PrivaCraft Automated Sandbox",
                 "notes": "BOLA/IDOR vulnerability registered. Pending sandbox authorization verification."
             }
         ]

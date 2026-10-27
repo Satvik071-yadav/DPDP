@@ -139,27 +139,26 @@ export const Findings: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       {/* Editorial Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-obsidian-900/90 via-obsidian-850/80 to-obsidian-900/90 border border-white/[0.08] p-6 shadow-obsidian-card backdrop-blur-md">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-6 shadow-subtle">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
           <div className="space-y-1.5">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 shadow-cyan-glow">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#F1F5F9] border border-[#E4E4E7] text-[#52796F]">
                 <ShieldAlert className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18181B] font-sans">
                     Identified Privacy & Exposure Findings
                   </h2>
-                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#52796F] border border-[#E4E4E7]">
                     {filteredFindings.length} Active Items
                   </span>
-                  <span className="hidden sm:inline-flex text-[10px] font-mono px-2 py-0.5 rounded bg-obsidian-950/80 text-slate-400 border border-white/[0.06]">
+                  <span className="hidden sm:inline-flex text-[10px] font-mono px-2 py-0.5 rounded bg-[#F8FAFC] text-[#71717A] border border-[#E4E4E7]">
                     SYNTHETIC DEMO FIXTURES
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                <p className="text-xs sm:text-sm text-[#71717A] mt-0.5">
                   Granular technical exposures evaluated against DPDP Act 2023 statutory obligations (Section 6, 8, 9, 16).
                 </p>
               </div>
@@ -168,7 +167,7 @@ export const Findings: React.FC = () => {
 
           <Link
             to="/fix-verify"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-cyan-glow transition-all self-start sm:self-auto active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-xs shadow-subtle transition-all self-start sm:self-auto active:scale-95"
           >
             <Wrench className="w-3.5 h-3.5" />
             <span>Launch Fix & Verify Workbench</span>
@@ -177,17 +176,17 @@ export const Findings: React.FC = () => {
       </div>
 
       {/* Multi-facet Filter and Search Bar */}
-      <div className="rounded-2xl bg-obsidian-900/85 border border-white/[0.08] p-5 shadow-obsidian-card backdrop-blur-md space-y-4">
+      <div className="rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] p-5 shadow-subtle space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           {/* Search Box */}
           <div className="md:col-span-4 relative">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#71717A]" />
             <input
               type="text"
               placeholder="Search by title, endpoint, or section..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-obsidian-950/80 border border-white/[0.08] rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 transition-all font-mono"
+              className="w-full bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#18181B] placeholder:text-[#71717A] focus:outline-none focus:border-[#52796F] focus:ring-1 focus:ring-[#14B8A6]/20 transition-all font-mono"
             />
           </div>
 
@@ -196,7 +195,7 @@ export const Findings: React.FC = () => {
             <select
               value={selectedScanId}
               onChange={(e) => setSelectedScanId(e.target.value)}
-              className="w-full h-full min-h-[40px] bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-cyan-400 cursor-pointer"
+              className="w-full h-full min-h-[40px] bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3 py-2 text-xs font-medium text-[#18181B] focus:outline-none focus:border-[#52796F] cursor-pointer"
             >
               <option value="all">All Audit Scans</option>
               {availableScanIds.map((sid) => (
@@ -212,7 +211,7 @@ export const Findings: React.FC = () => {
             <select
               value={selectedSeverity}
               onChange={(e) => setSelectedSeverity(e.target.value)}
-              className="w-full h-full min-h-[40px] bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-cyan-400 cursor-pointer"
+              className="w-full h-full min-h-[40px] bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3 py-2 text-xs font-medium text-[#18181B] focus:outline-none focus:border-[#52796F] cursor-pointer"
             >
               <option value="all">All Severities</option>
               <option value="critical">Critical</option>
@@ -228,7 +227,7 @@ export const Findings: React.FC = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full h-full min-h-[40px] bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-cyan-400 cursor-pointer"
+              className="w-full h-full min-h-[40px] bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3 py-2 text-xs font-medium text-[#18181B] focus:outline-none focus:border-[#52796F] cursor-pointer"
             >
               <option value="all">All Categories</option>
               <option value="pii_exposure">PII Exposure</option>
@@ -244,7 +243,7 @@ export const Findings: React.FC = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="w-full h-full min-h-[40px] bg-obsidian-950/80 border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-medium text-slate-200 focus:outline-none focus:border-cyan-400 cursor-pointer"
+              className="w-full h-full min-h-[40px] bg-[#F8FAFC] border border-[#E4E4E7] rounded-xl px-3 py-2 text-xs font-medium text-[#18181B] focus:outline-none focus:border-[#52796F] cursor-pointer"
             >
               <option value="severity">Sort: Severity (High to Low)</option>
               <option value="detectedAt">Sort: Detection Time (Newest)</option>
@@ -254,17 +253,17 @@ export const Findings: React.FC = () => {
         </div>
 
         {/* Quick Filter Status Pills & Clear Action */}
-        <div className="flex items-center justify-between gap-3 flex-wrap pt-2 border-t border-white/[0.06] text-xs">
+        <div className="flex items-center justify-between gap-3 flex-wrap pt-2 border-t border-[#E4E4E7] text-xs">
           <div className="flex items-center gap-1.5 overflow-x-auto">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider font-mono mr-1">Status:</span>
+            <span className="text-[10px] font-semibold text-[#71717A] uppercase tracking-wider font-mono mr-1">Status:</span>
             {['all', 'open', 'in_review', 'verified_fix', 'false_positive'].map((st) => (
               <button
                 key={st}
                 onClick={() => setSelectedStatus(st)}
                 className={`px-3 py-1 rounded-lg text-xs font-medium transition-all capitalize ${
                   selectedStatus === st
-                    ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 font-semibold shadow-cyan-glow'
-                    : 'bg-obsidian-950/60 border border-white/[0.06] text-slate-400 hover:text-slate-200 hover:border-white/[0.12]'
+                    ? 'bg-[#F1F5F9] text-[#52796F] border border-[#52796F] font-semibold shadow-subtle'
+                    : 'bg-[#F8FAFC] border border-[#E4E4E7] text-[#71717A] hover:text-[#18181B] hover:bg-[#F1F5F9]'
                 }`}
               >
                 {st === 'all' ? 'All Statuses' : st.replace('_', ' ')}
@@ -273,13 +272,13 @@ export const Findings: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-[11px] text-slate-400 font-mono">
+            <span className="text-[11px] text-[#71717A] font-mono">
               Showing {filteredFindings.length} of {findings.length}
             </span>
             {isFiltered && (
               <button
                 onClick={handleResetFilters}
-                className="flex items-center gap-1.5 text-xs text-rose-400 hover:text-rose-300 px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 transition-colors"
+                className="flex items-center gap-1.5 text-xs text-[#B91C1C] hover:text-[#B91C1C]/80 px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
                 <span>Reset Filters</span>
@@ -291,14 +290,14 @@ export const Findings: React.FC = () => {
 
       {/* Error Banner */}
       {loadError && (
-        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-center justify-between text-xs">
+        <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-[#B91C1C] flex items-center justify-between text-xs">
           <div className="flex items-center gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-[#B91C1C] flex-shrink-0" />
             <span>{loadError}</span>
           </div>
           <button
             onClick={loadFindings}
-            className="px-3 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 font-semibold transition-colors"
+            className="px-3 py-1 rounded-lg bg-red-50 hover:bg-rose-500/30 text-rose-200 font-semibold transition-colors"
           >
             Retry
           </button>
@@ -306,38 +305,38 @@ export const Findings: React.FC = () => {
       )}
 
       {/* Findings Table / List */}
-      <div className="rounded-2xl bg-obsidian-900/85 border border-white/[0.08] shadow-obsidian-card backdrop-blur-md overflow-hidden">
+      <div className="rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle overflow-hidden">
         {isLoading ? (
-          <div className="divide-y divide-white/[0.04] p-4 space-y-4 animate-pulse">
+          <div className="divide-y divide-[#E4E4E7] p-4 space-y-4 animate-pulse">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="p-4 space-y-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-16 bg-obsidian-800 rounded-full" />
-                  <div className="h-4 w-24 bg-obsidian-800 rounded" />
+                  <div className="h-4 w-16 bg-[#F1F5F9] rounded-full" />
+                  <div className="h-4 w-24 bg-[#F1F5F9] rounded" />
                 </div>
-                <div className="h-5 w-2/3 bg-obsidian-750 rounded" />
-                <div className="h-3 w-1/3 bg-obsidian-800 rounded" />
+                <div className="h-5 w-2/3 bg-[#F1F5F9] rounded" />
+                <div className="h-3 w-1/3 bg-[#F1F5F9] rounded" />
               </div>
             ))}
           </div>
         ) : filteredFindings.length === 0 ? (
-          <div className="py-20 text-center text-slate-400 space-y-3">
+          <div className="py-20 text-center text-[#71717A] space-y-3">
             <ShieldAlert className="w-10 h-10 text-slate-600 mx-auto" />
-            <p className="text-sm font-semibold text-slate-200 font-sans">No matching findings found</p>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <p className="text-sm font-semibold text-[#18181B] font-sans">No matching findings found</p>
+            <p className="text-xs text-[#71717A] max-w-sm mx-auto">
               No results match your search keywords or active severity filters.
             </p>
             {isFiltered && (
               <button
                 onClick={handleResetFilters}
-                className="mt-2 px-3.5 py-1.5 rounded-xl bg-obsidian-950 hover:bg-obsidian-800 border border-white/[0.08] text-xs text-cyan-400 font-medium transition-colors"
+                className="mt-2 px-3.5 py-1.5 rounded-xl bg-[#F8FAFC] hover:bg-[#F1F5F9] border border-[#E4E4E7] text-xs text-[#52796F] font-medium transition-colors"
               >
                 Reset All Filters
               </button>
             )}
           </div>
         ) : (
-          <div className="divide-y divide-white/[0.06]">
+          <div className="divide-y divide-[#E4E4E7]">
             {filteredFindings.map((finding) => {
               const sev = formatSeverity(finding.severity);
               return (
@@ -345,7 +344,7 @@ export const Findings: React.FC = () => {
                   key={finding.id}
                   data-testid="finding-row"
                   onClick={() => setSelectedFinding(finding)}
-                  className="p-5 hover:bg-obsidian-850/60 transition-colors cursor-pointer group flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="p-5 hover:bg-[#F1F5F9]/40 transition-colors cursor-pointer group flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
                   {/* Left Column: Title, Endpoint, Section */}
                   <div className="space-y-2 flex-1 min-w-0">
@@ -354,58 +353,58 @@ export const Findings: React.FC = () => {
                         <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
                         {sev.label}
                       </span>
-                      <span className="font-mono text-xs text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">
+                      <span className="font-mono text-xs text-[#52796F] bg-[#F1F5F9] px-2 py-0.5 rounded border border-[#E4E4E7] font-bold">
                         {finding.id}
                       </span>
                       {finding.scanId && (
-                        <span className="text-[10px] font-mono text-slate-400 bg-obsidian-950 px-2 py-0.5 rounded border border-white/[0.06]">
+                        <span className="text-[10px] font-mono text-[#71717A] bg-[#F8FAFC] px-2 py-0.5 rounded border border-[#E4E4E7]">
                           {finding.scanId}
                         </span>
                       )}
                       {finding.isDemoFixture && (
-                        <span className="text-[10px] font-mono text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 font-bold">
+                        <span className="text-[10px] font-mono text-[#B45309] bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-bold">
                           DEMO FIXTURE
                         </span>
                       )}
                       {/* Confidence Meter Bar */}
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400 bg-obsidian-950/80 px-2 py-0.5 rounded border border-white/[0.06]">
+                      <div className="flex items-center gap-1.5 text-[11px] text-[#71717A] bg-[#F8FAFC] px-2 py-0.5 rounded border border-[#E4E4E7]">
                         <span>{finding.confidence}% confidence</span>
-                        <div className="w-12 bg-obsidian-800 rounded-full h-1 overflow-hidden">
+                        <div className="w-12 bg-[#F1F5F9] rounded-full h-1 overflow-hidden">
                           <div
-                            className={`h-full ${finding.confidence >= 95 ? 'bg-emerald-400' : 'bg-cyan-400'}`}
+                            className={`h-full ${finding.confidence >= 95 ? 'bg-[#15803D]' : 'bg-[#14B8A6]'}`}
                             style={{ width: `${finding.confidence}%` }}
                           />
                         </div>
                       </div>
                       {finding.evidenceAvailable && (
-                        <span className="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                        <span className="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-blue-50 text-[#2563EB] border border-blue-200">
                           Forensic Packet Available
                         </span>
                       )}
                     </div>
 
-                    <h3 className="text-sm sm:text-base font-bold text-slate-100 group-hover:text-cyan-300 transition-colors leading-snug font-sans">
+                    <h3 className="text-sm sm:text-base font-bold text-[#18181B] group-hover:text-[#52796F] transition-colors leading-snug font-sans">
                       {finding.title}
                     </h3>
 
                     <div className="space-y-1 font-mono text-xs">
-                      <div className="text-slate-400 flex items-center gap-2 flex-wrap">
+                      <div className="text-[#71717A] flex items-center gap-2 flex-wrap">
                         <span className="text-slate-200 font-semibold">{finding.dpdpSection.split('-')[0].trim()}</span>
                         <span className="text-slate-600">•</span>
-                        <span className="text-slate-500 text-[11px]">Detected: {formatDate(finding.detectedAt)}</span>
+                        <span className="text-[#71717A] text-[11px]">Detected: {formatDate(finding.detectedAt)}</span>
                       </div>
-                      <div className="text-slate-400 flex items-center gap-1.5 truncate">
-                        <span className="text-slate-500 uppercase text-[10px] font-bold">Endpoint:</span>
-                        <span className="text-cyan-300/90 truncate text-[11px]">{finding.endpoint}</span>
+                      <div className="text-[#71717A] flex items-center gap-1.5 truncate">
+                        <span className="text-[#71717A] uppercase text-[10px] font-bold">Endpoint:</span>
+                        <span className="text-[#71717A] truncate text-[11px]">{finding.endpoint}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Right Column: Status & Action */}
-                  <div className="flex items-center justify-between md:justify-end gap-3 flex-shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-white/[0.06]">
+                  <div className="flex items-center justify-between md:justify-end gap-3 flex-shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-[#E4E4E7]">
                     <div className="flex flex-col md:items-end text-xs">
-                      <span className="text-[10px] text-slate-500 uppercase font-mono font-semibold">Status</span>
-                      <span className="font-semibold text-slate-200 capitalize mt-0.5">
+                      <span className="text-[10px] text-[#71717A] uppercase font-mono font-semibold">Status</span>
+                      <span className="font-semibold text-[#18181B] capitalize mt-0.5">
                         {finding.status.replace('_', ' ')}
                       </span>
                     </div>
@@ -416,7 +415,7 @@ export const Findings: React.FC = () => {
                           e.stopPropagation();
                           setSelectedFinding(finding);
                         }}
-                        className="p-2.5 rounded-xl bg-obsidian-950 hover:bg-obsidian-800 border border-white/[0.08] text-slate-300 hover:text-white transition-colors"
+                        className="p-2.5 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-[#71717A] hover:text-[#18181B] transition-colors"
                         title="Inspect Evidence Trace"
                       >
                         <Eye className="w-4 h-4" />
@@ -425,7 +424,7 @@ export const Findings: React.FC = () => {
                       <Link
                         to={`/fix-verify?findingId=${finding.id}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-gradient-to-r hover:from-cyan-400 hover:to-teal-400 text-cyan-300 hover:text-slate-950 border border-cyan-500/30 hover:border-transparent font-bold text-xs transition-all shadow-sm"
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#F1F5F9] hover:bg-[#14B8A6] hover:text-slate-950 text-[#52796F] border border-[#E4E4E7] font-bold text-xs transition-all shadow-subtle"
                       >
                         <Wrench className="w-3.5 h-3.5" />
                         <span>Fix</span>
