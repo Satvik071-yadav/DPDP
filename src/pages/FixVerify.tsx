@@ -513,9 +513,6 @@ export const FixVerify: React.FC = () => {
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#18181B] flex items-center gap-2.5 font-sans">
               <span>Fix & Verify</span>
             </h1>
-            <p className="text-xs sm:text-sm text-[#71717A] mt-0.5">
-              Turn security findings into verified fixes. Run deterministic synthetic security probes in a safe, controlled local environment.
-            </p>
           </div>
 
           {/* Local Demo Environment Notice Badge */}

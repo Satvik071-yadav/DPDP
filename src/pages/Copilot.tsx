@@ -375,9 +375,6 @@ export const Copilot: React.FC = () => {
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18181B] flex items-center gap-2 font-sans">
               <span>AI Investigation Copilot</span>
             </h1>
-            <p className="text-xs text-[#71717A]">
-              Turn technical evidence into clear, actionable decisions. Evidence-grounded explanations without fabricated findings.
-            </p>
           </div>
 
           {/* Toolbar: Finding Selector & Mode Switch */}

@@ -190,9 +190,6 @@ export const Domains: React.FC = () => {
               </span>
             )}
           </div>
-          <p className="text-sm text-[#71717A] mt-1">
-            Register and prove ownership of your organization's domains via DNS TXT or HTTP challenge to authorize privacy audits.
-          </p>
         </div>
 
         <div className="flex items-center gap-3">

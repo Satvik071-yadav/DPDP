@@ -388,9 +388,6 @@ export const PrivacyFlow: React.FC = () => {
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18181B] flex items-center gap-2 font-sans">
               <span>Privacy Flow</span>
             </h1>
-            <p className="text-xs text-[#71717A]">
-              Real data-driven visualization of client network connections, APIs, and third parties recorded by Playwright browser instrumentation.
-            </p>
           </div>
 
           {/* Scan Selector & Consent Switch Controls */}

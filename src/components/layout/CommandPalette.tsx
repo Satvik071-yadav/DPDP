@@ -10,7 +10,8 @@ import {
   Settings, 
   FileText, 
   ExternalLink,
-  X 
+  X,
+  Database
 } from 'lucide-react';
 import { api } from '@/services/api';
 import { Finding } from '@/types';
@@ -44,6 +45,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose 
   const quickPages = [
     { title: 'Overview Dashboard', path: '/', icon: FileText, category: 'Navigation', hint: 'SOC Overview' },
     { title: 'Scan Target Website', path: '/scan', icon: Radar, category: 'Navigation', hint: 'Protocol Scanner' },
+    { title: 'Database Compliance Audit', path: '/database-audit', icon: Database, category: 'Navigation', hint: 'HIPAA & SQL Scanner' },
     { title: 'Forensic Findings', path: '/findings', icon: AlertTriangle, category: 'Navigation', hint: '6 DPDP Violations' },
     { title: 'Privacy Flow Visualizer', path: '/privacy-flow', icon: Network, category: 'Navigation', hint: 'Interactive Graph' },
     { title: 'Fix & Verify Workbench', path: '/fix-verify', icon: Wrench, category: 'Navigation', hint: 'Remediation Sandbox' },

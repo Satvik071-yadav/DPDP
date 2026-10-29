@@ -201,9 +201,6 @@ export const Subscription: React.FC = () => {
               </span>
             )}
           </div>
-          <p className="text-sm text-[#71717A] mt-1">
-            Manage your organization's DPDP audit entitlements, website allowances, and subscription tier.
-          </p>
         </div>
 
         <button

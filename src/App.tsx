@@ -12,6 +12,7 @@ import { History } from '@/pages/History';
 import { Settings } from '@/pages/Settings';
 import { Domains } from '@/pages/Domains';
 import { Subscription } from '@/pages/Subscription';
+import { DatabaseAudit } from '@/pages/DatabaseAudit';
 
 export function App() {
   return (
@@ -29,6 +30,7 @@ export function App() {
           <Route path="/" element={<Overview />} />
           <Route path="/overview" element={<Navigate to="/" replace />} />
           <Route path="/scan" element={<Scan />} />
+          <Route path="/database-audit" element={<DatabaseAudit />} />
           <Route path="/domains" element={<Domains />} />
           <Route path="/subscription" element={<Subscription />} />
           <Route path="/findings" element={<Findings />} />

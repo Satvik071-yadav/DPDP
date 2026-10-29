@@ -16,7 +16,8 @@ import {
   Zap,
   Activity,
   Globe,
-  CreditCard
+  CreditCard,
+  Database
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +29,7 @@ interface SidebarProps {
 const navItems = [
   { name: 'Overview', path: '/', icon: LayoutDashboard, tooltip: 'Security & Compliance Overview' },
   { name: 'Scan Target', path: '/scan', icon: Radar, tooltip: 'Live Browser & Protocol Audit' },
+  { name: 'Database Audit', path: '/database-audit', icon: Database, tooltip: 'HIPAA & SQL Data Store Compliance' },
   { name: 'Domains', path: '/domains', icon: Globe, tooltip: 'Website & Ownership Verification' },
   { name: 'Subscription', path: '/subscription', icon: CreditCard, tooltip: 'Plans & Audit Quotas' },
   { name: 'Findings', path: '/findings', icon: AlertTriangle, badge: '6', tooltip: 'Forensic Privacy Findings' },

@@ -122,9 +122,6 @@ export const Settings: React.FC = () => {
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#18181B] font-sans">
               Platform Settings & Connectivity
             </h2>
-            <p className="text-xs sm:text-sm text-[#71717A] mt-0.5">
-              Configure Data Protection Officer (DPO) records, statutory audit rulesets, and FastAPI backend integration.
-            </p>
           </div>
         </div>
       </div>

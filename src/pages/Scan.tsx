@@ -309,9 +309,6 @@ export const Scan: React.FC = () => {
                     DEMO SCANNER
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-[#71717A] mt-0.5">
-                  Launch deterministic privacy investigations to detect personal data exposures, tracker fires, and consent notice validity under India's DPDP Act 2023.
-                </p>
               </div>
             </div>
           </div>

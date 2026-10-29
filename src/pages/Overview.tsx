@@ -328,9 +328,6 @@ export const Overview: React.FC = () => {
               <h1 className="text-3xl sm:text-5xl font-black text-[#18181B] tracking-tight leading-tight">
                 Continuous Client-Side Privacy Auditing & Exposure Defense
               </h1>
-              <p className="text-sm sm:text-base text-[#71717A] leading-relaxed">
-                PrivaCraft instruments automated headless Chromium browsers to detect pre-consent tracker egress, unconsented storage writes, statutory notice omissions, and data security vulnerabilities in live web applications under India's DPDP Act, 2023.
-              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -507,9 +504,6 @@ export const Overview: React.FC = () => {
                 Verify every fix.
               </span>
             </h2>
-            <p className="text-xs sm:text-sm text-[#71717A] leading-relaxed font-normal">
-              PrivaCraft is a continuous technical privacy auditing platform engineered to uncover personal data leakage, unauthorized third-party tracking, and statutory compliance gaps across modern web architectures.
-            </p>
           </div>
 
           {/* Prominent Website Scan Input */}
@@ -764,9 +758,6 @@ export const Overview: React.FC = () => {
                 <Activity className="w-4 h-4 text-[#52796F]" />
                 <span>Weekly Exposure vs. Verified Remediation Trajectory</span>
               </h3>
-              <p className="text-xs text-[#71717A] mt-0.5">
-                Observed potential personal-data exposures vs proven fixes validated in sandbox
-              </p>
             </div>
             <div className="flex items-center gap-3 text-xs font-mono">
               <span className="flex items-center gap-1.5 text-[#71717A]">
@@ -822,9 +813,6 @@ export const Overview: React.FC = () => {
                 ACTIVE
               </span>
             </div>
-            <p className="text-xs text-[#71717A] mt-0.5">
-              Current active vulnerability severity weights
-            </p>
           </div>
 
           <div className="h-48 w-full relative flex items-center justify-center my-3">
@@ -885,9 +873,6 @@ export const Overview: React.FC = () => {
                   {filteredFindings.length} Items
                 </span>
               </h3>
-              <p className="text-xs text-[#71717A] mt-0.5">
-                Forensic findings mapped directly against DPDP Act obligations
-              </p>
             </div>
 
             {/* Quick Filter Tabs */}

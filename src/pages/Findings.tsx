@@ -154,13 +154,7 @@ export const Findings: React.FC = () => {
                   <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#52796F] border border-[#E4E4E7]">
                     {filteredFindings.length} Active Items
                   </span>
-                  <span className="hidden sm:inline-flex text-[10px] font-mono px-2 py-0.5 rounded bg-[#F8FAFC] text-[#71717A] border border-[#E4E4E7]">
-                    SYNTHETIC DEMO FIXTURES
-                  </span>
                 </div>
-                <p className="text-xs sm:text-sm text-[#71717A] mt-0.5">
-                  Granular technical exposures evaluated against DPDP Act 2023 statutory obligations (Section 6, 8, 9, 16).
-                </p>
               </div>
             </div>
           </div>

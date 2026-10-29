@@ -122,9 +122,6 @@ export const History: React.FC = () => {
                     {filteredScans.length} ARCHIVED
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-[#71717A] mt-0.5">
-                  Archival records of completed technical privacy audits, recorded evidence, and compliance exposure trends under DPDP 2023.
-                </p>
               </div>
             </div>
           </div>
