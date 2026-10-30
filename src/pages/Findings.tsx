@@ -41,16 +41,22 @@ export const Findings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Statutory penalty calculator per finding
+  // Realistic penalty calculator per finding (DPDP Act 2023)
+  // Shows likely first-time penalty range (5-12% of statutory ceiling)
+  // Statutory ceilings: §8(5)→₹250Cr, §9(1)→₹200Cr, other→₹50Cr
+  // Section 33 factors reduce actual penalty for first-time offences
   const getPenaltyLabel = (f: Finding): string => {
     const sec = f.dpdpSection.toLowerCase();
     if (f.severity === 'critical') {
-      if (sec.includes('9(1)') || sec.includes('children')) return '₹200 Cr';
-      return '₹250 Cr';
+      if (sec.includes('9(1)') || sec.includes('children')) return '₹10–20 Cr';
+      return '₹15–30 Cr';
     }
-    if (f.severity === 'high') return '₹150 Cr';
-    if (f.severity === 'medium') return '₹50 Cr';
-    return '₹10 Cr';
+    if (f.severity === 'high') {
+      if (sec.includes('16') || sec.includes('6(1)')) return '₹3–10 Cr';
+      return '₹10–25 Cr';
+    }
+    if (f.severity === 'medium') return '₹2–5 Cr';
+    return '₹1–2 Cr';
   };
 
   const loadFindings = async () => {
@@ -392,7 +398,7 @@ export const Findings: React.FC = () => {
                           : 'bg-[#F1F5F9] text-[#71717A] border-[#E4E4E7]'
                       }`}>
                         <IndianRupee className="w-3 h-3" />
-                        {getPenaltyLabel(finding)} penalty
+                        {getPenaltyLabel(finding)} likely
                       </span>
                       {finding.evidenceAvailable && (
                         <span className="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-blue-50 text-[#2563EB] border border-blue-200">

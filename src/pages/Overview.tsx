@@ -243,30 +243,67 @@ export const Overview: React.FC = () => {
     }));
   }
 
-  // 5b. Statutory Penalty Exposure Calculator (DPDP Act 2023)
-  // Maps each finding severity to its statutory penalty bracket under DPDP Act 2023
-  const getPenaltyForFinding = (f: Finding): { amount: number; label: string; section: string } => {
+  // 5b. Realistic Penalty Exposure Calculator (DPDP Act 2023)
+  // Based on the Schedule to the DPDP Act (statutory ceilings) PLUS Section 33
+  // mitigation factors: first-time offence, proportionality, cooperation, remediation speed.
+  //
+  // DPDP Act 2023 Schedule — Statutory Ceilings ("may extend to"):
+  //   §8(5)  Security safeguards breach    → up to ₹250 Cr
+  //   §9(1)  Children's data breach        → up to ₹200 Cr
+  //   §16    Cross-border transfer         → "other provisions" up to ₹50 Cr
+  //   §6(1)  Consent obligation            → "other provisions" up to ₹50 Cr
+  //   SDF-specific obligations            → up to ₹150 Cr
+  //
+  // Section 33 factors that determine the actual penalty:
+  //   - Nature, gravity, and duration of the contravention
+  //   - Type of personal data affected
+  //   - Whether the contravention is repetitive
+  //   - Mitigation efforts and speed of response
+  //   - Proportionality to turnover/scale
+  //
+  // Realistic first-time penalty: ~5–12% of the statutory ceiling.
+
+  const getPenaltyForFinding = (f: Finding): {
+    maxAmount: number; maxLabel: string;
+    likelyAmount: number; likelyLabel: string;
+    section: string; scheduleRef: string
+  } => {
     const sec = f.dpdpSection.toLowerCase();
+
     if (f.severity === 'critical') {
       if (sec.includes('9(1)') || sec.includes('children')) {
-        return { amount: 200, label: '₹200 Crores', section: 'Section 9(1)' };
+        return { maxAmount: 200, maxLabel: '₹200 Cr (max)', likelyAmount: 15, likelyLabel: '₹10–20 Cr', section: 'Section 9(1)', scheduleRef: 'Schedule, Row 3' };
       }
-      return { amount: 250, label: '₹250 Crores', section: sec.includes('8(5)') ? 'Section 8(5)' : 'Section 16' };
+      if (sec.includes('8(5)')) {
+        return { maxAmount: 250, maxLabel: '₹250 Cr (max)', likelyAmount: 20, likelyLabel: '₹15–30 Cr', section: 'Section 8(5)', scheduleRef: 'Schedule, Row 1' };
+      }
+      return { maxAmount: 250, maxLabel: '₹250 Cr (max)', likelyAmount: 20, likelyLabel: '₹15–30 Cr', section: 'Section 8(5)', scheduleRef: 'Schedule, Row 1' };
     }
+
     if (f.severity === 'high') {
-      return { amount: 150, label: '₹150 Crores', section: sec.includes('6(1)') ? 'Section 6(1)' : 'Section 6(4)' };
+      if (sec.includes('16')) {
+        return { maxAmount: 50, maxLabel: '₹50 Cr (max)', likelyAmount: 7, likelyLabel: '₹5–10 Cr', section: 'Section 16', scheduleRef: 'Schedule, Row 5' };
+      }
+      if (sec.includes('6(1)')) {
+        return { maxAmount: 50, maxLabel: '₹50 Cr (max)', likelyAmount: 5, likelyLabel: '₹3–8 Cr', section: 'Section 6(1)', scheduleRef: 'Schedule, Row 5' };
+      }
+      return { maxAmount: 250, maxLabel: '₹250 Cr (max)', likelyAmount: 15, likelyLabel: '₹10–25 Cr', section: sec.includes('8(5)') ? 'Section 8(5)' : 'Section 8', scheduleRef: 'Schedule, Row 1' };
     }
+
     if (f.severity === 'medium') {
-      return { amount: 50, label: '₹50 Crores', section: sec.includes('11') ? 'Section 11(1)' : 'Section 6(2)' };
+      const sectionLabel = sec.includes('8(5)') ? 'Section 8(5)' : sec.includes('6(2)') ? 'Section 6(2)' : 'Section 8';
+      return { maxAmount: 50, maxLabel: '₹50 Cr (max)', likelyAmount: 3, likelyLabel: '₹2–5 Cr', section: sectionLabel, scheduleRef: 'Schedule, Row 5' };
     }
-    return { amount: 10, label: '₹10 Crores', section: 'General Advisory' };
+
+    return { maxAmount: 50, maxLabel: '₹50 Cr (max)', likelyAmount: 1, likelyLabel: '₹1–2 Cr', section: 'General', scheduleRef: 'Schedule, Row 5' };
   };
 
   const penaltyBreakdown = openFindings.map((f) => ({
     finding: f,
     penalty: getPenaltyForFinding(f),
   }));
-  const totalPenaltyExposure = penaltyBreakdown.reduce((sum, p) => sum + p.penalty.amount, 0);
+  const totalPenaltyExposureLikely = penaltyBreakdown.reduce((sum, p) => sum + p.penalty.likelyAmount, 0);
+  const totalPenaltyExposureMax = penaltyBreakdown.reduce((sum, p) => sum + p.penalty.maxAmount, 0);
 
   // 5c. Missing Compliance Policies Detection
   // Check which required DPDP policies are NOT evidenced across findings
@@ -817,26 +854,29 @@ export const Overview: React.FC = () => {
             </span>
           </div>
 
-          {/* Total Exposure Banner */}
+          {/* Total Exposure Banner - Realistic Range */}
           <div className={`p-4 rounded-xl border flex items-center justify-between ${
-            totalPenaltyExposure > 200
+            totalPenaltyExposureLikely > 30
               ? 'bg-red-50 border-red-200'
-              : totalPenaltyExposure > 50
+              : totalPenaltyExposureLikely > 10
               ? 'bg-amber-50 border-amber-200'
               : 'bg-green-50 border-green-200'
           }`}>
             <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#71717A]">Total Estimated Exposure</span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#71717A]">Likely First-Time Penalty (Sec. 33 adjusted)</span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className={`text-2xl sm:text-3xl font-black font-mono ${
-                  totalPenaltyExposure > 200 ? 'text-[#B91C1C]' : totalPenaltyExposure > 50 ? 'text-[#B45309]' : 'text-[#15803D]'
+                  totalPenaltyExposureLikely > 30 ? 'text-[#B91C1C]' : totalPenaltyExposureLikely > 10 ? 'text-[#B45309]' : 'text-[#15803D]'
                 }`}>
-                  ₹{totalPenaltyExposure}
+                  ₹{totalPenaltyExposureLikely}
                 </span>
                 <span className="text-sm font-bold text-[#71717A]">Crores</span>
                 <span className="text-[11px] text-[#71717A] font-mono">
-                  (~${Math.round(totalPenaltyExposure * 0.12)}M USD)
+                  (~${Math.round(totalPenaltyExposureLikely * 0.12)}M USD)
                 </span>
+              </div>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className="text-[10px] font-mono text-[#71717A]">Statutory max: ₹{totalPenaltyExposureMax} Cr</span>
               </div>
             </div>
             <div className="text-right">
@@ -869,14 +909,17 @@ export const Overview: React.FC = () => {
                       </span>
                       <div className="min-w-0">
                         <span className="text-xs font-semibold text-[#18181B] truncate block">{finding.title}</span>
-                        <span className="text-[10px] font-mono text-[#71717A]">{penalty.section}</span>
+                        <span className="text-[10px] font-mono text-[#71717A]">{penalty.section} • {penalty.scheduleRef}</span>
                       </div>
                     </div>
                     <div className="flex-shrink-0 text-right">
                       <span className={`text-sm font-black font-mono ${
                         finding.severity === 'critical' ? 'text-[#B91C1C]' : finding.severity === 'high' ? 'text-[#B45309]' : 'text-[#18181B]'
                       }`}>
-                        {penalty.label}
+                        {penalty.likelyLabel}
+                      </span>
+                      <span className="text-[9px] font-mono text-[#A1A1AA]">
+                        max: {penalty.maxLabel}
                       </span>
                     </div>
                   </div>
@@ -888,7 +931,7 @@ export const Overview: React.FC = () => {
           {/* Disclaimer */}
           <div className="pt-2 border-t border-[#E4E4E7] text-[10px] text-[#71717A] flex items-start gap-1.5">
             <CircleAlert className="w-3 h-3 mt-0.5 flex-shrink-0" />
-            <span>Penalty estimates based on DPDP Act 2023 statutory maximums. Actual determinations made by the Data Protection Board of India.</span>
+            <span>Likely penalty range estimated using DPDP Act 2023 Schedule ceilings adjusted by Section 33 factors (first-time offence, mitigation efforts, proportionality). Actual penalty determined by the Data Protection Board of India on a case-by-case basis.</span>
           </div>
         </div>
 

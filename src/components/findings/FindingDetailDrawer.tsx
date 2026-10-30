@@ -160,23 +160,38 @@ export const FindingDetailDrawer: React.FC<FindingDetailDrawerProps> = ({
                     {finding.legalRiskScore} / 10
                   </span>
                 </div>
-                <div className="pt-2 flex items-center justify-between text-[11px] text-[#71717A] border-t border-[#E4E4E7]">
-                  <span className="flex items-center gap-1"><IndianRupee className="w-3 h-3" /> Statutory Penalty (Max):</span>
-                  <span className={`font-mono font-bold px-2 py-0.5 rounded border ${
-                    finding.severity === 'critical'
-                      ? 'text-[#B91C1C] bg-red-50 border-red-200'
-                      : finding.severity === 'high'
-                      ? 'text-[#B45309] bg-amber-50 border-amber-200'
-                      : 'text-[#18181B] bg-[#F1F5F9] border-[#E4E4E7]'
-                  }`}>
-                    {finding.severity === 'critical'
-                      ? (finding.dpdpSection.toLowerCase().includes('9(1)') ? '₹200 Crores' : '₹250 Crores')
-                      : finding.severity === 'high'
-                      ? '₹150 Crores'
-                      : finding.severity === 'medium'
-                      ? '₹50 Crores'
-                      : '₹10 Crores'}
-                  </span>
+                <div className="pt-2 flex flex-col gap-1.5 text-[11px] text-[#71717A] border-t border-[#E4E4E7]">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1"><IndianRupee className="w-3 h-3" /> Likely First-Time Penalty:</span>
+                    <span className={`font-mono font-bold px-2 py-0.5 rounded border ${
+                      finding.severity === 'critical'
+                        ? 'text-[#B91C1C] bg-red-50 border-red-200'
+                        : finding.severity === 'high'
+                        ? 'text-[#B45309] bg-amber-50 border-amber-200'
+                        : 'text-[#18181B] bg-[#F1F5F9] border-[#E4E4E7]'
+                    }`}>
+                      {finding.severity === 'critical'
+                        ? (finding.dpdpSection.toLowerCase().includes('9(1)') ? '₹10–20 Crores' : '₹15–30 Crores')
+                        : finding.severity === 'high'
+                        ? (finding.dpdpSection.toLowerCase().includes('8(5)') ? '₹10–25 Crores' : '₹3–10 Crores')
+                        : finding.severity === 'medium'
+                        ? '₹2–5 Crores'
+                        : '₹1–2 Crores'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-[#A1A1AA]">Statutory ceiling (“may extend to”):</span>
+                    <span className="font-mono text-[#A1A1AA]">
+                      {finding.severity === 'critical'
+                        ? (finding.dpdpSection.toLowerCase().includes('9(1)') ? '₹200 Cr' : '₹250 Cr')
+                        : finding.severity === 'high'
+                        ? (finding.dpdpSection.toLowerCase().includes('8(5)') ? '₹250 Cr' : '₹50 Cr')
+                        : '₹50 Cr'}
+                    </span>
+                  </div>
+                  <div className="text-[9px] text-[#A1A1AA] leading-relaxed">
+                    Adjusted per Section 33 factors: first-time offence, mitigation efforts, proportionality to company scale.
+                  </div>
                 </div>
               </div>
 
