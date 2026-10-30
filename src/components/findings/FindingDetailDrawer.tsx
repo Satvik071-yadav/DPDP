@@ -16,7 +16,8 @@ import {
   Sparkles,
   Lock,
   Network,
-  Code2
+  Code2,
+  IndianRupee
 } from 'lucide-react';
 import { Finding, FindingStatus } from '@/types';
 import { formatSeverity, formatDate } from '@/lib/utils';
@@ -157,6 +158,24 @@ export const FindingDetailDrawer: React.FC<FindingDetailDrawerProps> = ({
                   <span>Regulatory Risk Index:</span>
                   <span className="font-mono font-bold text-[#B45309] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                     {finding.legalRiskScore} / 10
+                  </span>
+                </div>
+                <div className="pt-2 flex items-center justify-between text-[11px] text-[#71717A] border-t border-[#E4E4E7]">
+                  <span className="flex items-center gap-1"><IndianRupee className="w-3 h-3" /> Statutory Penalty (Max):</span>
+                  <span className={`font-mono font-bold px-2 py-0.5 rounded border ${
+                    finding.severity === 'critical'
+                      ? 'text-[#B91C1C] bg-red-50 border-red-200'
+                      : finding.severity === 'high'
+                      ? 'text-[#B45309] bg-amber-50 border-amber-200'
+                      : 'text-[#18181B] bg-[#F1F5F9] border-[#E4E4E7]'
+                  }`}>
+                    {finding.severity === 'critical'
+                      ? (finding.dpdpSection.toLowerCase().includes('9(1)') ? '₹200 Crores' : '₹250 Crores')
+                      : finding.severity === 'high'
+                      ? '₹150 Crores'
+                      : finding.severity === 'medium'
+                      ? '₹50 Crores'
+                      : '₹10 Crores'}
                   </span>
                 </div>
               </div>

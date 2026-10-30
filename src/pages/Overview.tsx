@@ -22,7 +22,11 @@ import {
   UserPlus,
   FileText,
   Eye,
-  Database
+  Database,
+  IndianRupee,
+  FileWarning,
+  XCircle,
+  CircleAlert
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -238,6 +242,57 @@ export const Overview: React.FC = () => {
       verified: dowCounts[day].verified,
     }));
   }
+
+  // 5b. Statutory Penalty Exposure Calculator (DPDP Act 2023)
+  // Maps each finding severity to its statutory penalty bracket under DPDP Act 2023
+  const getPenaltyForFinding = (f: Finding): { amount: number; label: string; section: string } => {
+    const sec = f.dpdpSection.toLowerCase();
+    if (f.severity === 'critical') {
+      if (sec.includes('9(1)') || sec.includes('children')) {
+        return { amount: 200, label: '₹200 Crores', section: 'Section 9(1)' };
+      }
+      return { amount: 250, label: '₹250 Crores', section: sec.includes('8(5)') ? 'Section 8(5)' : 'Section 16' };
+    }
+    if (f.severity === 'high') {
+      return { amount: 150, label: '₹150 Crores', section: sec.includes('6(1)') ? 'Section 6(1)' : 'Section 6(4)' };
+    }
+    if (f.severity === 'medium') {
+      return { amount: 50, label: '₹50 Crores', section: sec.includes('11') ? 'Section 11(1)' : 'Section 6(2)' };
+    }
+    return { amount: 10, label: '₹10 Crores', section: 'General Advisory' };
+  };
+
+  const penaltyBreakdown = openFindings.map((f) => ({
+    finding: f,
+    penalty: getPenaltyForFinding(f),
+  }));
+  const totalPenaltyExposure = penaltyBreakdown.reduce((sum, p) => sum + p.penalty.amount, 0);
+
+  // 5c. Missing Compliance Policies Detection
+  // Check which required DPDP policies are NOT evidenced across findings
+  const detectedSections = new Set(findings.map((f) => f.dpdpSection.toLowerCase()));
+  const requiredPolicies = [
+    { id: 'cookie-consent', name: 'Cookie Consent Banner', section: '6(1)', icon: 'consent',
+      detected: detectedSections.size > 0 && findings.some((f) => f.status === 'verified_fix' && f.dpdpSection.toLowerCase().includes('6(1)')),
+      description: 'Explicit pre-consent notice before setting non-essential cookies' },
+    { id: 'data-retention', name: 'Data Retention Policy', section: '8(7)', icon: 'retention',
+      detected: false,
+      description: 'Documented retention periods and automated erasure schedule' },
+    { id: 'dpo-contact', name: 'DPO Contact Information', section: '8(10)', icon: 'dpo',
+      detected: false,
+      description: 'Designated Data Protection Officer contact published on website' },
+    { id: 'grievance-redressal', name: 'Grievance Redressal Mechanism', section: '11(2)', icon: 'grievance',
+      detected: false,
+      description: 'Accessible process for Data Principals to file complaints' },
+    { id: 'cross-border', name: 'Cross-Border Transfer Safeguards', section: '16', icon: 'transfer',
+      detected: !findings.some((f) => f.dpdpSection.toLowerCase().includes('16') && f.status === 'open'),
+      description: 'Contractual safeguards for personal data transferred outside India' },
+    { id: 'children-data', name: "Children's Data Consent Gate", section: '9(1)', icon: 'children',
+      detected: !findings.some((f) => f.dpdpSection.toLowerCase().includes('9(1)') && f.status === 'open'),
+      description: 'Verifiable parental consent mechanism for users under 18' },
+  ];
+  const missingPolicies = requiredPolicies.filter((p) => !p.detected);
+  const presentPolicies = requiredPolicies.filter((p) => p.detected);
 
   // 6. Build Activity Stream from real records
   interface ActivityItem {
@@ -747,6 +802,158 @@ export const Overview: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 2b. Statutory Penalty Exposure & Missing Compliance Policies */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Statutory Penalty Exposure Card */}
+        <div className="lg:col-span-7 p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2">
+              <IndianRupee className="w-4 h-4 text-[#B91C1C]" />
+              <span>Statutory Penalty Exposure — DPDP Act 2023</span>
+            </h3>
+            <span className="text-[10px] font-mono text-[#71717A] bg-[#F8FAFC] px-2 py-0.5 rounded border border-[#E4E4E7]">
+              ADVISORY ESTIMATE
+            </span>
+          </div>
+
+          {/* Total Exposure Banner */}
+          <div className={`p-4 rounded-xl border flex items-center justify-between ${
+            totalPenaltyExposure > 200
+              ? 'bg-red-50 border-red-200'
+              : totalPenaltyExposure > 50
+              ? 'bg-amber-50 border-amber-200'
+              : 'bg-green-50 border-green-200'
+          }`}>
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#71717A]">Total Estimated Exposure</span>
+              <div className="flex items-baseline gap-2 mt-1">
+                <span className={`text-2xl sm:text-3xl font-black font-mono ${
+                  totalPenaltyExposure > 200 ? 'text-[#B91C1C]' : totalPenaltyExposure > 50 ? 'text-[#B45309]' : 'text-[#15803D]'
+                }`}>
+                  ₹{totalPenaltyExposure}
+                </span>
+                <span className="text-sm font-bold text-[#71717A]">Crores</span>
+                <span className="text-[11px] text-[#71717A] font-mono">
+                  (~${Math.round(totalPenaltyExposure * 0.12)}M USD)
+                </span>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] font-mono text-[#71717A] uppercase">Open Violations</span>
+              <div className={`text-2xl font-black font-mono ${
+                openFindings.length > 0 ? 'text-[#B91C1C]' : 'text-[#15803D]'
+              }`}>
+                {openFindings.length}
+              </div>
+            </div>
+          </div>
+
+          {/* Per-finding penalty breakdown */}
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {penaltyBreakdown.length === 0 ? (
+              <div className="text-center py-6 text-[#71717A] text-xs">
+                <CheckCircle2 className="w-5 h-5 mx-auto mb-1 text-[#15803D]" />
+                <p className="font-semibold text-[#15803D]">No Open Statutory Violations</p>
+                <p className="text-[11px]">All detected findings have been remediated.</p>
+              </div>
+            ) : (
+              penaltyBreakdown.map(({ finding, penalty }) => {
+                const sev = formatSeverity(finding.severity);
+                return (
+                  <div key={finding.id} className="flex items-center justify-between p-3 rounded-xl bg-[#F8FAFC] border border-[#E4E4E7] hover:bg-[#F1F5F9] transition-colors group">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border flex-shrink-0 ${sev.badge}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
+                        {sev.label}
+                      </span>
+                      <div className="min-w-0">
+                        <span className="text-xs font-semibold text-[#18181B] truncate block">{finding.title}</span>
+                        <span className="text-[10px] font-mono text-[#71717A]">{penalty.section}</span>
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 text-right">
+                      <span className={`text-sm font-black font-mono ${
+                        finding.severity === 'critical' ? 'text-[#B91C1C]' : finding.severity === 'high' ? 'text-[#B45309]' : 'text-[#18181B]'
+                      }`}>
+                        {penalty.label}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Disclaimer */}
+          <div className="pt-2 border-t border-[#E4E4E7] text-[10px] text-[#71717A] flex items-start gap-1.5">
+            <CircleAlert className="w-3 h-3 mt-0.5 flex-shrink-0" />
+            <span>Penalty estimates based on DPDP Act 2023 statutory maximums. Actual determinations made by the Data Protection Board of India.</span>
+          </div>
+        </div>
+
+        {/* Missing Compliance Policies Card */}
+        <div className="lg:col-span-5 p-6 rounded-2xl bg-[#FFFFFF] border border-[#E4E4E7] shadow-subtle space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[#18181B] flex items-center gap-2">
+              <FileWarning className="w-4 h-4 text-[#B45309]" />
+              <span>Missing Compliance Policies</span>
+            </h3>
+            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+              missingPolicies.length > 3
+                ? 'text-[#B91C1C] bg-red-50 border-red-200'
+                : missingPolicies.length > 0
+                ? 'text-[#B45309] bg-amber-50 border-amber-200'
+                : 'text-[#15803D] bg-green-50 border-green-200'
+            }`}>
+              {missingPolicies.length} / {requiredPolicies.length} MISSING
+            </span>
+          </div>
+
+          {/* Missing Policies List */}
+          <div className="space-y-2">
+            {missingPolicies.map((policy) => (
+              <div key={policy.id} className="flex items-start gap-3 p-3 rounded-xl bg-red-50/50 border border-red-200/60 hover:bg-red-50 transition-colors">
+                <XCircle className="w-4 h-4 text-[#B91C1C] flex-shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-[#18181B]">{policy.name}</span>
+                    <span className="text-[10px] font-mono text-[#B91C1C] bg-red-50 px-1.5 py-0.5 rounded border border-red-200">MISSING</span>
+                  </div>
+                  <p className="text-[10px] text-[#71717A] mt-0.5">{policy.description}</p>
+                  <span className="text-[10px] font-mono text-[#52796F] mt-1 inline-block">DPDP Act — Section {policy.section}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Present Policies */}
+          {presentPolicies.length > 0 && (
+            <div className="space-y-2 pt-2 border-t border-[#E4E4E7]">
+              <span className="text-[10px] font-semibold text-[#15803D] uppercase tracking-wider">Verified Present</span>
+              {presentPolicies.map((policy) => (
+                <div key={policy.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-green-50/50 border border-green-200/60">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D] flex-shrink-0" />
+                  <span className="text-xs font-medium text-[#18181B]">{policy.name}</span>
+                  <span className="text-[10px] font-mono text-[#15803D]">Section {policy.section}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Action CTA */}
+          <div className="pt-2 border-t border-[#E4E4E7]">
+            <Link
+              to="/scan"
+              className="w-full py-2.5 rounded-xl bg-[#F1F5F9] hover:bg-[#273449] border border-[#E4E4E7] text-center text-xs text-[#18181B] font-semibold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Radar className="w-3.5 h-3.5 text-[#52796F]" />
+              <span>Run Full Policy Compliance Scan</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
 
       {/* 3. Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

@@ -20,7 +20,8 @@ import {
   Database,
   ArrowRight,
   ShieldCheck,
-  Radar
+  Radar,
+  IndianRupee
 } from 'lucide-react';
 import { api } from '@/services/api';
 import { Finding, Severity, FindingStatus, FindingCategory } from '@/types';
@@ -39,6 +40,18 @@ export const Findings: React.FC = () => {
   const [selectedFinding, setSelectedFinding] = useState<Finding | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Statutory penalty calculator per finding
+  const getPenaltyLabel = (f: Finding): string => {
+    const sec = f.dpdpSection.toLowerCase();
+    if (f.severity === 'critical') {
+      if (sec.includes('9(1)') || sec.includes('children')) return '₹200 Cr';
+      return '₹250 Cr';
+    }
+    if (f.severity === 'high') return '₹150 Cr';
+    if (f.severity === 'medium') return '₹50 Cr';
+    return '₹10 Cr';
+  };
 
   const loadFindings = async () => {
     setIsLoading(true);
@@ -370,6 +383,17 @@ export const Findings: React.FC = () => {
                           />
                         </div>
                       </div>
+                      {/* Statutory Penalty Amount */}
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold border flex items-center gap-1 ${
+                        finding.severity === 'critical'
+                          ? 'bg-red-50 text-[#B91C1C] border-red-200'
+                          : finding.severity === 'high'
+                          ? 'bg-amber-50 text-[#B45309] border-amber-200'
+                          : 'bg-[#F1F5F9] text-[#71717A] border-[#E4E4E7]'
+                      }`}>
+                        <IndianRupee className="w-3 h-3" />
+                        {getPenaltyLabel(finding)} penalty
+                      </span>
                       {finding.evidenceAvailable && (
                         <span className="text-[10px] px-2 py-0.5 rounded font-mono font-medium bg-blue-50 text-[#2563EB] border border-blue-200">
                           Forensic Packet Available
