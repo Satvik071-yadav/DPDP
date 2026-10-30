@@ -41,22 +41,21 @@ export const Findings: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Realistic penalty calculator per finding (DPDP Act 2023)
-  // Shows likely first-time penalty range (5-12% of statutory ceiling)
-  // Statutory ceilings: §8(5)→₹250Cr, §9(1)→₹200Cr, other→₹50Cr
-  // Section 33 factors reduce actual penalty for first-time offences
+  // Lower-bound realistic penalty calculator (DPDP Act 2023)
+  // Shows conservative first-time penalty (2-4% of statutory ceiling)
+  // Based on Section 33 mitigating factors for cooperative first offenders
   const getPenaltyLabel = (f: Finding): string => {
     const sec = f.dpdpSection.toLowerCase();
     if (f.severity === 'critical') {
-      if (sec.includes('9(1)') || sec.includes('children')) return '₹10–20 Cr';
-      return '₹15–30 Cr';
+      if (sec.includes('9(1)') || sec.includes('children')) return '₹5–8 Cr';
+      return '₹5–10 Cr';
     }
     if (f.severity === 'high') {
-      if (sec.includes('16') || sec.includes('6(1)')) return '₹3–10 Cr';
-      return '₹10–25 Cr';
+      if (sec.includes('16') || sec.includes('6(1)')) return '₹1–3 Cr';
+      return '₹5–10 Cr';
     }
-    if (f.severity === 'medium') return '₹2–5 Cr';
-    return '₹1–2 Cr';
+    if (f.severity === 'medium') return '₹50L–1 Cr';
+    return '₹10–25 L';
   };
 
   const loadFindings = async () => {

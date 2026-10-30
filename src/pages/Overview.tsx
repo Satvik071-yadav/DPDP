@@ -261,7 +261,7 @@ export const Overview: React.FC = () => {
   //   - Mitigation efforts and speed of response
   //   - Proportionality to turnover/scale
   //
-  // Realistic first-time penalty: ~5–12% of the statutory ceiling.
+  // Realistic first-time penalty: ~2–4% of the statutory ceiling (lower bound).
 
   const getPenaltyForFinding = (f: Finding): {
     maxAmount: number; maxLabel: string;
@@ -270,32 +270,34 @@ export const Overview: React.FC = () => {
   } => {
     const sec = f.dpdpSection.toLowerCase();
 
+    // Lower-bound realistic estimates for first-time offences
+    // Based on 2-4% of statutory ceiling + Section 33 mitigating factors
     if (f.severity === 'critical') {
       if (sec.includes('9(1)') || sec.includes('children')) {
-        return { maxAmount: 200, maxLabel: '₹200 Cr (max)', likelyAmount: 15, likelyLabel: '₹10–20 Cr', section: 'Section 9(1)', scheduleRef: 'Schedule, Row 3' };
+        return { maxAmount: 200, maxLabel: '₹200 Cr ceiling', likelyAmount: 5, likelyLabel: '₹5–8 Cr', section: 'Section 9(1)', scheduleRef: 'Schedule, Row 3' };
       }
       if (sec.includes('8(5)')) {
-        return { maxAmount: 250, maxLabel: '₹250 Cr (max)', likelyAmount: 20, likelyLabel: '₹15–30 Cr', section: 'Section 8(5)', scheduleRef: 'Schedule, Row 1' };
+        return { maxAmount: 250, maxLabel: '₹250 Cr ceiling', likelyAmount: 5, likelyLabel: '₹5–10 Cr', section: 'Section 8(5)', scheduleRef: 'Schedule, Row 1' };
       }
-      return { maxAmount: 250, maxLabel: '₹250 Cr (max)', likelyAmount: 20, likelyLabel: '₹15–30 Cr', section: 'Section 8(5)', scheduleRef: 'Schedule, Row 1' };
+      return { maxAmount: 250, maxLabel: '₹250 Cr ceiling', likelyAmount: 5, likelyLabel: '₹5–10 Cr', section: 'Section 8(5)', scheduleRef: 'Schedule, Row 1' };
     }
 
     if (f.severity === 'high') {
       if (sec.includes('16')) {
-        return { maxAmount: 50, maxLabel: '₹50 Cr (max)', likelyAmount: 7, likelyLabel: '₹5–10 Cr', section: 'Section 16', scheduleRef: 'Schedule, Row 5' };
+        return { maxAmount: 50, maxLabel: '₹50 Cr ceiling', likelyAmount: 2, likelyLabel: '₹1–3 Cr', section: 'Section 16', scheduleRef: 'Schedule, Row 5' };
       }
       if (sec.includes('6(1)')) {
-        return { maxAmount: 50, maxLabel: '₹50 Cr (max)', likelyAmount: 5, likelyLabel: '₹3–8 Cr', section: 'Section 6(1)', scheduleRef: 'Schedule, Row 5' };
+        return { maxAmount: 50, maxLabel: '₹50 Cr ceiling', likelyAmount: 1, likelyLabel: '₹1–2 Cr', section: 'Section 6(1)', scheduleRef: 'Schedule, Row 5' };
       }
-      return { maxAmount: 250, maxLabel: '₹250 Cr (max)', likelyAmount: 15, likelyLabel: '₹10–25 Cr', section: sec.includes('8(5)') ? 'Section 8(5)' : 'Section 8', scheduleRef: 'Schedule, Row 1' };
+      return { maxAmount: 250, maxLabel: '₹250 Cr ceiling', likelyAmount: 5, likelyLabel: '₹5–10 Cr', section: sec.includes('8(5)') ? 'Section 8(5)' : 'Section 8', scheduleRef: 'Schedule, Row 1' };
     }
 
     if (f.severity === 'medium') {
       const sectionLabel = sec.includes('8(5)') ? 'Section 8(5)' : sec.includes('6(2)') ? 'Section 6(2)' : 'Section 8';
-      return { maxAmount: 50, maxLabel: '₹50 Cr (max)', likelyAmount: 3, likelyLabel: '₹2–5 Cr', section: sectionLabel, scheduleRef: 'Schedule, Row 5' };
+      return { maxAmount: 50, maxLabel: '₹50 Cr ceiling', likelyAmount: 0.5, likelyLabel: '₹50 L–1 Cr', section: sectionLabel, scheduleRef: 'Schedule, Row 5' };
     }
 
-    return { maxAmount: 50, maxLabel: '₹50 Cr (max)', likelyAmount: 1, likelyLabel: '₹1–2 Cr', section: 'General', scheduleRef: 'Schedule, Row 5' };
+    return { maxAmount: 50, maxLabel: '₹50 Cr ceiling', likelyAmount: 0.1, likelyLabel: '₹10–25 L', section: 'General', scheduleRef: 'Schedule, Row 5' };
   };
 
   const penaltyBreakdown = openFindings.map((f) => ({
@@ -856,9 +858,9 @@ export const Overview: React.FC = () => {
 
           {/* Total Exposure Banner - Realistic Range */}
           <div className={`p-4 rounded-xl border flex items-center justify-between ${
-            totalPenaltyExposureLikely > 30
+            totalPenaltyExposureLikely > 15
               ? 'bg-red-50 border-red-200'
-              : totalPenaltyExposureLikely > 10
+              : totalPenaltyExposureLikely > 5
               ? 'bg-amber-50 border-amber-200'
               : 'bg-green-50 border-green-200'
           }`}>
@@ -866,7 +868,7 @@ export const Overview: React.FC = () => {
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#71717A]">Likely First-Time Penalty (Sec. 33 adjusted)</span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className={`text-2xl sm:text-3xl font-black font-mono ${
-                  totalPenaltyExposureLikely > 30 ? 'text-[#B91C1C]' : totalPenaltyExposureLikely > 10 ? 'text-[#B45309]' : 'text-[#15803D]'
+                  totalPenaltyExposureLikely > 15 ? 'text-[#B91C1C]' : totalPenaltyExposureLikely > 5 ? 'text-[#B45309]' : 'text-[#15803D]'
                 }`}>
                   ₹{totalPenaltyExposureLikely}
                 </span>

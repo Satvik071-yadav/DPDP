@@ -14,7 +14,7 @@ export const DEMO_FINDINGS: Finding[] = [
     evidenceAvailable: true,
     dpdpSection: 'Section 8(5) - Reasonable Security Safeguards to Prevent Personal Data Breach',
     summary: 'Aadhaar 12-digit UID numbers and 10-digit Indian mobile numbers are being sent unmasked in client-side telemetry query parameters to a third-party analytics collector.',
-    impactExplanation: 'Under DPDP Act 2023 §8(5), Data Fiduciaries must implement reasonable technical safeguards. Leaking unmasked Aadhaar and phone identifiers to external servers carries severe exposure risks and potential regulatory penalties. The statutory ceiling under the DPDP Schedule is ₹250 Cr, but realistic first-time penalties (per Section 33 factors) are estimated at ₹15–30 Crores.',
+    impactExplanation: 'Under DPDP Act 2023 §8(5), Data Fiduciaries must implement reasonable technical safeguards. Leaking unmasked Aadhaar and phone identifiers to external servers carries severe exposure risks and potential regulatory penalties. The statutory ceiling under the DPDP Schedule is ₹250 Cr, but realistic first-time penalties (per Section 33 factors) are estimated at ₹5–10 Crores for cooperative first offenders.',
     legalRiskScore: 9.6,
     observedEvidence: {
       method: 'GET',
@@ -324,7 +324,7 @@ export function cacheUserProfile(profile: UserProfile) {
     evidenceAvailable: true,
     dpdpSection: 'Section 8(5) - Reasonable Security Safeguards to Prevent Personal Data Breach',
     summary: 'Endpoint lacks tenant ownership verification. Authenticated user Account A (usr_demo_custA) is permitted to query and receive confidential KYC records and PII belonging to Account B (usr_demo_custB).',
-    impactExplanation: 'Broken Object-Level Authorization (BOLA/IDOR) is the #1 API security vulnerability. Permitting cross-tenant access to confidential identity documents, PAN numbers, and masked Aadhaar numbers constitutes an active personal data breach under DPDP Act 2023 §8(5), exposing the Data Fiduciary to statutory investigation. Under the DPDP Schedule, the ceiling is ₹250 Cr, with likely first-time penalties of ₹10–25 Crores based on Section 33 assessment.',
+    impactExplanation: 'Broken Object-Level Authorization (BOLA/IDOR) is the #1 API security vulnerability. Permitting cross-tenant access to confidential identity documents, PAN numbers, and masked Aadhaar numbers constitutes an active personal data breach under DPDP Act 2023 §8(5), exposing the Data Fiduciary to statutory investigation. Under the DPDP Schedule, the ceiling is ₹250 Cr, with likely first-time penalties of ₹5–10 Crores based on Section 33 assessment for cooperative first offenders.',
     legalRiskScore: 9.2,
     observedEvidence: {
       method: 'GET',

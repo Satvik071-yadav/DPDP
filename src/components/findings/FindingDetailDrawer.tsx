@@ -171,12 +171,12 @@ export const FindingDetailDrawer: React.FC<FindingDetailDrawerProps> = ({
                         : 'text-[#18181B] bg-[#F1F5F9] border-[#E4E4E7]'
                     }`}>
                       {finding.severity === 'critical'
-                        ? (finding.dpdpSection.toLowerCase().includes('9(1)') ? '₹10–20 Crores' : '₹15–30 Crores')
+                        ? (finding.dpdpSection.toLowerCase().includes('9(1)') ? '₹5–8 Crores' : '₹5–10 Crores')
                         : finding.severity === 'high'
-                        ? (finding.dpdpSection.toLowerCase().includes('8(5)') ? '₹10–25 Crores' : '₹3–10 Crores')
+                        ? (finding.dpdpSection.toLowerCase().includes('8(5)') ? '₹5–10 Crores' : '₹1–3 Crores')
                         : finding.severity === 'medium'
-                        ? '₹2–5 Crores'
-                        : '₹1–2 Crores'}
+                        ? '₹50L–1 Crore'
+                        : '₹10–25 Lakhs'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[10px]">
